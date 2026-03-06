@@ -1,0 +1,20 @@
+server:
+  port: 8087
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/ems_db
+    username: postgres
+    password: pass123 # Replace with actual password or externalize
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+# To prevent lazy loading serialization issues
+  jackson:
+    serialization:
+      fail-on-empty-beans: false

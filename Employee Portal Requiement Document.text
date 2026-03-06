@@ -1,0 +1,114 @@
+1. Introduction
+1.1 Purpose
+The purpose of this application is to automate the attendance management process, employee leave tracking, reimbursements, HR policy updates, asset management, purchase requests, performance reviews, appraisals, service registers, and delivery reports within an organization.
+1.2 Scope
+The application should :
+•	Record employee in-time and out-time by clicking a “Timer In”/“Timer Out” button.
+•	Export attendance data to Excel.
+•	Maintain an employee leave tracker with leave requests and approval workflows.
+•	Manage reimbursement requests with ticket and bills upload option.
+•	Provide access to the employee handbook with update notifications.
+•	Maintain an asset list and handle purchase requests.
+•	Automate monthly performance reviews and appraisal processes.
+•	Maintain a service register and monthly delivery reports.
+•	Offer role-based logins: HR, Employee, Admin, Project Manager (PM), and IT Manager.
+•	Notify Birthday of employees
+•	Prepare and send MOM
+•	Employee Creation
+•	Onboarding & Induction (NDA/NCA/emergency info, checklists)
+•	Employee Communications (memos, increments, warnings)
+•	Exit & F&F (resignation, exit interview, NOCs)
+•	Letters & Employment Verification
+•	
+________________________________________
+2. Functional Requirements
+Employee Creation
+•	Application to create and maintain Employee ID and basic employee information.
+•	Employee details will be captured based on the Employee Information Sheet provided by the HR team.
+•	Centralized repository for all employee master data.
+2. Onboarding & Induction
+•	Application to manage employee onboarding and induction process.
+•	Facility to upload and store joining documents, including:
+o	NDA (Non-Disclosure Agreement)
+o	NCA (Non-Compete Agreement)
+o	Emergency Contact Information Form
+o	Aadhaar
+o	PAN
+o	Educational Certificates
+o	Experience Certificates
+•	Option to maintain online employee joining checklist.
+•	Application to capture and store Induction Feedback Form submitted by the employee.
+•	This module will help in reducing paperwork and manual tracking by the HR team.
+3. Employee Communications
+•	Application to create, store, and display official employee communications, including:
+o	Memos
+o	Increment Letters
+o	Warning Letters
+•	Employees should be able to view assigned communications through the application.
+4. Exit & Full & Final (F&F)
+•	Option to manage the employee exit process, including:
+o	Employee resignation letter submission and tracking
+o	Exit interview details
+o	Exit checklist and NOCs
+•	Support for maintaining complete exit documentation and records within the application.
+5. Employment Verification
+•	Option to initiate and track employee background verification directly from the application.
+•	Facility to store verification status and related documents.
+6. Attendance Management
+•	Timer In/Timer Out button to capture attendance.
+•	System logs date, time, and employee ID.
+•	Option to export attendance data to Excel for any date range.
+•	Intime and out time once entered should not be edited by the employee.
+•	Capture break hours of the employee and manage Break hours .
+•	If employee fails to enter out time of the previous day ,he should not be able to enter very next day intime.
+•	If employee enters intime after 9.30 am it should be marked as late if permission is not approved by hr/permission.
+•	Attendance template will be shared by HR team.
+7. Leave & permission Management
+•	Leave tracker showing the number of leaves taken per month by employee.
+•	Employees can request leave/permission through the application.
+•	Project Manager can approve/reject leave requests.
+•	Leave status updates and notifications to employees.
+•	Employee wise leave tracker should be managed and Template will shared by the HR team.
+8 Reimbursement Management
+•	Employees can submit reimbursement requests.
+•	Upload tickets/bills as proof.
+•	Format/template will be provided by HR.
+•	HR approval or Reject the claim and date of settlement should be maintained. Template will be shared by HR team.
+9 Employee Handbook
+•	Option to view the latest handbook.
+•	HR can updated policies. Employees can only view the policy .
+•	Employees notified of policy changes.
+10. Asset Management
+•	Maintain asset list as per template shared by IT manager.
+•	Assign assets to employees.
+•	Record asset return on resignation/termination.
+•	Repairs and maintenance of asset to be maintained
+11.Purchase Request Management
+•	IT admin can raise purchase requests of laptops and hardware.
+•	Approval workflow for purchase requests.
+•	Option to  raise PO request to vendors
+12. Monthly Performance Review
+•	PM gives feedback and rating on the performance of the employee.
+•	Final review stored for history.
+•	Employee can view their performance rating.
+•	Template to be shared by HR team
+•	HR should have option to modify the template.
+13. Appraisal Process Automation (APA)
+•	Three ratings: Employee, PM, HR.
+•	HR initiates appraisal to employee → Employee fills the rating and share  back document back to HR .Hr forward the same to PM for rating → PM review and fills his rating in the PM rating column → HR fills the HR rating finalizes.
+•	Calculation formula from HR applied automatically.
+•	Store appraisal history for each employee.
+•	Share feedback document with the employee.
+•	Calculation formula to be shared by HR team
+14. Service Register
+•	Maintains record of appreciations and mistakes for each employee.
+•	Entries made by PM or HR.
+•	PM can review before rating employee in APA.
+•	HR team will share the template.
+•	HR to have option to modify the template.
+•	Employee can review the service register.
+15. Delivery Reports
+•	Monthly delivery report template provided by HR.
+•	Employee fills, PM approves.
+•	Stored for historical reference.
+
