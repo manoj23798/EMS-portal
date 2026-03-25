@@ -1,6 +1,7 @@
 package com.ems.service.impl;
 
 import com.ems.dto.response.AttendanceResponse;
+import com.ems.dto.response.AttendanceResponse.BreakRecordResponse;
 import com.ems.entity.Attendance;
 import com.ems.entity.BreakRecord;
 import com.ems.entity.Employee;
@@ -247,10 +248,15 @@ public class AttendanceServiceImpl implements AttendanceService {
                 .totalHours(attendance.getTotalHours())
                 .breakDuration(attendance.getBreakDuration())
                 .status(attendance.getStatus())
-                /* 
-                 * In a real system, you'd map BreakRecords to DTOs here too.
-                 * Omitting for brevity unless requested. 
-                 */
+                .onBreak(attendance.getBreaks().stream().anyMatch(b -> b.getBreakEnd() == null))
+                .breaks(attendance.getBreaks().stream()
+                        .map(b -> AttendanceResponse.BreakRecordResponse.builder()
+                                .id(b.getId())
+                                .breakStart(b.getBreakStart())
+                                .breakEnd(b.getBreakEnd())
+                                .duration(b.getDuration())
+                                .build())
+                        .collect(Collectors.toList()))
                 .build();
     }
 }

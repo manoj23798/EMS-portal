@@ -19,14 +19,15 @@ public class AttendanceResponse {
     private Long totalHours;
     private Long breakDuration;
     private String status;
+    private boolean onBreak;
     private List<BreakRecordResponse> breaks;
-}
 
-@Data
-@Builder
-class BreakRecordResponse {
-    private Long id;
-    private LocalTime breakStart;
-    private LocalTime breakEnd;
-    private Long duration;
+    @Data
+    @Builder
+    public static class BreakRecordResponse {
+        private Long id;
+        private LocalTime breakStart;
+        private LocalTime breakEnd;
+        private Long duration;
+    }
 }

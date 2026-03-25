@@ -80,14 +80,6 @@ public class Employee {
 
     @Column(unique = true)
     private String pan;
-
-    // Account Information
-    @Column(unique = true)
-    private String username;
-
-    private String password;
-
-    private String role; // Admin, HR, Employee, PM, IT Manager
     
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)

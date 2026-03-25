@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import { PermissionAPI } from '../../services/api';
 import { Clock, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { tokenManager } from '../../utils/tokenManager';
 
 export default function PermissionApply() {
-    const EMPLOYEE_ID = 1;
+    const userData = tokenManager.getUserData();
+    const EMPLOYEE_ID = userData?.employeeId;
     const navigate = useNavigate();
 
     const [form, setForm] = useState({

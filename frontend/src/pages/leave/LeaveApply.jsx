@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import { LeaveAPI } from '../../services/api';
 import { FileText, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { tokenManager } from '../../utils/tokenManager';
 
 export default function LeaveApply() {
-    const EMPLOYEE_ID = 1;
+    const userData = tokenManager.getUserData();
+    const EMPLOYEE_ID = userData?.employeeId;
     const navigate = useNavigate();
 
     const [form, setForm] = useState({

@@ -13,7 +13,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = "*")
 public class PermissionController {
 
     private final PermissionService permissionService;
@@ -50,5 +50,12 @@ public class PermissionController {
             @PathVariable Long id,
             @RequestParam Long managerId) {
         return ResponseEntity.ok(permissionService.rejectPermission(id, managerId));
+    }
+
+    // ===================== ADMIN ENDPOINTS =====================
+
+    @GetMapping("/admin/permissions")
+    public ResponseEntity<List<PermissionRequestResponse>> getAllPermissions() {
+        return ResponseEntity.ok(permissionService.getAllPermissions());
     }
 }

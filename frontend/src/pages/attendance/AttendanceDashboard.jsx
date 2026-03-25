@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { AttendanceAPI } from '../../services/api';
 import { Clock, Coffee, LogOut, Play, Pause, Timer } from 'lucide-react';
+import { tokenManager } from '../../utils/tokenManager';
 import { useNavigate } from 'react-router-dom';
 
 export default function AttendanceDashboard() {
-    // For demo purposes, using employeeId = 1. In production, this comes from auth context.
-    const EMPLOYEE_ID = 1;
+    const userData = tokenManager.getUserData();
+    const EMPLOYEE_ID = userData?.employeeId;
     const navigate = useNavigate();
 
     const [attendance, setAttendance] = useState(null);
@@ -13,6 +14,13 @@ export default function AttendanceDashboard() {
     const [actionLoading, setActionLoading] = useState(false);
     const [error, setError] = useState('');
     const [currentTime, setCurrentTime] = useState(new Date());
+
+    useEffect(() => {
+        if (!EMPLOYEE_ID) {
+            setError('Employee information not found. Please log in again.');
+            setLoading(false);
+        }
+    }, [EMPLOYEE_ID]);
 
     // Live clock
     useEffect(() => {
@@ -57,10 +65,7 @@ export default function AttendanceDashboard() {
     const timedIn = attendance?.inTime != null;
     const timedOut = attendance?.outTime != null;
 
-    // Determine break state
-    const isOnBreak = attendance && !timedOut && attendance.breakDuration !== null;
-    // We can't perfectly determine active break from current response shape, 
-    // so we rely on server error messages for edge cases.
+    const isOnBreak = attendance?.onBreak === true;
 
     const formatMinutes = (totalMins) => {
         if (totalMins == null || totalMins === 0) return '0h 0m';
@@ -169,12 +174,12 @@ export default function AttendanceDashboard() {
                         {/* Start Break */}
                         <button
                             className="btn btn-secondary"
-                            disabled={actionLoading || !timedIn || timedOut}
+                            disabled={actionLoading || !timedIn || timedOut || isOnBreak}
                             onClick={() => handleAction(AttendanceAPI.startBreak, 'Start Break')}
                             style={{
                                 minWidth: 160, padding: '14px 28px', fontSize: '1rem',
                                 background: 'var(--warning)', color: 'white',
-                                opacity: (!timedIn || timedOut) ? 0.5 : 1
+                                opacity: (!timedIn || timedOut || isOnBreak) ? 0.5 : 1
                             }}
                         >
                             <Coffee size={20} />
@@ -184,12 +189,12 @@ export default function AttendanceDashboard() {
                         {/* End Break */}
                         <button
                             className="btn btn-secondary"
-                            disabled={actionLoading || !timedIn || timedOut}
+                            disabled={actionLoading || !timedIn || timedOut || !isOnBreak}
                             onClick={() => handleAction(AttendanceAPI.endBreak, 'End Break')}
                             style={{
                                 minWidth: 160, padding: '14px 28px', fontSize: '1rem',
-                                background: '#2d6a4f', color: 'white',
-                                opacity: (!timedIn || timedOut) ? 0.5 : 1
+                                background: 'var(--primary)', color: 'white',
+                                opacity: (!timedIn || timedOut || !isOnBreak) ? 0.5 : 1
                             }}
                         >
                             <Pause size={20} />
@@ -220,7 +225,7 @@ export default function AttendanceDashboard() {
                 </div>
 
                 <div className="card" style={{ padding: '24px', textAlign: 'center' }}>
-                    <Timer size={28} style={{ color: '#2d6a4f', marginBottom: 8 }} />
+                    <Timer size={28} style={{ color: 'var(--primary)', marginBottom: 8 }} />
                     <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: 4 }}>Working Hours</p>
                     <p style={{ fontWeight: 700, fontSize: '1.4rem' }}>{formatMinutes(attendance?.totalHours)}</p>
                 </div>

@@ -1,0 +1,33 @@
+services:
+  # Spring Boot Backend
+  - type: web
+    name: ems-backend
+    env: docker
+    region: frankfurt # Change if needed (e.g., ohio, singapore)
+    plan: free # Uses Render's free tier
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    envVars:
+      - key: DATABASE_URL
+        value: jdbc:postgresql://ep-sparkling-bonus-am0n47mt-pooler.c-5.us-east-1.aws.neon.tech/neondb?sslmode=require
+      - key: DATABASE_USER
+        value: neondb_owner
+      - key: DATABASE_PASSWORD
+        value: npg_QaJtRASH65Vl
+      - key: JWT_SECRET_KEY
+        generateValue: true # Render will securely generate a random 256-bit string
+      - key: FRONTEND_URL
+        sync: false # User will provide the Vercel/Netlify URL once deployed
+
+  # React Frontend (Optional logic in Render, but better suited for Vercel/Netlify)
+  - type: static
+    name: ems-frontend
+    rootDir: ./frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: ems-backend
+          envVarKey: RENDER_EXTERNAL_URL

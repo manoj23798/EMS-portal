@@ -66,6 +66,13 @@ public class PermissionServiceImpl implements PermissionService {
     }
 
     @Override
+    public List<PermissionRequestResponse> getAllPermissions() {
+        return permissionRequestRepository.findAll().stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     @Transactional
     public PermissionRequestResponse approvePermission(Long permissionId, Long managerId) {
         PermissionRequest permission = permissionRequestRepository.findById(permissionId)

@@ -13,7 +13,9 @@ public interface PermissionService {
 
     List<PermissionRequestResponse> getPendingPermissions();
 
-    PermissionRequestResponse approvePermission(Long permissionId, Long managerId);
+    List<PermissionRequestResponse> getAllPermissions();
+
+    PermissionRequestResponse approvePermission(Long id, Long managerId);
 
     PermissionRequestResponse rejectPermission(Long permissionId, Long managerId);
 }

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { AdminAttendanceAPI } from '../../services/api';
-import { ShieldCheck, Download, Calendar, Search } from 'lucide-react';
+import { ShieldCheck, Download, Calendar, Search, LayoutGrid, List } from 'lucide-react';
+import MonthlyAttendanceGrid from '../../components/MonthlyAttendanceGrid';
 
 export default function AdminAttendanceDashboard() {
     const today = new Date().toISOString().split('T')[0];
@@ -12,6 +13,7 @@ export default function AdminAttendanceDashboard() {
     const [exportEndDate, setExportEndDate] = useState(today);
     const [searchTerm, setSearchTerm] = useState('');
     const [exporting, setExporting] = useState(false);
+    const [viewMode, setViewMode] = useState('daily'); // 'daily' or 'monthly'
 
     useEffect(() => {
         fetchAttendance();
@@ -74,125 +76,151 @@ export default function AdminAttendanceDashboard() {
     return (
         <div className="page-content">
             {/* Header */}
-            <div style={{ marginBottom: 28 }}>
-                <h1 style={{ fontSize: '1.75rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <ShieldCheck size={28} />
-                    HR Attendance Dashboard
-                </h1>
-                <p style={{ color: 'var(--text-muted)', marginTop: 4 }}>View all employees' attendance and export reports</p>
-            </div>
+            <div style={{ marginBottom: 28, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div>
+                    <h1 style={{ fontSize: '1.75rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <ShieldCheck size={28} />
+                        HR Attendance Dashboard
+                    </h1>
+                    <p style={{ color: 'var(--text-muted)', marginTop: 4 }}>View all employees' attendance and export reports</p>
+                </div>
 
-            {/* Filter & Export Row */}
-            <div className="card" style={{ marginBottom: 24 }}>
-                <div className="card-body" style={{ display: 'flex', gap: 16, alignItems: 'flex-end', flexWrap: 'wrap' }}>
-                    {/* View by date */}
-                    <div className="form-group">
-                        <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                            <Calendar size={16} /> View Date
-                        </label>
-                        <input
-                            type="date"
-                            className="form-input"
-                            value={selectedDate}
-                            onChange={(e) => setSelectedDate(e.target.value)}
-                        />
-                    </div>
-
-                    {/* Search */}
-                    <div className="form-group" style={{ flex: 1, minWidth: 200 }}>
-                        <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                            <Search size={16} /> Search
-                        </label>
-                        <input
-                            type="text"
-                            className="form-input"
-                            placeholder="Search by name or status..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                    </div>
-
-                    {/* Separator */}
-                    <div style={{ borderLeft: '1px solid var(--border)', height: 50, margin: '0 8px' }}></div>
-
-                    {/* Export date range */}
-                    <div className="form-group">
-                        <label className="form-label">Export From</label>
-                        <input
-                            type="date"
-                            className="form-input"
-                            value={exportStartDate}
-                            onChange={(e) => setExportStartDate(e.target.value)}
-                        />
-                    </div>
-                    <div className="form-group">
-                        <label className="form-label">Export To</label>
-                        <input
-                            type="date"
-                            className="form-input"
-                            value={exportEndDate}
-                            onChange={(e) => setExportEndDate(e.target.value)}
-                        />
-                    </div>
+                {/* View Toggle */}
+                <div style={{ display: 'flex', background: 'var(--surface)', padding: 4, borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
                     <button
-                        className="btn btn-primary"
-                        onClick={handleExport}
-                        disabled={exporting}
-                        style={{ padding: '10px 24px' }}
+                        onClick={() => setViewMode('daily')}
+                        className={`btn ${viewMode === 'daily' ? 'btn-primary' : ''}`}
+                        style={{ padding: '8px 16px', borderRadius: 'var(--radius-md)', border: 'none', background: viewMode === 'daily' ? 'var(--primary)' : 'transparent', color: viewMode === 'daily' ? 'white' : 'var(--text-muted)' }}
                     >
-                        <Download size={18} />
-                        {exporting ? 'Exporting...' : 'Export Excel'}
+                        <List size={18} /> Daily View
+                    </button>
+                    <button
+                        onClick={() => setViewMode('monthly')}
+                        className={`btn ${viewMode === 'monthly' ? 'btn-primary' : ''}`}
+                        style={{ padding: '8px 16px', borderRadius: 'var(--radius-md)', border: 'none', background: viewMode === 'monthly' ? 'var(--primary)' : 'transparent', color: viewMode === 'monthly' ? 'white' : 'var(--text-muted)' }}
+                    >
+                        <LayoutGrid size={18} /> Monthly Grid
                     </button>
                 </div>
             </div>
 
-            {/* Attendance Table */}
-            <div className="card">
-                <div className="card-header">
-                    <span className="card-title">
-                        Attendance for {new Date(selectedDate + 'T00:00').toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-                        &nbsp;({filteredRecords.length} records)
-                    </span>
-                </div>
-                <div className="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Employee ID</th>
-                                <th>Employee Name</th>
-                                <th>In Time</th>
-                                <th>Out Time</th>
-                                <th>Break Duration</th>
-                                <th>Total Hours</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {loading ? (
-                                <tr><td colSpan="7" style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>Loading...</td></tr>
-                            ) : filteredRecords.length === 0 ? (
-                                <tr><td colSpan="7" style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>No attendance records for this date.</td></tr>
-                            ) : (
-                                filteredRecords.map(record => (
-                                    <tr key={record.id}>
-                                        <td style={{ fontWeight: 500, fontFamily: 'monospace' }}>EMP{String(record.employeeId).padStart(4, '0')}</td>
-                                        <td style={{ fontWeight: 500 }}>{record.employeeName}</td>
-                                        <td>{formatTime(record.inTime)}</td>
-                                        <td>{formatTime(record.outTime)}</td>
-                                        <td>{formatMinutes(record.breakDuration)}</td>
-                                        <td style={{ fontWeight: 600 }}>{formatMinutes(record.totalHours)}</td>
-                                        <td>
-                                            <span className={`status-badge ${record.status === 'Late' ? 'status-inactive' : 'status-active'}`}>
-                                                {record.status}
-                                            </span>
-                                        </td>
+            {viewMode === 'monthly' ? (
+                <MonthlyAttendanceGrid />
+            ) : (
+                <>
+                    {/* Filter & Export Row */}
+                    <div className="card" style={{ marginBottom: 24 }}>
+                        <div className="card-body" style={{ display: 'flex', gap: 16, alignItems: 'flex-end', flexWrap: 'wrap' }}>
+                            {/* View by date */}
+                            <div className="form-group">
+                                <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                    <Calendar size={16} /> View Date
+                                </label>
+                                <input
+                                    type="date"
+                                    className="form-input"
+                                    value={selectedDate}
+                                    onChange={(e) => setSelectedDate(e.target.value)}
+                                />
+                            </div>
+
+                            {/* Search */}
+                            <div className="form-group" style={{ flex: 1, minWidth: 200 }}>
+                                <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                    <Search size={16} /> Search
+                                </label>
+                                <input
+                                    type="text"
+                                    className="form-input"
+                                    placeholder="Search by name or status..."
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                />
+                            </div>
+
+                            {/* Separator */}
+                            <div style={{ borderLeft: '1px solid var(--border)', height: 50, margin: '0 8px' }}></div>
+
+                            {/* Export date range */}
+                            <div className="form-group">
+                                <label className="form-label">Export From</label>
+                                <input
+                                    type="date"
+                                    className="form-input"
+                                    value={exportStartDate}
+                                    onChange={(e) => setExportStartDate(e.target.value)}
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Export To</label>
+                                <input
+                                    type="date"
+                                    className="form-input"
+                                    value={exportEndDate}
+                                    onChange={(e) => setExportEndDate(e.target.value)}
+                                />
+                            </div>
+                            <button
+                                className="btn btn-primary"
+                                onClick={handleExport}
+                                disabled={exporting}
+                                style={{ padding: '10px 24px' }}
+                            >
+                                <Download size={18} />
+                                {exporting ? 'Exporting...' : 'Export Excel'}
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Attendance Table */}
+                    <div className="card">
+                        <div className="card-header">
+                            <span className="card-title">
+                                Attendance for {new Date(selectedDate + 'T00:00').toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                                &nbsp;({filteredRecords.length} records)
+                            </span>
+                        </div>
+                        <div className="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Employee ID</th>
+                                        <th>Employee Name</th>
+                                        <th>In Time</th>
+                                        <th>Out Time</th>
+                                        <th>Break Duration</th>
+                                        <th>Total Hours</th>
+                                        <th>Status</th>
                                     </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+                                </thead>
+                                <tbody>
+                                    {loading ? (
+                                        <tr><td colSpan="7" style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>Loading...</td></tr>
+                                    ) : filteredRecords.length === 0 ? (
+                                        <tr><td colSpan="7" style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>No attendance records for this date.</td></tr>
+                                    ) : (
+                                        filteredRecords.map(record => (
+                                            <tr key={record.id}>
+                                                <td style={{ fontWeight: 500, fontFamily: 'monospace' }}>EMP{String(record.employeeId).padStart(4, '0')}</td>
+                                                <td style={{ fontWeight: 500 }}>{record.employeeName}</td>
+                                                <td>{formatTime(record.inTime)}</td>
+                                                <td>{formatTime(record.outTime)}</td>
+                                                <td>{formatMinutes(record.breakDuration)}</td>
+                                                <td style={{ fontWeight: 600 }}>{formatMinutes(record.totalHours)}</td>
+                                                <td>
+                                                    <span className={`status-badge ${record.status === 'Late' ? 'status-inactive' : 'status-active'}`}>
+                                                        {record.status}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </>
+            )}
         </div>
     );
 }

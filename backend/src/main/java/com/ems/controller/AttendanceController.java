@@ -17,7 +17,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = "*")
 public class AttendanceController {
 
     private final AttendanceService attendanceService;
@@ -67,6 +67,13 @@ public class AttendanceController {
     public ResponseEntity<List<AttendanceResponse>> getAllAttendance(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         return ResponseEntity.ok(attendanceService.getAllAttendance(date));
+    }
+
+    @GetMapping("/admin/attendance/history")
+    public ResponseEntity<List<AttendanceResponse>> getAttendanceHistory(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+        return ResponseEntity.ok(attendanceService.getAttendanceHistoryByDateRange(startDate, endDate));
     }
 
     @GetMapping("/admin/attendance/export")

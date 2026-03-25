@@ -1,42 +1,49 @@
 :root {
-  --primary: #4361ee;
-  --primary-hover: #3a56d4;
-  --secondary: #3f37c9;
-  --success: #4cc9f0;
-  --danger: #f72585;
-  --warning: #f8961e;
-  --background: #f8f9fa;
-  --surface: #ffffff;
-  --text-main: #2b2d42;
-  --text-muted: #8d99ae;
-  --border: #e9ecef;
-  --sidebar-bg: #ffffff;
-  --sidebar-active: #f1f3f5;
-  --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
-  --shadow-md: 0 4px 6px rgba(0,0,0,0.07);
-  --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
-  --glass-bg: rgba(255, 255, 255, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.5);
-  --radius-md: 8px;
-  --radius-lg: 12px;
-  --radius-full: 9999px;
-  --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-}
+  /* Brand Colors */
+  --primary: #f97316;
+  /* Bright Orange */
+  --primary-hover: #ea580c;
+  /* Deep Orange */
+  --primary-light: #ffedd5;
+  /* Very soft orange backing */
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --primary: #4cc9f0;
-    --primary-hover: #4361ee;
-    --background: #121212;
-    --surface: #1e1e1e;
-    --text-main: #f8f9fa;
-    --text-muted: #adb5bd;
-    --border: #2b2d42;
-    --sidebar-bg: #1a1a1a;
-    --sidebar-active: #2b2b2b;
-    --glass-bg: rgba(30, 30, 30, 0.7);
-    --glass-border: rgba(255, 255, 255, 0.1);
-  }
+  /* UI Colors */
+  --background: #fafafa;
+  /* Extremely light warm white */
+  --surface: #ffffff;
+  /* Pure white components */
+
+  /* Typography - Warm tones for legibility that match the orange theme */
+  --text-main: #431407;
+  /* Very deep warm brown/orange for high contrast */
+  --text-muted: #9a3412;
+  /* Medium warm tone for secondary text */
+
+  /* Structural Elements */
+  --border: #fed7aa;
+  /* Soft orange border */
+  --sidebar-bg: #ffffff;
+  --sidebar-active: #ffedd5;
+
+  /* Status Colors */
+  --success: #10b981;
+  --danger: #ef4444;
+  --warning: #f59e0b;
+
+  /* Aesthetics */
+  --shadow-sm: 0 2px 4px rgba(234, 88, 12, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(234, 88, 12, 0.1), 0 2px 4px -1px rgba(234, 88, 12, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(234, 88, 12, 0.1), 0 4px 6px -2px rgba(234, 88, 12, 0.05);
+
+  /* Glassmorphism */
+  --glass-bg: rgba(255, 255, 255, 0.85);
+  --glass-border: rgba(254, 215, 170, 0.5);
+
+  /* Metrics */
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 * {
@@ -44,6 +51,12 @@
   padding: 0;
   box-sizing: border-box;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  margin: 0;
 }
 
 body {
@@ -55,19 +68,34 @@ body {
 /* Layout */
 .app-container {
   display: flex;
-  min-height: 100vh;
+  height: 100vh;
   width: 100vw;
   overflow: hidden;
+  background: linear-gradient(135deg, var(--background) 0%, #fff7ed 100%);
 }
 
 .sidebar {
   width: 260px;
+  height: 100%;
   background-color: var(--sidebar-bg);
   border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
   transition: var(--transition);
   z-index: 10;
+  overflow-y: auto;
+}
+
+/* Thinner scrollbar for sidebar */
+.sidebar::-webkit-scrollbar {
+  width: 5px;
+}
+.sidebar::-webkit-scrollbar-thumb {
+  background: rgba(249, 115, 22, 0.2);
+  border-radius: 10px;
+}
+.sidebar::-webkit-scrollbar-thumb:hover {
+  background: rgba(249, 115, 22, 0.4);
 }
 
 .sidebar-header {
@@ -107,9 +135,10 @@ body {
 }
 
 .nav-item.active {
-  background-color: var(--primary);
-  color: white;
-  box-shadow: var(--shadow-md);
+  background-color: var(--primary-light);
+  color: var(--primary-hover);
+  border-left: 4px solid var(--primary);
+  font-weight: 600;
 }
 
 .main-content {
@@ -120,7 +149,7 @@ body {
 }
 
 .topbar {
-  height: 70px;
+  height: 54px;
   background: var(--glass-bg);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -134,7 +163,7 @@ body {
 
 .page-content {
   flex: 1;
-  padding: 32px;
+  padding: 16px 32px 32px 32px;
   overflow-y: auto;
   animation: fadeIn 0.5s ease-out forwards;
 }
@@ -190,7 +219,8 @@ body {
   color: var(--text-main);
 }
 
-.form-input, .form-select {
+.form-input,
+.form-select {
   padding: 10px 14px;
   border-radius: var(--radius-md);
   border: 1px solid var(--border);
@@ -201,9 +231,11 @@ body {
   outline: none;
 }
 
-.form-input:focus, .form-select:focus {
+.form-input:focus,
+.form-select:focus {
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.2);
+  background-color: var(--surface);
 }
 
 /* Buttons */
@@ -233,21 +265,44 @@ body {
 }
 
 .btn-secondary {
-  background: var(--sidebar-active);
+  background: var(--surface);
   color: var(--text-main);
+  border: 1px solid var(--border);
 }
 
 .btn-secondary:hover {
-  background: var(--border);
+  background: var(--primary-light);
+  color: var(--primary-hover);
+  border-color: var(--primary-light);
 }
 
 .btn-danger {
-  background: rgba(247, 37, 133, 0.1);
+  background: #fef2f2;
   color: var(--danger);
+  border: none;
 }
 
 .btn-danger:hover {
-  background: rgba(247, 37, 133, 0.2);
+  background: #fee2e2;
+}
+
+/* Full View Support */
+body.hide-nav .topbar,
+body.hide-nav .sidebar {
+  display: none !important;
+}
+
+body.hide-nav .main-content {
+  margin-left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+}
+
+body.hide-nav .page-content {
+  padding: 0 !important;
+  margin: 0 !important;
+  max-width: none !important;
+  height: 100vh !important;
 }
 
 /* Table */
@@ -261,7 +316,8 @@ table {
   border-collapse: collapse;
 }
 
-th, td {
+th,
+td {
   padding: 16px 20px;
   text-align: left;
   border-bottom: 1px solid var(--border);
@@ -276,7 +332,7 @@ th {
 }
 
 tr:hover td {
-  background-color: var(--sidebar-active);
+  background-color: var(--primary-light);
 }
 
 .status-badge {
@@ -288,16 +344,466 @@ tr:hover td {
 }
 
 .status-active {
-  background: rgba(76, 201, 240, 0.1);
+  background: #d1fae5;
   color: var(--success);
 }
 
 .status-inactive {
-  background: rgba(247, 37, 133, 0.1);
+  background: #fee2e2;
   color: var(--danger);
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
+
+/* A4 Document Simulation */
+.a4-document-editor {
+  background: var(--background);
+  color: #333;
+}
+.a4-document-editor .ql-container.ql-snow {
+  border: none !important;
+  background-color: transparent;
+}
+.a4-document-editor .ql-editor {
+  width: 794px; /* A4 width at 96 DPI */
+  min-height: 1123px; /* A4 height at 96 DPI */
+  margin: 0 auto;
+  padding: 80px; /* Standard margins */
+  font-size: 1rem;
+  line-height: 1.6;
+  
+  /* Creates visual 'pages' separated by a 32px gap */
+  background-color: white !important;
+  
+  /* Drop shadow adheres strictly to the non-transparent linear-gradient papers! */
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.08));
+  overflow-y: visible !important;
+}
+
+/* Ensure the wrapper respects the drop shadow margins */
+.a4-wrapper {
+  padding: 32px 0;
+  background: #f1f5f9;
+  height: 600px;
+  overflow-y: auto;
+  border-radius: var(--radius-md);
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+}
+
+/* True A4 Editing: Continuous Web Layout */
+.a4-live-editor-wrapper {
+  background: #e2e8f0;
+  padding: 40px;
+  height: 75vh;
+  overflow-y: auto;
+  overflow-x: auto;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  box-shadow: inset 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.a4-live-editor {
+  width: 1000px; /* Expanded desk width */
+  min-height: calc(100vh - 200px); /* Minimum screen-filling length */
+  margin: 0 auto;
+  background-color: #ffffff;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08), 0 10px 40px -10px rgba(0,0,0,0.12);
+  border-radius: 4px;
+  position: relative;
+  overflow: visible;
+}
+
+.a4-live-editor .ql-container.ql-snow {
+  border: none !important;
+  background-color: transparent;
+}
+
+.a4-live-editor .ql-editor {
+  padding: 40px 60px !important; 
+  font-size: 16px; 
+  line-height: 24px !important; 
+  min-height: calc(100vh - 200px);
+  
+  /* Standard paper feel */
+  background-color: #ffffff !important;
+  word-break: break-word;
+}
+
+/* Custom toolbar styling handled in JSX, leaving basic Quill snow styles for children buttons */
+.a4-live-editor .ql-toolbar.ql-snow {
+  border: none !important;
+  background: transparent !important;
+  padding: 0 !important;
+}
+
+.a4-live-editor-wrapper {
+  background: #f1f5f9; /* Solid desk color */
+  padding: 60px 40px;
+  min-height: 80vh;
+  overflow-y: auto;
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.a4-live-editor-wrapper {
+  background: #cbd5e1; /* Deep grey desk color */
+  padding: 40px;
+  height: 75vh;
+  overflow-y: auto;
+  overflow-x: auto;
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  position: relative;
+}
+
+/* Remove any and all page-break lines or simulations */
+.a4-live-editor .ql-editor::before,
+.a4-live-editor .ql-editor::after {
+  display: none !important;
+}
+
+.a4-live-editor-wrapper {
+  background: #e2e8f0;
+  padding: 20px;
+  height: 85vh;
+  overflow-y: auto;
+  overflow-x: auto;
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+/* Force responsive constraints on all rich text content to prevent them from overflowing into padding or margins */
+.ql-editor img {
+  max-width: 100% !important;
+  height: auto !important;
+  object-fit: contain;
+}
+
+.ql-editor pre, .ql-editor code {
+  white-space: pre-wrap !important;
+  word-break: break-word !important;
+  overflow-x: hidden !important;
+  max-width: 100%;
+}
+
+/* Ensure rich text keeps proper spacing between paragraphs and lists */
+.ql-editor p {
+  margin-bottom: 1em !important;
+}
+
+.ql-editor p:last-child {
+  margin-bottom: 0 !important;
+}
+
+.ql-editor p:empty::before, .ql-editor p br {
+  content: " ";
+  white-space: pre;
+}
+
+.ql-editor ul, .ql-editor ol {
+  margin-bottom: 1em !important;
+}
+
+/* === REIMBURSEMENT SPREADSHEET FORM (TAILWIND REPLACEMENT) === */
+.reimbursement-form {
+  background: white;
+  padding: 32px;
+  max-width: 1300px;
+  margin: 32px auto;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-md);
+  border-radius: var(--radius-md);
+  color: #111827;
+}
+
+.reimbursement-form header,
+.reimbursement-form > .mb-6.flex {
+  display: flex;
+  flex-direction: column;
+  border-bottom: 2px solid #e5e7eb;
+  padding-bottom: 8px;
+  margin-bottom: 24px;
+}
+
+.reimbursement-form h2 {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--primary);
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+
+/* Base Master Details Input */
+.reimbursement-form .bg-gray-50.p-4 {
+  background: #f9fafb;
+  padding: 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+/* Section Header */
+.reimbursement-form section > div:first-child {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 4px;
+}
+
+.reimbursement-form section h3 {
+  font-size: 12px;
+  font-weight: 700;
+  color: #374151;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Tables */
+.reimbursement-form section .overflow-x-auto {
+  margin-top: 12px;
+  margin-bottom: 24px;
+  overflow-x: auto;
+}
+
+.reimbursement-form table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #d1d5db;
+  font-size: 11px;
+}
+
+.reimbursement-form th {
+  background: #f3f4f6;
+  border: 1px solid #d1d5db;
+  padding: 8px;
+  font-weight: 700;
+  color: #D84315;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+.reimbursement-form td {
+  border: 1px solid #d1d5db;
+  padding: 4px;
+  background: white;
+}
+
+.reimbursement-form td.bg-gray-50 {
+  background: #f9fafb;
+}
+
+/* Inputs within Tables */
+.reimbursement-form table input[type="text"],
+.reimbursement-form table input[type="number"],
+.reimbursement-form table input[type="date"] {
+  width: 100%;
+  padding: 4px;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 11px;
+}
+
+.reimbursement-form table input:focus {
+  background: #fff;
+  box-shadow: inset 0 0 0 1px #D84315;
+}
+
+/* Checkboxes and Files */
+.reimbursement-form table input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+  cursor: pointer;
+}
+
+.reimbursement-form .flex-col.items-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.reimbursement-form .flex.items-center.gap-2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Add Row Button */
+.reimbursement-form .add-line-btn {
+  margin-top: 8px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #D84315;
+  display: flex;
+  align-items: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 8px;
+  letter-spacing: 0.5px;
+}
+
+.reimbursement-form .add-line-btn:hover {
+  text-decoration: underline;
+  background: #fff8f5;
+  border-radius: 4px;
+}
+
+.reimbursement-form button svg {
+  margin-right: 4px;
+}
+
+/* Final Calculation Summary */
+.reimbursement-form .bg-\[\#FFF8F5\] {
+  background-color: #FFF8F5;
+  border: 1px solid rgba(216, 67, 21, 0.2);
+  padding: 24px;
+  border-radius: 4px;
+  margin-top: 32px;
+}
+
+.reimbursement-form .grid.grid-cols-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  margin-top: 16px;
+}
+
+@media (min-width: 1024px) {
+  .reimbursement-form .grid.grid-cols-2 {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.reimbursement-form .space-y-1 {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.reimbursement-form .text-xl.font-black {
+  font-size: 20px;
+  font-weight: 900;
+}
+
+.reimbursement-form .border-l {
+  border-left: 1px solid #e5e7eb;
+  padding-left: 24px;
+}
+
+/* Balance Box */
+.reimbursement-form .bg-red-50 {
+  background-color: #fef2f2;
+  border: 1px solid #fee2e2;
+}
+
+.reimbursement-form .text-red-600 {
+  color: #dc2626;
+}
+
+.reimbursement-form .bg-green-50 {
+  background-color: #f0fdf4;
+  border: 1px solid #dcfce3;
+}
+
+.reimbursement-form .text-green-600 {
+  color: #16a34a;
+}
+
+/* Buttons inside summary */
+.reimbursement-form .flex.items-center.gap-4 {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.reimbursement-form button[type="submit"] {
+  background-color: #D84315;
+  color: white;
+  padding: 12px 32px;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 14px;
+  border: none;
+  cursor: pointer;
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+}
+
+.reimbursement-form button[type="submit"]:hover {
+  background-color: #ea580c;
+}
+
+.reimbursement-form .border-gray-300.hover\:bg-gray-50 {
+  border: 1px solid #d1d5db;
+  background: white;
+  padding: 12px 24px;
+  color: #6b7280;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.reimbursement-form .border-gray-300.hover\:bg-gray-50:hover {
+  background: #f9fafb;
+}
+
+.reimbursement-form .truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 80px;
+}
+
+/* File Input Icons */
+.reimbursement-form label.cursor-pointer {
+  cursor: pointer;
+}
+
+.reimbursement-form label.cursor-pointer:hover {
+  color: #D84315;
+}
+
+/* === UTILITY CLASSES TO REPLACE MISSING TAILWIND === */
+.reimbursement-form .hidden { display: none !important; }
+.reimbursement-form .flex { display: flex; }
+.reimbursement-form .items-center { align-items: center; }
+.reimbursement-form .justify-between { justify-content: space-between; }
+.reimbursement-form .gap-1 { gap: 4px; }
+.reimbursement-form .gap-2 { gap: 8px; }
+.reimbursement-form .gap-3 { gap: 12px; }
+.reimbursement-form .gap-4 { gap: 16px; }
+.reimbursement-form .gap-6 { gap: 24px; }
+.reimbursement-form .flex-col { flex-direction: column; }
+.reimbursement-form .w-full { width: 100%; }
+.reimbursement-form .text-center { text-align: center; }
+.reimbursement-form .text-right { text-align: right; }
+.reimbursement-form .whitespace-nowrap { white-space: nowrap; }
+.reimbursement-form .uppercase { text-transform: uppercase; }

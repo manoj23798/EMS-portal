@@ -5,9 +5,13 @@ import com.ems.dto.response.EmployeeResponse;
 import com.ems.entity.Department;
 import com.ems.entity.Designation;
 import com.ems.entity.Employee;
+import com.ems.entity.User;
+import com.ems.entity.Role;
 import com.ems.repository.DepartmentRepository;
 import com.ems.repository.DesignationRepository;
 import com.ems.repository.EmployeeRepository;
+import com.ems.repository.RoleRepository;
+import com.ems.repository.UserRepository;
 import com.ems.service.EmployeeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,6 +28,8 @@ public class EmployeeServiceImpl implements EmployeeService {
     private final EmployeeRepository employeeRepository;
     private final DepartmentRepository departmentRepository;
     private final DesignationRepository designationRepository;
+    private final RoleRepository roleRepository;
+    private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -39,6 +45,23 @@ public class EmployeeServiceImpl implements EmployeeService {
         mapRequestToEntity(request, employee);
         
         Employee saved = employeeRepository.save(employee);
+        
+        // Create User entity if auth details are provided
+        if (request.getUsername() != null && !request.getUsername().isEmpty()) {
+            Role role = roleRepository.findByRoleName(request.getRole() != null ? request.getRole() : "EMPLOYEE")
+                    .orElseThrow(() -> new RuntimeException("Role not found"));
+            
+            User user = User.builder()
+                    .username(request.getUsername())
+                    .email(request.getEmail())
+                    .passwordHash(passwordEncoder.encode(request.getPassword() != null ? request.getPassword() : "default123"))
+                    .role(role)
+                    .employee(saved)
+                    .status("ACTIVE")
+                    .build();
+            userRepository.save(user);
+        }
+        
         return mapEntityToResponse(saved);
     }
 
@@ -65,6 +88,35 @@ public class EmployeeServiceImpl implements EmployeeService {
         mapRequestToEntity(request, employee);
         
         Employee updated = employeeRepository.save(employee);
+        
+        // Update User entity if it exists or create one
+        if (request.getUsername() != null && !request.getUsername().isEmpty()) {
+            User user = userRepository.findByEmployeeId(updated.getId()).orElse(new User());
+            user.setUsername(request.getUsername());
+            user.setEmail(request.getEmail());
+            user.setEmployee(updated);
+            user.setStatus(updated.getStatus());
+            
+            if (request.getRole() != null) {
+                Role role = roleRepository.findByRoleName(request.getRole())
+                        .orElseThrow(() -> new RuntimeException("Role not found"));
+                user.setRole(role);
+            }
+            
+            if (request.getPassword() != null && !request.getPassword().isEmpty()) {
+                user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
+            }
+            
+            // If it's a new user where role wasn't provided, default it
+            if (user.getId() == null && user.getRole() == null) {
+                Role role = roleRepository.findByRoleName("EMPLOYEE")
+                        .orElseThrow(() -> new RuntimeException("Role not found"));
+                user.setRole(role);
+            }
+            
+            userRepository.save(user);
+        }
+        
         return mapEntityToResponse(updated);
     }
 
@@ -99,15 +151,9 @@ public class EmployeeServiceImpl implements EmployeeService {
         employee.setWorkLocation(request.getWorkLocation());
 
         // Delta fields
+        // Delta fields
         employee.setAadhaar(request.getAadhaar());
         employee.setPan(request.getPan());
-        employee.setUsername(request.getUsername());
-        employee.setRole(request.getRole());
-
-        // Only encode/update password if it's provided (important for update operations)
-        if (request.getPassword() != null && !request.getPassword().isEmpty()) {
-            employee.setPassword(passwordEncoder.encode(request.getPassword()));
-        }
 
         if (request.getDepartmentId() != null) {
             Department dept = departmentRepository.findById(request.getDepartmentId())
