@@ -1,10 +1,10 @@
 FROM eclipse-temurin:17-jdk-alpine AS build
 
 WORKDIR /app
-COPY mvnw .
-COPY .mvn .mvn
-COPY pom.xml .
-COPY src src
+COPY backend/mvnw .
+COPY backend/.mvn .mvn
+COPY backend/pom.xml .
+COPY backend/src src
 
 # Make Maven wrapper executable
 RUN chmod +x mvnw

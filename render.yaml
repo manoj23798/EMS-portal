@@ -5,8 +5,7 @@ services:
     env: docker
     region: frankfurt # Change if needed (e.g., ohio, singapore)
     plan: free # Uses Render's free tier
-    dockerfilePath: ./backend/Dockerfile
-    dockerContext: ./backend
+    dockerfilePath: ./Dockerfile
     envVars:
       - key: DATABASE_URL
         value: jdbc:postgresql://ep-sparkling-bonus-am0n47mt-pooler.c-5.us-east-1.aws.neon.tech/neondb?sslmode=require
