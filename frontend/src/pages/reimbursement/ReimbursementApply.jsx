@@ -467,13 +467,13 @@ export default function ReimbursementApply() {
                             <tbody className="bg-white text-center font-semibold text-black">
                                 <tr>
                                     <td className="border border-black p-2 text-xs">
-                                        {formData.fromDate ? `${formData.fromDate.split('-').reverse().join('-')} to\n${formData.toDate.split('-').reverse().join('-')}` : '-'}
+                                        {formData.travelStartDate ? `${formData.travelStartDate.split('-').reverse().join('-')} to\n${formData.travelEndDate.split('-').reverse().join('-')}` : '-'}
                                     </td>
                                     <td className="border border-black p-2">{totals.ticketTotal.toFixed(0)}</td>
                                     <td className="border border-black p-2">{totals.lodgingTotal.toFixed(0)}</td>
                                     <td className="border border-black p-2">{totals.conveyTotal.toFixed(0)}</td>
                                     <td className="border border-black p-2">{totals.foodTotal.toFixed(0)}</td>
-                                    <td className="border border-black p-2">{totals.othersTotal.toFixed(0)}</td>
+                                    <td className="border border-black p-2">{totals.otherTotal.toFixed(0)}</td>
                                     <td className="border border-black p-2">{totals.wageTotal.toFixed(0)}</td>
                                     <td className="border border-black p-2">{totals.totalClaimed.toFixed(0)}</td>
                                     <td className="border border-black p-0 bg-white align-top relative h-full">
