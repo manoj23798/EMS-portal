@@ -20,7 +20,7 @@ services:
 
   # React Frontend (Optional logic in Render, but better suited for Vercel/Netlify)
   - type: static
-    name: ems-frontend
+    name: ems-frontend3
     rootDir: ./frontend
     buildCommand: npm install && npm run build
     staticPublishPath: ./dist

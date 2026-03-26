@@ -121,8 +121,8 @@ export default function AdminReimbursementDashboard() {
                                             <div className="text-xs text-gray-500">{claim.employeeCode} - {claim.designation}</div>
                                         </td>
                                         <td>{new Date(claim.submissionDate).toLocaleDateString()}</td>
-                                        <td className="font-mono font-bold text-orange-600">₹{claim.totalClaimed.toFixed(2)}</td>
-                                        <td className={`font-mono font-bold ${claim.amountToReturn < 0 ? 'text-red-600' : 'text-green-600'}`}>₹{claim.amountToReturn.toFixed(2)}</td>
+                                        <td className="font-mono font-bold text-orange-600">₹{(claim.totalClaimed || 0).toFixed(2)}</td>
+                                        <td className={`font-mono font-bold ${claim.amountToReturn < 0 ? 'text-red-600' : 'text-green-600'}`}>₹{(claim.amountToReturn || 0).toFixed(2)}</td>
                                         <td>
                                             {claim.status === 'MANAGER_APPROVED' && <span className="badge bg-blue-100 text-blue-800">Ready to Settle</span>}
                                             {claim.status === 'ACCOUNTS_SETTLED' && <span className="badge bg-green-100 text-green-800">Settled ✓</span>}
@@ -189,13 +189,13 @@ export default function AdminReimbursementDashboard() {
                                     </thead>
                                     <tbody>
                                         <tr className="font-mono">
-                                            <td className="p-1 border">{selectedClaim.ticketTotal.toFixed(2)}</td>
-                                            <td className="p-1 border">{selectedClaim.lodgingTotal.toFixed(2)}</td>
-                                            <td className="p-1 border">{selectedClaim.conveyTotal.toFixed(2)}</td>
-                                            <td className="p-1 border">{selectedClaim.foodTotal.toFixed(2)}</td>
-                                            <td className="p-1 border">{selectedClaim.otherTotal.toFixed(2)}</td>
-                                            <td className="p-1 border">{selectedClaim.wageTotal.toFixed(2)}</td>
-                                            <td className="p-1 border bg-orange-50 font-bold text-orange-700">{selectedClaim.totalClaimed.toFixed(2)}</td>
+                                            <td className="p-1 border">{(selectedClaim.ticketTotal || 0).toFixed(2)}</td>
+                                            <td className="p-1 border">{(selectedClaim.lodgingTotal || 0).toFixed(2)}</td>
+                                            <td className="p-1 border">{(selectedClaim.conveyTotal || 0).toFixed(2)}</td>
+                                            <td className="p-1 border">{(selectedClaim.foodTotal || 0).toFixed(2)}</td>
+                                            <td className="p-1 border">{(selectedClaim.otherTotal || 0).toFixed(2)}</td>
+                                            <td className="p-1 border">{(selectedClaim.wageTotal || 0).toFixed(2)}</td>
+                                            <td className="p-1 border bg-orange-50 font-bold text-orange-700">{(selectedClaim.totalClaimed || 0).toFixed(2)}</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -203,12 +203,12 @@ export default function AdminReimbursementDashboard() {
                                 <div className="flex justify-between bg-yellow-50 p-3 rounded border border-yellow-200">
                                     <div>
                                         <span className="text-gray-600 block text-xs">Advance Taken</span>
-                                        <span className="font-mono font-bold">₹{selectedClaim.advanceAmount.toFixed(2)}</span>
+                                        <span className="font-mono font-bold">₹{(selectedClaim.advanceAmount || 0).toFixed(2)}</span>
                                     </div>
                                     <div className="text-right">
                                         <span className="text-gray-600 block text-xs">Amt to Return/(Due)</span>
                                         <span className={`font-mono font-bold text-xl ${selectedClaim.amountToReturn < 0 ? 'text-red-600' : 'text-green-600'}`}>
-                                            ₹{selectedClaim.amountToReturn.toFixed(2)}
+                                            ₹{(selectedClaim.amountToReturn || 0).toFixed(2)}
                                         </span>
                                     </div>
                                 </div>
@@ -224,7 +224,7 @@ export default function AdminReimbursementDashboard() {
                                         {selectedClaim.accountsApprovedAmount && (
                                             <div className="mt-4 pt-4 border-t border-gray-300">
                                                 <p className="text-xs">Previously Settled Amount:</p>
-                                                <p className="text-2xl font-mono font-bold text-green-700">₹{selectedClaim.accountsApprovedAmount.toFixed(2)}</p>
+                                                <p className="text-2xl font-mono font-bold text-green-700">₹{(selectedClaim.accountsApprovedAmount || 0).toFixed(2)}</p>
                                                 <p className="text-sm mt-2">{selectedClaim.accountsReason}</p>
                                             </div>
                                         )}

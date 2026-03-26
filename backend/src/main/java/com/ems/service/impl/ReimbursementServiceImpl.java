@@ -240,6 +240,21 @@ public class ReimbursementServiceImpl implements ReimbursementService {
         res.setAccountsApprovalDate(rm.getAccountsApprovalDate());
         res.setAccountsApprovalBy(rm.getAccountsApprovalBy());
 
+        // Calculate and set sub-totals for display
+        double tTotal = rm.getTickets() != null ? rm.getTickets().stream().mapToDouble(t -> t.getAmount() != null ? t.getAmount() : 0.0).sum() : 0.0;
+        double lTotal = rm.getLodgings() != null ? rm.getLodgings().stream().mapToDouble(l -> l.getAmount() != null ? l.getAmount() : 0.0).sum() : 0.0;
+        double cTotal = rm.getConveyances() != null ? rm.getConveyances().stream().mapToDouble(c -> c.getAmount() != null ? c.getAmount() : 0.0).sum() : 0.0;
+        double fTotal = rm.getFoods() != null ? rm.getFoods().stream().mapToDouble(f -> f.getTotal() != null ? f.getTotal() : 0.0).sum() : 0.0;
+        double oTotal = rm.getOthers() != null ? rm.getOthers().stream().mapToDouble(o -> o.getAmount() != null ? o.getAmount() : 0.0).sum() : 0.0;
+        double wTotal = rm.getWages() != null ? rm.getWages().stream().mapToDouble(w -> w.getTotalAmount() != null ? w.getTotalAmount() : 0.0).sum() : 0.0;
+
+        res.setTicketTotal(tTotal);
+        res.setLodgingTotal(lTotal);
+        res.setConveyTotal(cTotal);
+        res.setFoodTotal(fTotal);
+        res.setOtherTotal(oTotal);
+        res.setWageTotal(wTotal);
+
         // Map Tickets
         if (rm.getTickets() != null) {
             res.setTickets(rm.getTickets().stream().map(t -> {

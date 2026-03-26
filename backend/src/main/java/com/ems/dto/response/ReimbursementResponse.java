@@ -22,6 +22,14 @@ public class ReimbursementResponse {
     private Double totalAmountClaimed;
     private Double advanceAmount;
     private Double amountToReturn;
+    
+    // Sub-totals for display
+    private Double ticketTotal;
+    private Double lodgingTotal;
+    private Double conveyTotal;
+    private Double foodTotal;
+    private Double otherTotal;
+    private Double wageTotal;
 
     // Approvals
     private LocalDate managerApprovalDate;
