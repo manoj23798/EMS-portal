@@ -253,6 +253,46 @@ body {
   transition: var(--transition);
 }
 
+.add-line-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 12px;
+  background: white;
+  border: 1px dashed #d1d5db;
+  border-top: none;
+  color: #6b7280;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  transition: all 0.2s ease;
+}
+
+.add-line-btn:hover {
+  background: #f9fafb;
+  color: #D84315;
+  border-color: #D84315;
+}
+
+.reimbursement-form input:not([type="checkbox"]):not([type="file"]) {
+  border: none;
+  background: transparent;
+  width: 100%;
+  padding: 4px;
+  text-align: inherit;
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+  transition: all 0.2s ease;
+}
+
+.reimbursement-form input:not([type="checkbox"]):not([type="file"]):focus {
+  background: #fdf2f0;
+  outline: none;
+  border-radius: 4px;
+}
+
 .btn-primary {
   background: var(--primary);
   color: white;
@@ -527,10 +567,13 @@ tr:hover td {
 
 /* === REIMBURSEMENT SPREADSHEET FORM (TAILWIND REPLACEMENT) === */
 .reimbursement-form {
-  background: white;
-  padding: 8px;
+  background: #fdfdfd;
+  padding: 40px;
   width: 100%;
-  color: #111827;
+  max-width: 100%;
+  margin: 0 auto;
+  color: #1f2937;
+  font-family: 'Inter', sans-serif;
 }
 
 .reimbursement-form header,
@@ -588,30 +631,54 @@ tr:hover td {
 
 .reimbursement-form table {
   width: 100%;
-  border-collapse: collapse;
-  border: 2px solid #000;
-  font-size: 11px;
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+  font-size: 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
 .reimbursement-form th {
-  background: #ffffff;
-  border: 1px solid #000;
-  padding: 8px;
-  font-weight: 800;
-  color: #000;
+  background: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+  border-right: 1px solid #e5e7eb;
+  padding: 12px 10px;
+  font-weight: 600;
+  color: #4b5563;
   text-transform: uppercase;
+  letter-spacing: 0.05em;
   text-align: center;
 }
 
+.reimbursement-form th:last-child {
+  border-right: none;
+}
+
 .reimbursement-form td {
-  border: 1px solid #000;
-  padding: 4px;
+  border-bottom: 1px solid #f3f4f6;
+  border-right: 1px solid #f3f4f6;
+  padding: 8px;
   background: white;
-  color: #000;
+  transition: background 0.2s ease;
+}
+
+.reimbursement-form td:last-child {
+  border-right: none;
+}
+
+.reimbursement-form tr:last-child td {
+  border-bottom: none;
+}
+
+.reimbursement-form tr:hover td {
+  background: #fbfbfb;
 }
 
 .reimbursement-form td.bg-gray-50 {
-  background: #fdfdfd;
+  background: #f9fafb;
+  font-weight: 600;
 }
 
 /* Inputs within Tables */

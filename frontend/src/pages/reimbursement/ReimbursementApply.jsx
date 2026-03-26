@@ -86,9 +86,10 @@ export default function ReimbursementApply() {
     };
 
     return (
-        <div className="reimbursement-form page-content">
-            <div className="mb-6 flex flex-col items-start border-b-2 border-gray-200 pb-2">
-                <h2 className="text-lg font-bold tracking-widest text-gray-800 mt-1 uppercase">REIMBURSEMENT FORM</h2>
+        <div className="reimbursement-form">
+            <div className="mb-10 flex flex-col items-center border-b pb-6">
+                <h2 className="text-3xl font-black tracking-tight text-gray-900 mt-1 uppercase" style={{ color: '#D84315' }}>REIMBURSEMENT FORM</h2>
+                <p className="text-gray-500 text-sm mt-2 font-medium">Please fill in the details accurately for faster processing</p>
             </div>
 
             {error && <div className="bg-red-50 border border-red-200 p-3 mb-4 text-red-600 text-sm">{error}</div>}
@@ -138,10 +139,10 @@ export default function ReimbursementApply() {
                         <h3 className="text-[12px] font-bold text-gray-800 uppercase tracking-wide">TICKET DETAILS</h3>
                         <div className="text-[11px] text-gray-500 font-medium">Sub-total: ₹{totals.ticketTotal.toFixed(2)}</div>
                     </div>
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-[11px] border-collapse border border-gray-300">
+                    <div className="overflow-x-auto rounded-lg shadow-sm border border-gray-100">
+                        <table className="w-full">
                             <thead>
-                                <tr className="bg-gray-100">
+                                <tr className="bg-gray-50/50">
                                     <th className="border border-gray-300 p-2 font-bold text-[#D84315] w-28">DATE</th>
                                     <th className="border border-gray-300 p-2 font-bold text-[#D84315]">TRAVEL FROM</th>
                                     <th className="border border-gray-300 p-2 font-bold text-[#D84315]">TRAVEL TO</th>
@@ -200,18 +201,18 @@ export default function ReimbursementApply() {
                         <h3 className="text-[12px] font-bold text-gray-800 uppercase tracking-wide">LODGING AND BOARDING DETAILS</h3>
                         <div className="text-[11px] text-gray-500 font-medium">Sub-total: ₹{totals.lodgingTotal.toFixed(2)}</div>
                     </div>
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-[11px] border-collapse border border-gray-300">
+                    <div className="overflow-x-auto rounded-lg shadow-sm border border-gray-100">
+                        <table className="w-full">
                             <thead>
-                                <tr className="bg-gray-100">
-                                    <th className="border border-gray-300 p-2 font-bold text-[#D84315]">DATE RANGE</th>
-                                    <th className="border border-gray-300 p-2 font-bold text-[#D84315]">LOCATION</th>
-                                    <th className="border border-gray-300 p-2 font-bold text-[#D84315] w-20 text-center">DAYS</th>
-                                    <th className="border border-gray-300 p-2 font-bold text-[#D84315] w-20 text-center">PERSONS</th>
-                                    <th className="border border-gray-300 p-2 font-bold text-[#D84315] w-28 text-center">RATE</th>
-                                    <th className="border border-gray-300 p-2 font-bold text-[#D84315] w-28 text-center">AMOUNT</th>
-                                    <th className="border border-gray-300 p-2 font-bold text-[#D84315] w-16 text-center">BILL</th>
-                                    <th className="border border-gray-300 p-2 w-10"></th>
+                                <tr className="bg-gray-50/50">
+                                    <th className="p-2 font-bold text-[#D84315]">DATE RANGE</th>
+                                    <th className="p-2 font-bold text-[#D84315]">LOCATION</th>
+                                    <th className="p-2 font-bold text-[#D84315] w-20 text-center">DAYS</th>
+                                    <th className="p-2 font-bold text-[#D84315] w-20 text-center">PERSONS</th>
+                                    <th className="p-2 font-bold text-[#D84315] w-28 text-center">RATE</th>
+                                    <th className="p-2 font-bold text-[#D84315] w-28 text-center">AMOUNT</th>
+                                    <th className="p-2 font-bold text-[#D84315] w-16 text-center">BILL</th>
+                                    <th className="w-10"></th>
                                 </tr>
                             </thead>
                             <tbody className="bg-white">
@@ -251,17 +252,17 @@ export default function ReimbursementApply() {
                         <h3 className="text-[12px] font-bold text-gray-800 uppercase tracking-wide">LOCAL CONVEYANCE</h3>
                         <div className="text-[11px] text-gray-500 font-medium">Sub-total: ₹{totals.conveyTotal.toFixed(2)}</div>
                     </div>
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-[11px] border-collapse border border-gray-300">
+                    <div className="overflow-x-auto rounded-lg shadow-sm border border-gray-100">
+                        <table className="w-full">
                             <thead>
-                                <tr className="bg-gray-100">
-                                    <th className="border border-gray-300 p-2 font-bold text-[#D84315] w-28 text-center">DATE</th>
-                                    <th className="border border-gray-300 p-2 font-bold text-[#D84315]">LOCATION FROM</th>
-                                    <th className="border border-gray-300 p-2 font-bold text-[#D84315]">LOCATION TO</th>
-                                    <th className="border border-gray-300 p-2 font-bold text-[#D84315] w-32 text-center">MODE</th>
-                                    <th className="border border-gray-300 p-2 font-bold text-[#D84315] w-28 text-center">AMOUNT</th>
-                                    <th className="border border-gray-300 p-2 font-bold text-[#D84315] w-16 text-center">BILL</th>
-                                    <th className="border border-gray-300 p-2 w-10"></th>
+                                <tr className="bg-gray-50/50">
+                                    <th className="p-2 font-bold text-[#D84315] w-28 text-center">DATE</th>
+                                    <th className="p-2 font-bold text-[#D84315]">LOCATION FROM</th>
+                                    <th className="p-2 font-bold text-[#D84315]">LOCATION TO</th>
+                                    <th className="p-2 font-bold text-[#D84315] w-32 text-center">MODE</th>
+                                    <th className="p-2 font-bold text-[#D84315] w-28 text-center">AMOUNT</th>
+                                    <th className="p-2 font-bold text-[#D84315] w-16 text-center">BILL</th>
+                                    <th className="w-10"></th>
                                 </tr>
                             </thead>
                             <tbody className="bg-white">
@@ -302,20 +303,20 @@ export default function ReimbursementApply() {
                         <h3 className="text-[12px] font-bold text-gray-800 uppercase tracking-wide">FOOD/PARKING</h3>
                         <div className="text-[11px] text-gray-500 font-medium">Sub-total: ₹{totals.foodTotal.toFixed(2)}</div>
                     </div>
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-[11px] border-collapse border border-gray-300">
+                    <div className="overflow-x-auto rounded-lg shadow-sm border border-gray-100">
+                        <table className="w-full">
                             <thead>
-                                <tr className="bg-gray-100">
-                                    <th className="border border-gray-300 p-2 font-bold text-[#D84315] w-28 text-center">DATE</th>
-                                    <th className="border border-gray-300 p-2 font-bold text-[#D84315] w-16 text-center">MORN</th>
-                                    <th className="border border-gray-300 p-2 font-bold text-[#D84315] w-16 text-center">AFT</th>
-                                    <th className="border border-gray-300 p-2 font-bold text-[#D84315] w-16 text-center">EVE</th>
-                                    <th className="border border-gray-300 p-2 font-bold text-[#D84315] w-16 text-center">NIGHT</th>
-                                    <th className="border border-gray-300 p-2 font-bold text-[#D84315] w-24 text-center">TOTAL</th>
-                                    <th className="border border-gray-300 p-2 font-bold text-[#D84315] w-16 text-center">GST</th>
-                                    <th className="border border-gray-300 p-2 font-bold text-[#D84315] w-16 text-center">SGST</th>
-                                    <th className="border border-gray-300 p-2 font-bold text-[#D84315] w-12 text-center">BILL</th>
-                                    <th className="border border-gray-300 p-2 w-8"></th>
+                                <tr className="bg-gray-50/50">
+                                    <th className="p-2 font-bold text-[#D84315] w-28 text-center">DATE</th>
+                                    <th className="p-2 font-bold text-[#D84315] w-16 text-center">MORN</th>
+                                    <th className="p-2 font-bold text-[#D84315] w-16 text-center">AFT</th>
+                                    <th className="p-2 font-bold text-[#D84315] w-16 text-center">EVE</th>
+                                    <th className="p-2 font-bold text-[#D84315] w-16 text-center">NIGHT</th>
+                                    <th className="p-2 font-bold text-[#D84315] w-24 text-center">TOTAL</th>
+                                    <th className="p-2 font-bold text-[#D84315] w-16 text-center">GST</th>
+                                    <th className="p-2 font-bold text-[#D84315] w-16 text-center">SGST</th>
+                                    <th className="p-2 font-bold text-[#D84315] w-12 text-center">BILL</th>
+                                    <th className="w-8"></th>
                                 </tr>
                             </thead>
                             <tbody className="bg-white">
@@ -357,15 +358,15 @@ export default function ReimbursementApply() {
                         <h3 className="text-[12px] font-bold text-gray-800 uppercase tracking-wide">OTHERS</h3>
                         <div className="text-[11px] text-gray-500 font-medium">Sub-total: ₹{totals.otherTotal.toFixed(2)}</div>
                     </div>
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-[11px] border-collapse border border-gray-300">
+                    <div className="overflow-x-auto rounded-lg shadow-sm border border-gray-100">
+                        <table className="w-full">
                             <thead>
-                                <tr className="bg-gray-100">
-                                    <th className="border border-gray-300 p-2 font-bold text-[#D84315] w-28 text-center">DATE</th>
-                                    <th className="border border-gray-300 p-2 font-bold text-[#D84315]">DESCRIPTION</th>
-                                    <th className="border border-gray-300 p-2 font-bold text-[#D84315] w-32 text-center">AMOUNT</th>
-                                    <th className="border border-gray-300 p-2 font-bold text-[#D84315] w-16 text-center">BILL</th>
-                                    <th className="border border-gray-300 p-2 w-10"></th>
+                                <tr className="bg-gray-50/50">
+                                    <th className="p-2 font-bold text-[#D84315] w-28 text-center">DATE</th>
+                                    <th className="p-2 font-bold text-[#D84315]">DESCRIPTION</th>
+                                    <th className="p-2 font-bold text-[#D84315] w-32 text-center">AMOUNT</th>
+                                    <th className="p-2 font-bold text-[#D84315] w-16 text-center">BILL</th>
+                                    <th className="w-10"></th>
                                 </tr>
                             </thead>
                             <tbody className="bg-white">
@@ -404,18 +405,18 @@ export default function ReimbursementApply() {
                         <h3 className="text-[12px] font-bold text-gray-800 uppercase tracking-wide">WAGES</h3>
                         <div className="text-[11px] text-gray-500 font-medium">Sub-total: ₹{totals.wageTotal.toFixed(2)}</div>
                     </div>
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-[11px] border-collapse border border-gray-300">
+                    <div className="overflow-x-auto rounded-lg shadow-sm border border-gray-100">
+                        <table className="w-full">
                             <thead>
-                                <tr className="bg-gray-100">
-                                    <th className="border border-gray-300 p-2 font-bold text-[#D84315] w-12 text-center text-[10px]">S.NO</th>
-                                    <th className="border border-gray-300 p-2 font-bold text-[#D84315]">NAME</th>
-                                    <th className="border border-gray-300 p-2 font-bold text-[#D84315] w-28 text-center">FROM</th>
-                                    <th className="border border-gray-300 p-2 font-bold text-[#D84315] w-28 text-center">TO</th>
-                                    <th className="border border-gray-300 p-2 font-bold text-[#D84315] w-20 text-center">DAYS</th>
-                                    <th className="border border-gray-300 p-2 font-bold text-[#D84315] w-28 text-center">RATE</th>
-                                    <th className="border border-gray-300 p-2 font-bold text-[#D84315] w-28 text-center">AMOUNT</th>
-                                    <th className="border border-gray-300 p-2 w-10"></th>
+                                <tr className="bg-gray-50/50">
+                                    <th className="p-2 font-bold text-[#D84315] w-12 text-center text-[10px]">S.NO</th>
+                                    <th className="p-2 font-bold text-[#D84315]">NAME</th>
+                                    <th className="p-2 font-bold text-[#D84315] w-28 text-center">FROM</th>
+                                    <th className="p-2 font-bold text-[#D84315] w-28 text-center">TO</th>
+                                    <th className="p-2 font-bold text-[#D84315] w-20 text-center">DAYS</th>
+                                    <th className="p-2 font-bold text-[#D84315] w-28 text-center">RATE</th>
+                                    <th className="p-2 font-bold text-[#D84315] w-28 text-center">AMOUNT</th>
+                                    <th className="w-10"></th>
                                 </tr>
                             </thead>
                             <tbody className="bg-white">
@@ -442,65 +443,66 @@ export default function ReimbursementApply() {
                 </section>
 
                 {/* 8. TOTAL AMOUNT CLAIMED (FINAL SUBMISSION SUMMARY) */}
-                <section className="mt-8 mb-4">
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-[12px] border-collapse" style={{ border: '2px solid #000' }}>
+                <section className="mt-12 mb-8">
+                    <div className="overflow-hidden rounded-xl border border-gray-200 shadow-lg bg-white">
+                        <table className="w-full text-[13px] border-collapse">
                             <thead>
                                 <tr>
-                                    <th colSpan="10" className="p-2 text-center text-[14px] font-black uppercase text-black border-2 border-black" style={{ backgroundColor: '#FFBF00' }}>
-                                        TOTAL AMOUNT CLAIMED
+                                    <th colSpan="10" className="p-4 text-center text-[16px] font-black uppercase text-white border-none" style={{ background: 'linear-gradient(90deg, #D84315 0%, #FF8A65 100%)' }}>
+                                        FINAL SETTLEMENT SUMMARY
                                     </th>
                                 </tr>
-                                <tr className="bg-white text-black text-center">
-                                    <th className="border border-black p-2 font-bold whitespace-nowrap">Date</th>
-                                    <th className="border border-black p-2 font-bold whitespace-nowrap">Ticket<br/>Details</th>
-                                    <th className="border border-black p-2 font-bold whitespace-nowrap lg:w-32">Lodging &<br/>Boarding Details</th>
-                                    <th className="border border-black p-2 font-bold whitespace-nowrap">Local<br/>Con</th>
-                                    <th className="border border-black p-2 font-bold whitespace-nowrap">Food</th>
-                                    <th className="border border-black p-2 font-bold whitespace-nowrap">Others</th>
-                                    <th className="border border-black p-2 font-bold whitespace-nowrap">Wages</th>
-                                    <th className="border border-black p-2 font-bold whitespace-nowrap">Amount</th>
-                                    <th className="border border-black p-2 font-bold whitespace-nowrap w-24">Advance<br/>Amount</th>
-                                    <th className="border border-black p-2 font-bold whitespace-nowrap w-24">Amount to<br/>be return</th>
+                                <tr className="bg-gray-50 text-gray-600 text-center">
+                                    <th className="p-3 font-bold border-r border-gray-100 uppercase text-[10px] tracking-wider">Date Range</th>
+                                    <th className="p-3 font-bold border-r border-gray-100 uppercase text-[10px] tracking-wider">Tickets</th>
+                                    <th className="p-3 font-bold border-r border-gray-100 uppercase text-[10px] tracking-wider">Lodging</th>
+                                    <th className="p-3 font-bold border-r border-gray-100 uppercase text-[10px] tracking-wider">Conveyance</th>
+                                    <th className="p-3 font-bold border-r border-gray-100 uppercase text-[10px] tracking-wider">Food</th>
+                                    <th className="p-3 font-bold border-r border-gray-100 uppercase text-[10px] tracking-wider">Others</th>
+                                    <th className="p-3 font-bold border-r border-gray-100 uppercase text-[10px] tracking-wider">Wages</th>
+                                    <th className="p-3 font-bold border-r border-gray-100 uppercase text-[10px] tracking-wider">Gross Total</th>
+                                    <th className="p-3 font-bold border-r border-gray-100 uppercase text-[10px] tracking-wider w-32">Advance Taken</th>
+                                    <th className="p-3 font-bold uppercase text-[10px] tracking-wider">Net Balance</th>
                                 </tr>
                             </thead>
-                            <tbody className="bg-white text-center font-semibold text-black">
+                            <tbody className="bg-white text-center font-medium text-gray-800">
                                 <tr>
-                                    <td className="border border-black p-2 text-xs">
-                                        {formData.travelStartDate ? `${formData.travelStartDate.split('-').reverse().join('-')} to\n${formData.travelEndDate.split('-').reverse().join('-')}` : '-'}
+                                    <td className="p-4 border-r border-gray-50 text-[11px] font-bold text-gray-500">
+                                        {formData.travelStartDate ? `${formData.travelStartDate.split('-').reverse().join('-')} - ${formData.travelEndDate.split('-').reverse().join('-')}` : '---'}
                                     </td>
-                                    <td className="border border-black p-2">{totals.ticketTotal.toFixed(0)}</td>
-                                    <td className="border border-black p-2">{totals.lodgingTotal.toFixed(0)}</td>
-                                    <td className="border border-black p-2">{totals.conveyTotal.toFixed(0)}</td>
-                                    <td className="border border-black p-2">{totals.foodTotal.toFixed(0)}</td>
-                                    <td className="border border-black p-2">{totals.otherTotal.toFixed(0)}</td>
-                                    <td className="border border-black p-2">{totals.wageTotal.toFixed(0)}</td>
-                                    <td className="border border-black p-2">{totals.totalClaimed.toFixed(0)}</td>
-                                    <td className="border border-black p-0 bg-white align-top relative h-full">
+                                    <td className="p-4 border-r border-gray-50">₹{totals.ticketTotal.toFixed(0)}</td>
+                                    <td className="p-4 border-r border-gray-50">₹{totals.lodgingTotal.toFixed(0)}</td>
+                                    <td className="p-4 border-r border-gray-50">₹{totals.conveyTotal.toFixed(0)}</td>
+                                    <td className="p-4 border-r border-gray-50">₹{totals.foodTotal.toFixed(0)}</td>
+                                    <td className="p-4 border-r border-gray-50">₹{totals.otherTotal.toFixed(0)}</td>
+                                    <td className="p-4 border-r border-gray-50">₹{totals.wageTotal.toFixed(0)}</td>
+                                    <td className="p-4 border-r border-gray-50 font-black text-[#D84315]">₹{totals.totalClaimed.toFixed(0)}</td>
+                                    <td className="p-0 border-r border-gray-50 bg-gray-50/30">
                                         <input 
                                             type="number" 
-                                            className="w-full h-full min-h-[40px] px-1 py-2 text-center font-bold bg-white focus:outline-none focus:bg-gray-50" 
+                                            className="w-full h-full min-h-[50px] px-2 text-center font-bold bg-transparent focus:outline-none focus:bg-white transition-colors" 
                                             value={formData.advanceAmount || ''} 
                                             onChange={e => setFormData({...formData, advanceAmount: Number(e.target.value)})} 
                                             placeholder="0"
-                                            style={{ color: '#000' }}
+                                            style={{ color: '#D84315' }}
                                         />
                                     </td>
-                                    <td className="border border-black p-2">
-                                        {totals.amountToReturn.toFixed(0)}
+                                    <td className={`p-4 font-black ${totals.amountToReturn < 0 ? 'text-red-600 bg-red-50/30' : 'text-green-600 bg-green-50/30'}`}>
+                                        ₹{Math.abs(totals.amountToReturn).toFixed(0)}
+                                        <div className="text-[8px] uppercase mt-1 opacity-70">{totals.amountToReturn < 0 ? 'Payable' : 'Returnable'}</div>
                                     </td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
 
-                    <div className="mt-6 flex justify-end gap-4">
-                        <button type="button" onClick={() => window.location.reload()} className="px-6 py-2.5 text-black font-bold uppercase tracking-wider text-[11px] border-2 border-black hover:bg-gray-100 transition-all bg-white shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_rgba(0,0,0,1)] active:translate-y-[2px] active:shadow-none" style={{ borderRadius: '0' }}>
-                            RESET
+                    <div className="mt-8 flex justify-end gap-5">
+                        <button type="button" onClick={() => window.location.reload()} className="px-8 py-3 text-gray-600 font-bold uppercase tracking-wider text-[12px] border border-gray-300 hover:bg-gray-50 transition-all rounded-lg active:scale-95">
+                            CLEAR ALL
                         </button>
-                        <button type="submit" disabled={loading} className="px-8 py-2.5 text-white font-bold uppercase tracking-wider text-[11px] border-2 border-black flex items-center hover:bg-[#b03612] transition-all disabled:bg-gray-400 shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_rgba(0,0,0,1)] active:translate-y-[2px] active:shadow-none" style={{ backgroundColor: '#D84315', borderRadius: '0' }}>
-                            {loading ? <span className="animate-spin mr-3 border-2 border-white border-t-transparent rounded-full w-4 h-4"></span> : <Send size={14} className="mr-2" />}
-                            SUBMIT CLAIM
+                        <button type="submit" disabled={loading} className="px-10 py-3 text-white font-black uppercase tracking-widest text-[12px] flex items-center hover:shadow-xl hover:-translate-y-0.5 transition-all disabled:bg-gray-400 rounded-lg active:scale-95 shadow-lg" style={{ backgroundColor: '#D84315' }}>
+                            {loading ? <span className="animate-spin mr-3 border-2 border-white border-t-transparent rounded-full w-4 h-4"></span> : <Send size={16} className="mr-3" />}
+                            SUBMIT REIMBURSEMENT
                         </button>
                     </div>
                 </section>
