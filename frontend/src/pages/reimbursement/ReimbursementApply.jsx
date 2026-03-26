@@ -441,50 +441,67 @@ export default function ReimbursementApply() {
                     </div>
                 </section>
 
-                {/* FINAL SUBMISSION SUMMARY */}
-                <section className="bg-[#FFF8F5] border border-[#D84315]/20 p-6 rounded-sm space-y-4">
-                    <h3 className="text-sm font-bold text-gray-800 uppercase border-b border-[#D84315]/10 pb-2">FINAL CALCULATION SUMMARY</h3>
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 text-xs">
-                        <div className="space-y-1">
-                            <div className="text-gray-500 font-medium">Tickets & Lodging</div>
-                            <div className="text-base font-bold text-gray-900">₹{(totals.ticketTotal + totals.lodgingTotal).toFixed(2)}</div>
-                        </div>
-                        <div className="space-y-1">
-                            <div className="text-gray-500 font-medium">Conveyance & Food</div>
-                            <div className="text-base font-bold text-gray-900">₹{(totals.conveyTotal + totals.foodTotal).toFixed(2)}</div>
-                        </div>
-                        <div className="space-y-1 border-l border-gray-200 pl-6">
-                            <div className="text-gray-500 font-bold uppercase" style={{ color: '#D84315' }}>TOTAL CLAIMED</div>
-                            <div className="text-xl font-black text-gray-900 leading-none">₹{totals.totalClaimed.toFixed(2)}</div>
-                        </div>
-                        <div className="space-y-1 border-l border-gray-200 pl-6">
-                            <div className="text-gray-500 font-medium">Advance Amount</div>
-                            <input 
-                                type="number" 
-                                className="w-32 border border-gray-300 px-2 py-1 text-sm font-bold bg-white focus:outline-none focus:border-[#D84315]" 
-                                value={formData.advanceAmount} 
-                                onChange={e => setFormData({...formData, advanceAmount: Number(e.target.value)})} 
-                            />
-                        </div>
+                {/* 8. TOTAL AMOUNT CLAIMED (FINAL SUBMISSION SUMMARY) */}
+                <section className="mt-8 mb-4">
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-[12px] border-collapse" style={{ border: '2px solid #000' }}>
+                            <thead>
+                                <tr>
+                                    <th colSpan="10" className="p-2 text-center text-[14px] font-black uppercase text-black border-2 border-black" style={{ backgroundColor: '#FFBF00' }}>
+                                        TOTAL AMOUNT CLAIMED
+                                    </th>
+                                </tr>
+                                <tr className="bg-white text-black text-center">
+                                    <th className="border border-black p-2 font-bold whitespace-nowrap">Date</th>
+                                    <th className="border border-black p-2 font-bold whitespace-nowrap">Ticket<br/>Details</th>
+                                    <th className="border border-black p-2 font-bold whitespace-nowrap lg:w-32">Lodging &<br/>Boarding Details</th>
+                                    <th className="border border-black p-2 font-bold whitespace-nowrap">Local<br/>Con</th>
+                                    <th className="border border-black p-2 font-bold whitespace-nowrap">Food</th>
+                                    <th className="border border-black p-2 font-bold whitespace-nowrap">Others</th>
+                                    <th className="border border-black p-2 font-bold whitespace-nowrap">Wages</th>
+                                    <th className="border border-black p-2 font-bold whitespace-nowrap">Amount</th>
+                                    <th className="border border-black p-2 font-bold whitespace-nowrap w-24">Advance<br/>Amount</th>
+                                    <th className="border border-black p-2 font-bold whitespace-nowrap w-24">Amount to<br/>be return</th>
+                                </tr>
+                            </thead>
+                            <tbody className="bg-white text-center font-semibold text-black">
+                                <tr>
+                                    <td className="border border-black p-2 text-xs">
+                                        {formData.fromDate ? `${formData.fromDate.split('-').reverse().join('-')} to\n${formData.toDate.split('-').reverse().join('-')}` : '-'}
+                                    </td>
+                                    <td className="border border-black p-2">{totals.ticketTotal.toFixed(0)}</td>
+                                    <td className="border border-black p-2">{totals.lodgingTotal.toFixed(0)}</td>
+                                    <td className="border border-black p-2">{totals.conveyTotal.toFixed(0)}</td>
+                                    <td className="border border-black p-2">{totals.foodTotal.toFixed(0)}</td>
+                                    <td className="border border-black p-2">{totals.othersTotal.toFixed(0)}</td>
+                                    <td className="border border-black p-2">{totals.wageTotal.toFixed(0)}</td>
+                                    <td className="border border-black p-2">{totals.totalClaimed.toFixed(0)}</td>
+                                    <td className="border border-black p-0 bg-white align-top relative h-full">
+                                        <input 
+                                            type="number" 
+                                            className="w-full h-full min-h-[40px] px-1 py-2 text-center font-bold bg-white focus:outline-none focus:bg-gray-50" 
+                                            value={formData.advanceAmount || ''} 
+                                            onChange={e => setFormData({...formData, advanceAmount: Number(e.target.value)})} 
+                                            placeholder="0"
+                                            style={{ color: '#000' }}
+                                        />
+                                    </td>
+                                    <td className="border border-black p-2">
+                                        {totals.amountToReturn.toFixed(0)}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
 
-                    <div className={`mt-4 p-4 rounded flex items-center justify-between ${totals.amountToReturn < 0 ? 'bg-red-50 border border-red-100' : 'bg-green-50 border border-green-100'}`}>
-                        <div className="flex items-center gap-3">
-                            <Calculator className={totals.amountToReturn < 0 ? 'text-red-500' : 'text-green-500'} size={24} />
-                            <div>
-                                <div className="text-[10px] font-bold uppercase text-gray-500">{totals.amountToReturn < 0 ? 'Balance to be Paid by Company' : 'Balance to be Returned to Company'}</div>
-                                <div className={`text-2xl font-black ${totals.amountToReturn < 0 ? 'text-red-600' : 'text-green-600'}`}>₹{Math.abs(totals.amountToReturn).toFixed(2)}</div>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-4">
-                            <button type="button" onClick={() => window.location.reload()} className="px-6 py-3 text-gray-500 font-bold uppercase tracking-wider text-sm border border-gray-300 hover:bg-gray-50 transition-all" style={{ borderRadius: '2px' }}>
-                                RESET
-                            </button>
-                            <button type="submit" disabled={loading} className="px-8 py-3 text-white font-bold uppercase tracking-wider text-sm flex items-center hover:scale-[1.02] active:scale-[0.98] transition-all disabled:bg-gray-400" style={{ backgroundColor: '#D84315', borderRadius: '2px' }}>
-                                {loading ? <span className="animate-spin mr-3 border-2 border-white border-t-transparent rounded-full w-4 h-4"></span> : <Send size={18} className="mr-3" />}
-                                SUBMIT CLAIM
-                            </button>
-                        </div>
+                    <div className="mt-6 flex justify-end gap-4">
+                        <button type="button" onClick={() => window.location.reload()} className="px-6 py-2.5 text-black font-bold uppercase tracking-wider text-[11px] border-2 border-black hover:bg-gray-100 transition-all bg-white shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_rgba(0,0,0,1)] active:translate-y-[2px] active:shadow-none" style={{ borderRadius: '0' }}>
+                            RESET
+                        </button>
+                        <button type="submit" disabled={loading} className="px-8 py-2.5 text-white font-bold uppercase tracking-wider text-[11px] border-2 border-black flex items-center hover:bg-[#b03612] transition-all disabled:bg-gray-400 shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_rgba(0,0,0,1)] active:translate-y-[2px] active:shadow-none" style={{ backgroundColor: '#D84315', borderRadius: '0' }}>
+                            {loading ? <span className="animate-spin mr-3 border-2 border-white border-t-transparent rounded-full w-4 h-4"></span> : <Send size={14} className="mr-2" />}
+                            SUBMIT CLAIM
+                        </button>
                     </div>
                 </section>
             </form>

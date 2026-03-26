@@ -528,12 +528,8 @@ tr:hover td {
 /* === REIMBURSEMENT SPREADSHEET FORM (TAILWIND REPLACEMENT) === */
 .reimbursement-form {
   background: white;
-  padding: 32px;
-  max-width: 1300px;
-  margin: 32px auto;
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow-md);
-  border-radius: var(--radius-md);
+  padding: 8px;
+  width: 100%;
   color: #111827;
 }
 
@@ -593,28 +589,29 @@ tr:hover td {
 .reimbursement-form table {
   width: 100%;
   border-collapse: collapse;
-  border: 1px solid #d1d5db;
+  border: 2px solid #000;
   font-size: 11px;
 }
 
 .reimbursement-form th {
-  background: #f3f4f6;
-  border: 1px solid #d1d5db;
+  background: #ffffff;
+  border: 1px solid #000;
   padding: 8px;
-  font-weight: 700;
-  color: #D84315;
+  font-weight: 800;
+  color: #000;
   text-transform: uppercase;
   text-align: center;
 }
 
 .reimbursement-form td {
-  border: 1px solid #d1d5db;
+  border: 1px solid #000;
   padding: 4px;
   background: white;
+  color: #000;
 }
 
 .reimbursement-form td.bg-gray-50 {
-  background: #f9fafb;
+  background: #fdfdfd;
 }
 
 /* Inputs within Tables */
