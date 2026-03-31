@@ -25,7 +25,7 @@ public class HandbookController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<HandbookPolicyResponse> getPolicyById(@PathVariable Long id) {
+    public ResponseEntity<HandbookPolicyResponse> getPolicyById(@PathVariable("id") Long id) {
         HandbookPolicyResponse policy = handbookService.getPolicyById(id);
         if (!"ACTIVE".equals(policy.getStatus())) {
              throw new RuntimeException("Policy is archived and unavailable");

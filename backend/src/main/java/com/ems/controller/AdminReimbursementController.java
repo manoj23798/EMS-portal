@@ -27,7 +27,7 @@ public class AdminReimbursementController {
     @PutMapping("/{id}/settle")
     @PreAuthorize("hasAnyRole('HR', 'ADMIN')")
     public ResponseEntity<ReimbursementResponse> settleReimbursement(
-            @PathVariable Long id,
+            @PathVariable("id") Long id,
             @RequestBody Map<String, Object> payload) {
         
         Double approvedAmount = null;
@@ -41,7 +41,7 @@ public class AdminReimbursementController {
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('HR', 'ADMIN')")
-    public ResponseEntity<ReimbursementResponse> getReimbursementById(@PathVariable Long id) {
+    public ResponseEntity<ReimbursementResponse> getReimbursementById(@PathVariable("id") Long id) {
         return ResponseEntity.ok(reimbursementService.getReimbursementById(id));
     }
 }

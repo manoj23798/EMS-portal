@@ -147,4 +147,17 @@ export const AdminCommunicationAPI = {
     getTypes: () => api.get('/communications/types')
 };
 
+export const ReimbursementAPI = {
+    create: (data) => api.post('/reimbursement/create', data),
+    getMyClaims: () => api.get('/reimbursement/my'),
+    getManagerPending: () => api.get('/manager/reimbursement/pending'),
+    getAdminAll: () => api.get('/admin/reimbursement/all'),
+    getById: (id) => api.get(`/reimbursement/${id}`),
+    managerAction: (id, approve) => api.put(`/manager/reimbursement/${id}/approve`, { approve }),
+    financeSettle: (id, approvedAmount, reason) => api.put(`/admin/reimbursement/${id}/settle`, { 
+        approvedAmount, 
+        reason 
+    })
+};
+
 export default api;

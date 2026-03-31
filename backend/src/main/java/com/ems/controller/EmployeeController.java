@@ -46,23 +46,23 @@ public class EmployeeController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<EmployeeResponse> getEmployeeById(@PathVariable Long id) {
+    public ResponseEntity<EmployeeResponse> getEmployeeById(@PathVariable("id") Long id) {
         return ResponseEntity.ok(employeeService.getEmployeeById(id));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<EmployeeResponse> updateEmployee(@PathVariable Long id, @Valid @RequestBody EmployeeCreateRequest request) {
+    public ResponseEntity<EmployeeResponse> updateEmployee(@PathVariable("id") Long id, @Valid @RequestBody EmployeeCreateRequest request) {
         return ResponseEntity.ok(employeeService.updateEmployee(id, request));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deactivateEmployee(@PathVariable Long id) {
+    public ResponseEntity<Void> deactivateEmployee(@PathVariable("id") Long id) {
         employeeService.deactivateEmployee(id);
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/{id}/documents")
-    public ResponseEntity<?> uploadDocument(@PathVariable Long id,
+    public ResponseEntity<?> uploadDocument(@PathVariable("id") Long id,
                                             @RequestParam("file") MultipartFile file,
                                             @RequestParam("documentType") String documentType) {
         Employee employee = employeeRepository.findById(id).orElse(null);
@@ -108,7 +108,7 @@ public class EmployeeController {
     }
     
     @GetMapping("/{id}/documents")
-    public ResponseEntity<?> getEmployeeDocuments(@PathVariable Long id) {
+    public ResponseEntity<?> getEmployeeDocuments(@PathVariable("id") Long id) {
         List<EmployeeDocument> docs = employeeDocumentRepository.findByEmployeeId(id);
         return ResponseEntity.ok(docs);
     }

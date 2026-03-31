@@ -41,12 +41,12 @@ public class CommunicationController {
     }
 
     @GetMapping("/admin/communications/{id}")
-    public ResponseEntity<CommunicationResponse> getCommunicationByIdForAdmin(@PathVariable Long id) {
+    public ResponseEntity<CommunicationResponse> getCommunicationByIdForAdmin(@PathVariable("id") Long id) {
         return ResponseEntity.ok(communicationService.getCommunicationByIdForAdmin(id));
     }
 
     @DeleteMapping("/admin/communications/{id}")
-    public ResponseEntity<Void> deleteCommunication(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteCommunication(@PathVariable("id") Long id) {
         communicationService.deleteCommunication(id);
         return ResponseEntity.noContent().build();
     }
@@ -54,14 +54,14 @@ public class CommunicationController {
     // ===================== EMPLOYEE ENDPOINTS =====================
 
     @GetMapping("/communications/my")
-    public ResponseEntity<List<CommunicationResponse>> getMyCommunications(@RequestParam Long employeeId) {
+    public ResponseEntity<List<CommunicationResponse>> getMyCommunications(@RequestParam("employeeId") Long employeeId) {
         return ResponseEntity.ok(communicationService.getMyCommunications(employeeId));
     }
 
     @GetMapping("/communications/{id}")
     public ResponseEntity<CommunicationResponse> getCommunicationByIdForEmployee(
-            @PathVariable Long id, 
-            @RequestParam Long employeeId) {
+            @PathVariable("id") Long id, 
+            @RequestParam("employeeId") Long employeeId) {
         return ResponseEntity.ok(communicationService.getCommunicationByIdForEmployee(id, employeeId));
     }
     

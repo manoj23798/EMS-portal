@@ -33,7 +33,7 @@ public class ReimbursementController {
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('EMPLOYEE', 'MANAGER', 'HR', 'ADMIN', 'PROJECT_MANAGER', 'IT_MANAGER')")
-    public ResponseEntity<ReimbursementResponse> getReimbursementById(@PathVariable Long id) {
+    public ResponseEntity<ReimbursementResponse> getReimbursementById(@PathVariable("id") Long id) {
         return ResponseEntity.ok(reimbursementService.getReimbursementById(id));
     }
 }

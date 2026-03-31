@@ -202,8 +202,8 @@ public class ReimbursementServiceImpl implements ReimbursementService {
         ReimbursementMaster rm = masterRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Reimbursement record not found"));
         
-        if (!rm.getStatus().equals("MANAGER_APPROVED")) {
-            throw new RuntimeException("Reimbursement must be MANAGER_APPROVED first before settlement");
+        if (!rm.getStatus().equals("MANAGER_APPROVED") && !rm.getStatus().equals("PENDING")) {
+            throw new RuntimeException("Reimbursement must be PENDING or MANAGER_APPROVED for settlement");
         }
 
         rm.setStatus("ACCOUNTS_SETTLED");
@@ -220,7 +220,13 @@ public class ReimbursementServiceImpl implements ReimbursementService {
         res.setId(rm.getId());
         if (rm.getEmployee() != null) {
             res.setEmployeeName(rm.getEmployee().getFirstName() + " " + rm.getEmployee().getLastName());
-            res.setEmployeeCode(rm.getEmployee().getEmployeeId()); // Using employeeId string if it's the code
+            res.setEmployeeCode(rm.getEmployee().getEmployeeId());
+            res.setEmployeeId(rm.getEmployee().getId());
+            
+            // Get username from user repository
+            userRepository.findByEmployeeId(rm.getEmployee().getId())
+                    .ifPresent(u -> res.setUsername(u.getUsername()));
+
             if (rm.getEmployee().getDesignation() != null) {
                 res.setDesignation(rm.getEmployee().getDesignation().getTitle());
             }

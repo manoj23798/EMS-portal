@@ -28,6 +28,7 @@ public class ReimbursementRequest {
         private String amountExpression;
         private String person;
         private Boolean ticketAvailable;
+        private String billImage;
     }
 
     @Data
@@ -38,6 +39,7 @@ public class ReimbursementRequest {
         private Integer persons;
         private Double ratePerPerson;
         private Boolean billAvailable;
+        private String billImage;
     }
 
     @Data
@@ -48,6 +50,7 @@ public class ReimbursementRequest {
         private String modeOfTravel;
         private Double amount;
         private Boolean ticketAvailable;
+        private String billImage;
     }
 
     @Data
@@ -60,6 +63,7 @@ public class ReimbursementRequest {
         private Double gst;
         private Double sgst;
         private Boolean billAvailable;
+        private String billImage;
     }
 
     @Data
@@ -68,6 +72,7 @@ public class ReimbursementRequest {
         private String description;
         private Double amount;
         private Boolean billAvailable;
+        private String billImage;
     }
 
     @Data
@@ -77,5 +82,6 @@ public class ReimbursementRequest {
         private String toDate;
         private Double daysWorked;
         private Double perDaySalary;
+        private String billImage;
     }
 }

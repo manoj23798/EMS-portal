@@ -30,7 +30,7 @@ public class NotificationController {
     }
 
     @PutMapping("/{id}/read")
-    public ResponseEntity<Void> markAsRead(@PathVariable Long id, @RequestHeader("Authorization") String token) {
+    public ResponseEntity<Void> markAsRead(@PathVariable("id") Long id, @RequestHeader("Authorization") String token) {
         Long employeeId = extractEmployeeId(token);
         notificationService.markAsRead(id, employeeId);
         return ResponseEntity.ok().build();

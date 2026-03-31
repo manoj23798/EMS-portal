@@ -30,7 +30,7 @@ import PolicyEditor from './pages/handbook/PolicyEditor';
 import ReimbursementApply from './pages/reimbursement/ReimbursementApply';
 import ReimbursementHistory from './pages/reimbursement/ReimbursementHistory';
 import AdminReimbursementDashboard from './pages/reimbursement/AdminReimbursementDashboard';
-import ManagerReimbursementDashboard from './pages/reimbursement/ManagerReimbursementDashboard';
+import ReimbursementView from './pages/reimbursement/ReimbursementView';
 
 import './index.css';
 
@@ -78,7 +78,8 @@ function App() {
             {/* Reimbursement Modules */}
             <Route path="reimbursement/apply" element={<RoleGuard allowedRoles={['ADMIN', 'HR', 'PROJECT_MANAGER', 'IT_MANAGER', 'EMPLOYEE']}><ReimbursementApply /></RoleGuard>} />
             <Route path="reimbursement/history" element={<RoleGuard allowedRoles={['ADMIN', 'HR', 'PROJECT_MANAGER', 'IT_MANAGER', 'EMPLOYEE']}><ReimbursementHistory /></RoleGuard>} />
-            <Route path="manager/reimbursements" element={<RoleGuard allowedRoles={['ADMIN', 'HR', 'PROJECT_MANAGER', 'IT_MANAGER']}><ManagerReimbursementDashboard /></RoleGuard>} />
+            <Route path="reimbursement/view/:id" element={<RoleGuard allowedRoles={['ADMIN', 'HR', 'PROJECT_MANAGER', 'IT_MANAGER', 'EMPLOYEE']}><ReimbursementView /></RoleGuard>} />
+            <Route path="manager/reimbursements" element={<RoleGuard allowedRoles={['ADMIN', 'HR', 'PROJECT_MANAGER', 'IT_MANAGER']}><AdminReimbursementDashboard /></RoleGuard>} />
             <Route path="admin/reimbursements" element={<RoleGuard allowedRoles={['ADMIN', 'HR']}><AdminReimbursementDashboard /></RoleGuard>} />
 
           </Route>

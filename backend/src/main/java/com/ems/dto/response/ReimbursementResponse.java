@@ -10,6 +10,8 @@ public class ReimbursementResponse {
     private Long id;
     private String employeeName;
     private String employeeCode;
+    private Long employeeId;
+    private String username;
     private String designation;
     
     private String reasonForTravel;

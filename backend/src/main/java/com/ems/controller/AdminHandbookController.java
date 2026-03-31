@@ -49,7 +49,7 @@ public class AdminHandbookController {
 
     @PutMapping("/policy/{id}")
     public ResponseEntity<?> updatePolicy(
-            @PathVariable Long id,
+            @PathVariable("id") Long id,
             @RequestBody @Valid HandbookPolicyRequest request,
             BindingResult result,
             @RequestHeader("Authorization") String token) {
@@ -71,12 +71,12 @@ public class AdminHandbookController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<HandbookPolicyResponse> getPolicyById(@PathVariable Long id) {
+    public ResponseEntity<HandbookPolicyResponse> getPolicyById(@PathVariable("id") Long id) {
         return ResponseEntity.ok(handbookService.getPolicyById(id));
     }
 
     @DeleteMapping("/policy/{id}")
-    public ResponseEntity<Void> archivePolicy(@PathVariable Long id) {
+    public ResponseEntity<Void> archivePolicy(@PathVariable("id") Long id) {
         handbookService.archivePolicy(id);
         return ResponseEntity.ok().build();
     }

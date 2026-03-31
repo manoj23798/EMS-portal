@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Trash2, Send, Calculator, Paperclip, FileText, X } from "lucide-react";
+import { Plus, Trash2, Send, Calculator, Paperclip, FileText, X, CheckCircle, ArrowLeft } from "lucide-react";
+import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 
 export default function ReimbursementApply() {
+    const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
 
     // Master Form Data
     const [formData, setFormData] = useState({
@@ -77,7 +80,8 @@ export default function ReimbursementApply() {
         try {
             await api.post('/reimbursement/create', payload);
             setSuccess('Reimbursement form submitted successfully!');
-            // Reset form could go here
+            setIsSuccessModalOpen(true);
+            // Reset form or redirect after modal close
         } catch (err) {
             setError(err.response?.data?.message || 'Failed to submit reimbursement form');
         } finally {
@@ -87,7 +91,14 @@ export default function ReimbursementApply() {
 
     return (
         <div className="reimbursement-form">
-            <div className="mb-10 flex flex-col items-center border-b pb-6">
+            <div className="mb-10 flex flex-col items-center border-b pb-6 relative">
+                <button 
+                    onClick={() => navigate('/reimbursement/history')}
+                    className="absolute left-0 top-1 p-2 text-[#D84315] hover:bg-red-50 rounded-full transition-all flex items-center gap-2 group"
+                >
+                    <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
+                    <span className="text-xs font-bold uppercase tracking-wider hidden sm:inline">Back</span>
+                </button>
                 <h2 className="text-3xl font-black tracking-tight text-gray-900 mt-1 uppercase" style={{ color: '#D84315' }}>REIMBURSEMENT FORM</h2>
                 <p className="text-gray-500 text-sm mt-2 font-medium">Please fill in the details accurately for faster processing</p>
             </div>
@@ -507,6 +518,29 @@ export default function ReimbursementApply() {
                     </div>
                 </section>
             </form>
+
+            {/* Success Modal Popup */}
+            {isSuccessModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-8 text-center animate-in fade-in zoom-in duration-300">
+                        <div className="flex justify-center mb-6">
+                            <div className="bg-green-100 p-4 rounded-full">
+                                <CheckCircle className="text-green-600 w-12 h-12" />
+                            </div>
+                        </div>
+                        <h2 className="text-2xl font-black text-gray-900 mb-2 uppercase tracking-tight">SUCCESS!</h2>
+                        <p className="text-gray-500 font-medium mb-8">
+                            Your reimbursement claim has been submitted successfully and sent for approval.
+                        </p>
+                        <button 
+                            onClick={() => navigate('/reimbursement/history')}
+                            className="w-full py-4 bg-[#D84315] text-white font-black uppercase tracking-widest text-sm rounded-xl hover:shadow-lg hover:brightness-110 active:scale-95 transition-all"
+                        >
+                            GO TO HISTORY
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

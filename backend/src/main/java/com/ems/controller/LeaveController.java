@@ -27,12 +27,12 @@ public class LeaveController {
     }
 
     @GetMapping("/leaves/my")
-    public ResponseEntity<List<LeaveRequestResponse>> getMyLeaves(@RequestParam Long employeeId) {
+    public ResponseEntity<List<LeaveRequestResponse>> getMyLeaves(@RequestParam("employeeId") Long employeeId) {
         return ResponseEntity.ok(leaveService.getMyLeaves(employeeId));
     }
 
     @GetMapping("/leaves/balance")
-    public ResponseEntity<List<LeaveBalanceResponse>> getMyBalance(@RequestParam Long employeeId) {
+    public ResponseEntity<List<LeaveBalanceResponse>> getMyBalance(@RequestParam("employeeId") Long employeeId) {
         return ResponseEntity.ok(leaveService.getMyBalance(employeeId));
     }
 
@@ -45,16 +45,16 @@ public class LeaveController {
 
     @PutMapping("/manager/leaves/{id}/approve")
     public ResponseEntity<LeaveRequestResponse> approveLeave(
-            @PathVariable Long id,
-            @RequestParam Long managerId,
+            @PathVariable("id") Long id,
+            @RequestParam("managerId") Long managerId,
             @RequestParam(required = false) String remarks) {
         return ResponseEntity.ok(leaveService.approveLeave(id, managerId, remarks));
     }
 
     @PutMapping("/manager/leaves/{id}/reject")
     public ResponseEntity<LeaveRequestResponse> rejectLeave(
-            @PathVariable Long id,
-            @RequestParam Long managerId,
+            @PathVariable("id") Long id,
+            @RequestParam("managerId") Long managerId,
             @RequestParam(required = false) String remarks) {
         return ResponseEntity.ok(leaveService.rejectLeave(id, managerId, remarks));
     }

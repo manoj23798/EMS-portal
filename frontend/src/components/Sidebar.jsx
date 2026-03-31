@@ -83,30 +83,17 @@ export default function Sidebar() {
                 
                 {/* Module 6: Reimbursement */}
                 <div style={{ borderTop: '1px solid var(--border)', margin: '8px 0' }} />
-                <NavLink to="/reimbursement/apply"
-                    className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
-                    <FileBadge size={20} />
-                    <span>Apply Reimburse</span>
-                </NavLink>
                 <NavLink to="/reimbursement/history"
-                    className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
-                    <FileText size={20} />
+                    className={({ isActive }) => isActive || window.location.pathname.startsWith('/reimbursement') ? "nav-item active" : "nav-item"}>
+                    <FileBadge size={20} />
                     <span>My Reimbursements</span>
                 </NavLink>
 
                 {isManager && (
-                    <NavLink to="/manager/reimbursements"
-                        className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
-                        <UserCheck size={20} />
-                        <span>Manager Dash</span>
-                    </NavLink>
-                )}
-
-                {isHRorAdmin && (
                     <NavLink to="/admin/reimbursements"
                         className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
                         <ShieldCheck size={20} />
-                        <span>Finance Approvals</span>
+                        <span>Admin Reimbursement</span>
                     </NavLink>
                 )}
 

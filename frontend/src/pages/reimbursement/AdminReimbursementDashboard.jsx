@@ -1,282 +1,383 @@
 import React, { useState, useEffect } from 'react';
-import api from '../../services/api';
-import { Eye, Check, X, AlertTriangle, CreditCard } from 'lucide-react';
+import { 
+    Search, 
+    Filter, 
+    ArrowRight,
+    User,
+    Calendar,
+    Receipt,
+    ClipboardList,
+    TrendingUp,
+    CheckCircle,
+    Clock,
+    ShieldCheck,
+    ArrowUpDown,
+    ChevronDown,
+    RotateCcw,
+    Download,
+    Printer,
+    FileDown
+} from 'lucide-react';
+import { ReimbursementAPI } from '../../services/api';
+import { tokenManager } from '../../utils/tokenManager';
+import { useNavigate } from 'react-router-dom';
 
-export default function AdminReimbursementDashboard() {
-    const [allClaims, setAllClaims] = useState([]);
+const AdminReimbursementDashboard = () => {
+    const [claims, setClaims] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [selectedClaim, setSelectedClaim] = useState(null);
-    const [processing, setProcessing] = useState(false);
-    
-    // Settlement formData
-    const [settleAmount, setSettleAmount] = useState('');
-    const [remarks, setRemarks] = useState('');
+    const [searchTerm, setSearchTerm] = useState('');
+    const [statusFilter, setStatusFilter] = useState('ALL');
+    const [sortBy, setSortBy] = useState('DATE_DESC');
+    const [startDate, setStartDate] = useState('');
+    const [endDate, setEndDate] = useState('');
+    const navigate = useNavigate();
+
+    const userRole = tokenManager.getUserRole() || '';
+    const isManager = ['PROJECT_MANAGER', 'IT_MANAGER', 'ADMIN', 'HR'].includes(userRole);
+    const isFinance = ['ADMIN', 'HR'].includes(userRole);
 
     useEffect(() => {
-        fetchAll();
-    }, []);
-
-    const fetchAll = async () => {
-        try {
-            setLoading(true);
-            const response = await api.get('/admin/reimbursement/all');
-            setAllClaims(response.data);
-            setError(null);
-        } catch (err) {
-            setError(err.response?.data?.message || 'Failed to fetch accounts queue');
-        } finally {
-            setLoading(false);
+        const fetchClaims = async () => {
+            try {
+                let allClaims = [];
+                // Manager check
+                if (isManager) {
+                    const managerRes = await ReimbursementAPI.getManagerPending();
+                    allClaims = [...allClaims, ...managerRes.data];
+                }
+                // Admin/Finance check
+                if (isFinance) {
+                    const adminRes = await ReimbursementAPI.getAdminAll();
+                    // Merge and unique by ID
+                    const existingIds = new Set(allClaims.map(c => c.id));
+                    adminRes.data.forEach(c => {
+                        if (!existingIds.has(c.id)) allClaims.push(c);
+                    });
+                }
+                
+                setClaims(allClaims);
+                setLoading(false);
+            } catch (err) {
+                console.error('Error fetching claims:', err);
+                setLoading(false);
+            }
+        };
+        fetchClaims();
+    }, [isManager, isFinance]);
+    
+    // Debug log to verify data fields from backend
+    useEffect(() => {
+        if (claims.length > 0) {
+            console.log("Admin Dashboard Data Sample:", claims[0]);
         }
+    }, [claims]);
+
+    const getStatusTheme = (status) => {
+        const themes = {
+            'PENDING': 'badge-pending',
+            'MANAGER_APPROVED': 'badge-warning',
+            'ACCOUNTS_SETTLED': 'badge-success',
+            'MANAGER_REJECTED': 'badge-danger',
+            'ACCOUNTS_REJECTED': 'badge-danger'
+        };
+        return themes[status] || 'badge-pending';
     };
 
-    const handleSettle = async (claimId) => {
-        if (!window.confirm('Are you confirm you want to SETTLE this claim? This action is final.')) return;
-        
-        try {
-            setProcessing(true);
-            const payload = {
-                approvedAmount: settleAmount ? Number(settleAmount) : null,
-                reason: remarks
-            };
-            await api.put(`/admin/reimbursement/${claimId}/settle`, payload);
-            setSelectedClaim(null);
-            fetchAll(); 
-        } catch (err) {
-            alert(err.response?.data?.message || 'Failed to settle claim');
-        } finally {
-            setProcessing(false);
-        }
-    };
-
-    const handleAccountsReject = async (claimId) => {
-        if (!remarks) {
-            alert("Please provide a reason in the remarks field before rejecting.");
-            return;
-        }
-        if (!window.confirm('Are you sure you want to REJECT this claim from Accounts?')) return;
-        
-        try {
-            setProcessing(true);
-            const payload = {
-                approvedAmount: 0,
-                reason: 'ACCOUNTS REJECTED: ' + remarks
-            };
-            await api.put(`/admin/reimbursement/${claimId}/settle`, payload);
-            setSelectedClaim(null);
-            fetchAll(); 
-        } catch (err) {
-            alert(err.response?.data?.message || 'Failed to reject claim');
-        } finally {
-            setProcessing(false);
-        }
-    };
-
-    const openModal = (claim) => {
-        setSelectedClaim(claim);
-        // Pre-fill with the claimed amount by default to speed up standard approvals
-        setSettleAmount(claim.totalClaimed.toString());
-        setRemarks('');
-    };
-
-    if (loading) return <div className="p-8 text-center text-gray-500">Loading accounts pipeline...</div>;
-
-    return (
-        <div className="page-container">
-            <div className="page-header border-b-2 border-orange-500 pb-4 mb-6">
-                <h1 className="text-3xl font-bold text-gray-800">Finance Dashboard: Reimbursements</h1>
-                <p className="text-gray-500 mt-2">Settle and finalize manager-approved expense reports</p>
-            </div>
+    const processedClaims = [...claims]
+        .filter(c => {
+            // Robust check: Search in any top-level string/number field
+            const searchLower = searchTerm.toLowerCase();
+            const matchesSearch = !searchTerm || Object.keys(c).some(key => {
+                const val = c[key];
+                if (val === null || val === undefined) return false;
+                // Search in nested objects like 'user' if they exist
+                if (typeof val === 'object') {
+                    return Object.values(val).some(v => String(v).toLowerCase().includes(searchLower));
+                }
+                return String(val).toLowerCase().includes(searchLower);
+            });
             
-            {error && <div className="error-alert mb-4">{error}</div>}
+            const matchesStatus = statusFilter === 'ALL' || c.status === statusFilter;
+            
+            const matchesDate = (() => {
+                if (!startDate && !endDate) return true;
+                if (!c.submissionDate) return true; // Don't hide records just because they lack dates
+                const d = new Date(c.submissionDate);
+                const s = startDate ? new Date(startDate) : new Date('1970-01-01');
+                const e = endDate ? new Date(endDate) : new Date('2100-01-01');
+                e.setHours(23, 59, 59); 
+                return d >= s && d <= e;
+            })();
+            
+            return matchesSearch && matchesStatus && matchesDate;
+        })
+        .sort((a, b) => {
+            if (sortBy === 'DATE_DESC') {
+                const dateDiff = new Date(b.submissionDate || 0) - new Date(a.submissionDate || 0);
+                if (dateDiff === 0) return b.id - a.id; // Secondary sort by ID desc
+                return dateDiff;
+            }
+            if (sortBy === 'DATE_ASC') {
+                const dateDiff = new Date(a.submissionDate || 0) - new Date(b.submissionDate || 0);
+                if (dateDiff === 0) return a.id - b.id; // Secondary sort by ID asc
+                return dateDiff;
+            }
+            if (sortBy === 'AMOUNT_DESC') return (b.totalAmountClaimed || b.totalClaimed || 0) - (a.totalAmountClaimed || a.totalClaimed || 0);
+            if (sortBy === 'AMOUNT_ASC') return (a.totalAmountClaimed || a.totalClaimed || 0) - (b.totalAmountClaimed || b.totalClaimed || 0);
+            return 0;
+        });
 
-            <div className="card shadow-sm border border-gray-200">
-                <div className="overflow-x-auto">
-                    <table className="data-table w-full">
-                        <thead className="bg-gray-50">
-                            <tr>
-                                <th>Tracking ID</th>
-                                <th>Employee</th>
-                                <th>Submission Date</th>
-                                <th>Total Claimed</th>
-                                <th>Amt To Return</th>
-                                <th>Status</th>
-                                <th className="text-center">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {allClaims.length === 0 ? (
-                                <tr>
-                                    <td colSpan="7" className="text-center py-8 text-gray-500">
-                                        <AlertTriangle size={32} className="mx-auto text-yellow-500 mb-2" />
-                                        No reimbursement claims found.
-                                    </td>
-                                </tr>
-                            ) : (
-                                allClaims.map((claim) => (
-                                    <tr key={claim.id} className="hover:bg-orange-50 transition-colors">
-                                        <td className="font-mono text-xs font-semibold text-gray-600">REQ-{claim.id.toString().padStart(5, '0')}</td>
-                                        <td>
-                                            <div className="font-bold">{claim.employeeName}</div>
-                                            <div className="text-xs text-gray-500">{claim.employeeCode} - {claim.designation}</div>
-                                        </td>
-                                        <td>{new Date(claim.submissionDate).toLocaleDateString()}</td>
-                                        <td className="font-mono font-bold text-orange-600">₹{(claim.totalClaimed || 0).toFixed(2)}</td>
-                                        <td className={`font-mono font-bold ${claim.amountToReturn < 0 ? 'text-red-600' : 'text-green-600'}`}>₹{(claim.amountToReturn || 0).toFixed(2)}</td>
-                                        <td>
-                                            {claim.status === 'MANAGER_APPROVED' && <span className="badge bg-blue-100 text-blue-800">Ready to Settle</span>}
-                                            {claim.status === 'ACCOUNTS_SETTLED' && <span className="badge bg-green-100 text-green-800">Settled ✓</span>}
-                                            {claim.status === 'ACCOUNTS_REJECTED' && <span className="badge bg-red-100 text-red-800">Rejected x</span>}
-                                            {claim.status === 'PENDING' && <span className="badge bg-gray-100 text-gray-500">Pending Mgr</span>}
-                                        </td>
-                                        <td className="text-center">
-                                            <button 
-                                                onClick={() => openModal(claim)}
-                                                className="btn btn-secondary text-xs px-3 py-1 flex items-center inline-flex border"
-                                            >
-                                                <Eye size={14} className="mr-1" /> {claim.status === 'MANAGER_APPROVED' ? 'Settle' : 'View'}
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+    const handleExport = () => {
+        if (processedClaims.length === 0) return;
+        
+        const headers = ["Req ID", "Employee", "Emp Code", "Reason", "Travel Start", "Travel End", "Amount", "Advance", "Due", "Status", "Submitted"];
+        const csvRows = processedClaims.map(c => [
+            c.id,
+            c.employeeName,
+            c.employeeCode,
+            `"${c.reasonForTravel}"`,
+            c.travelStartDate,
+            c.travelEndDate,
+            c.totalAmountClaimed || c.totalClaimed,
+            c.advanceAmount || 0,
+            c.amountToReturn || 0,
+            c.status,
+            c.submissionDate
+        ].join(","));
+        
+        // Add UTF-8 BOM for Excel compatibility (ensures Rupee symbol and special charts display correctly)
+        const csvContent = "\ufeff" + [headers.join(","), ...csvRows].join("\n");
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", `Reimbursement_Report_${new Date().toISOString().split('T')[0]}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
 
-            {/* Accounts Settlement Modal */}
-            {selectedClaim && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-                    <div className="bg-white rounded-lg shadow-xl w-full max-w-5xl max-h-[95vh] flex flex-col border-t-4 border-green-500">
-                        <div className="p-4 border-b flex justify-between items-center bg-gray-50">
-                            <div>
-                                <h2 className="text-xl font-bold text-gray-800">ACCOUNTS SETTLEMENT: REQ-{selectedClaim.id.toString().padStart(5, '0')}</h2>
-                                <p className="text-sm text-gray-500">Submitted by {selectedClaim.employeeName}</p>
-                            </div>
-                            <button onClick={() => setSelectedClaim(null)} className="text-gray-500 hover:text-black">
-                                <X size={24} />
-                            </button>
-                        </div>
-                        <div className="p-6 overflow-y-auto w-full flex-grow flex flex-col md:flex-row gap-6">
-                            
-                            {/* Left Side: Employee Form Details */}
-                            <div className="flex-1 border-r pr-6">
-                                <div className="grid grid-cols-2 gap-4 mb-4">
-                                    <div>
-                                        <p className="text-xs text-gray-500 font-bold uppercase">Applicant</p>
-                                        <p className="font-semibold">{selectedClaim.employeeName}</p>
-                                    </div>
-                                    <div>
-                                        <p className="text-xs text-gray-500 font-bold uppercase">Travel Details</p>
-                                        <p className="font-semibold">{selectedClaim.reasonForTravel}</p>
-                                        <p className="text-sm text-gray-600">{selectedClaim.travelStartDate} to {selectedClaim.travelEndDate}</p>
-                                    </div>
-                                </div>
-                                
-                                <h3 className="font-bold border-b pb-1 mb-2 text-orange-600 text-sm">Financial Breakdown</h3>
-                                <table className="w-full text-xs text-left mb-6 border">
-                                    <thead className="bg-gray-100">
-                                        <tr>
-                                            <th className="p-1 border">Tkt</th>
-                                            <th className="p-1 border">Ldg</th>
-                                            <th className="p-1 border">Cony</th>
-                                            <th className="p-1 border">Food</th>
-                                            <th className="p-1 border">Oth</th>
-                                            <th className="p-1 border">Wages</th>
-                                            <th className="p-1 border bg-orange-100">Total</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr className="font-mono">
-                                            <td className="p-1 border">{(selectedClaim.ticketTotal || 0).toFixed(2)}</td>
-                                            <td className="p-1 border">{(selectedClaim.lodgingTotal || 0).toFixed(2)}</td>
-                                            <td className="p-1 border">{(selectedClaim.conveyTotal || 0).toFixed(2)}</td>
-                                            <td className="p-1 border">{(selectedClaim.foodTotal || 0).toFixed(2)}</td>
-                                            <td className="p-1 border">{(selectedClaim.otherTotal || 0).toFixed(2)}</td>
-                                            <td className="p-1 border">{(selectedClaim.wageTotal || 0).toFixed(2)}</td>
-                                            <td className="p-1 border bg-orange-50 font-bold text-orange-700">{(selectedClaim.totalClaimed || 0).toFixed(2)}</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-
-                                <div className="flex justify-between bg-yellow-50 p-3 rounded border border-yellow-200">
-                                    <div>
-                                        <span className="text-gray-600 block text-xs">Advance Taken</span>
-                                        <span className="font-mono font-bold">₹{(selectedClaim.advanceAmount || 0).toFixed(2)}</span>
-                                    </div>
-                                    <div className="text-right">
-                                        <span className="text-gray-600 block text-xs">Amt to Return/(Due)</span>
-                                        <span className={`font-mono font-bold text-xl ${selectedClaim.amountToReturn < 0 ? 'text-red-600' : 'text-green-600'}`}>
-                                            ₹{(selectedClaim.amountToReturn || 0).toFixed(2)}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            {/* Right Side: Accounts Settlement Controller */}
-                            <div className="w-full md:w-1/3 flex flex-col pt-4 md:pt-0">
-                                <h3 className="font-bold text-green-700 mb-4 flex items-center border-b pb-2"><CreditCard className="mr-2" size={20}/> ACCOUNTS ACTION</h3>
-                                
-                                {selectedClaim.status !== 'MANAGER_APPROVED' ? (
-                                    <div className="bg-gray-100 p-4 rounded text-center text-gray-600 border border-gray-300">
-                                        This claim is currently <b>{selectedClaim.status}</b> and cannot be settled right now.
-                                        {selectedClaim.accountsApprovedAmount && (
-                                            <div className="mt-4 pt-4 border-t border-gray-300">
-                                                <p className="text-xs">Previously Settled Amount:</p>
-                                                <p className="text-2xl font-mono font-bold text-green-700">₹{(selectedClaim.accountsApprovedAmount || 0).toFixed(2)}</p>
-                                                <p className="text-sm mt-2">{selectedClaim.accountsReason}</p>
-                                            </div>
-                                        )}
-                                    </div>
-                                ) : (
-                                    <div className="space-y-4">
-                                        <div className="form-group border-l-4 border-green-500 pl-3">
-                                            <label className="font-bold text-sm block mb-1">Final Settled Claimed Amount (₹)</label>
-                                            <input 
-                                                type="number" 
-                                                step="0.01" 
-                                                className="w-full p-2 border border-green-300 rounded font-mono text-xl focus:outline-none focus:ring-2 focus:ring-green-500"
-                                                value={settleAmount}
-                                                onChange={(e) => setSettleAmount(e.target.value)}
-                                            />
-                                            <p className="text-xs text-gray-500 mt-1">Change this if Accounts makes deductions.</p>
-                                        </div>
-                                        
-                                        <div className="form-group border-l-4 border-gray-400 pl-3">
-                                            <label className="font-bold text-sm block mb-1">Accounts Remarks (Optional)</label>
-                                            <textarea 
-                                                className="w-full p-2 border rounded focus:outline-none focus:ring-1 focus:ring-gray-500" 
-                                                rows="3"
-                                                placeholder="Notes for the employee..."
-                                                value={remarks}
-                                                onChange={(e) => setRemarks(e.target.value)}
-                                            ></textarea>
-                                        </div>
-
-                                        <div className="mt-8 space-y-3">
-                                            <button 
-                                                disabled={processing}
-                                                onClick={() => handleSettle(selectedClaim.id)}
-                                                className="w-full btn bg-green-600 hover:bg-green-700 text-white py-3 shadow-md flex justify-center items-center font-bold text-lg"
-                                            >
-                                                {processing ? 'Processing...' : '✔ MARK AS SETTLED'}
-                                            </button>
-                                            <button 
-                                                disabled={processing}
-                                                onClick={() => handleAccountsReject(selectedClaim.id)}
-                                                className="w-full text-red-600 hover:bg-red-50 py-2 border border-red-200 rounded text-sm font-bold"
-                                            >
-                                                ✗ REJECT CLAIM
-                                            </button>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
+    if (loading) return (
+        <div className="flex items-center justify-center min-h-[400px]">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#ff9100]"></div>
         </div>
     );
-}
+
+    return (
+        <div className="ux-modern page-content animate-fadeIn !max-w-none px-6">
+            {/* Header Area */}
+            <div className="flex justify-between items-center mb-8">
+                <div>
+                    <h1 className="ux-heading">Admin Reimbursement</h1>
+                    <p className="ux-subtext flex items-center gap-2">
+                    <ShieldCheck size={16} /> Centralized management for employee reimbursement claims
+                    </p>
+                </div>
+                
+                <div className="flex items-center gap-3">
+                    <div className="relative group">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#ff9100] transition-colors" size={16} />
+                        <input 
+                            type="text" 
+                            placeholder="Search Name, ID, Reason..." 
+                            className="pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-medium focus:border-[#ff9100] focus:ring-4 focus:ring-orange-50 outline-none w-72 transition-all shadow-sm"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                    </div>
+                </div>
+            </div>
+
+            {/* Filter Section */}
+            <div className="flex flex-wrap items-center justify-between gap-4 mb-6 bg-gray-50/50 p-4 rounded-2xl border border-gray-100">
+                <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2">
+                        <Filter size={14} className="text-gray-400" />
+                        <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Status:</span>
+                    </div>
+                    
+                    <select 
+                        className="bg-white border border-gray-200 rounded-lg px-3 py-1.5 text-xs font-bold text-gray-700 outline-none focus:border-[#ff9100] cursor-pointer shadow-sm"
+                        value={statusFilter}
+                        onChange={(e) => setStatusFilter(e.target.value)}
+                    >
+                        <option value="ALL">All Status</option>
+                        <option value="PENDING">Pending</option>
+                        <option value="MANAGER_APPROVED">Approved</option>
+                        <option value="ACCOUNTS_SETTLED">Settled</option>
+                        <option value="ACCOUNTS_REJECTED">Rejected</option>
+                    </select>
+
+                    <div className="mx-2 h-4 w-px bg-gray-200"></div>
+
+                    <div className="flex items-center gap-2">
+                        <Calendar size={14} className="text-gray-400" />
+                        <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Range:</span>
+                        <input type="date" className="bg-white border border-gray-200 rounded-lg px-2 py-1 text-xs font-bold" value={startDate} onChange={e => setStartDate(e.target.value)} />
+                        <span className="text-gray-400">-</span>
+                        <input type="date" className="bg-white border border-gray-200 rounded-lg px-2 py-1 text-xs font-bold" value={endDate} onChange={e => setEndDate(e.target.value)} />
+                    </div>
+                </div>
+
+                <div className="flex items-center gap-4">
+                    <button 
+                        onClick={handleExport}
+                        className="flex items-center gap-2 px-4 py-2 bg-[#1d6f42] text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-[#155331] transition-all shadow-md active:scale-95"
+                    >
+                        <FileDown size={14} /> EXPORT TO EXCEL
+                    </button>
+
+                    <div className="flex items-center gap-2">
+                        <ArrowUpDown size={14} className="text-gray-400" />
+                        <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Sort By:</span>
+                    </div>
+
+                    <select 
+                        className="bg-white border border-gray-200 rounded-lg px-3 py-1.5 text-xs font-bold text-gray-700 outline-none focus:border-[#ff9100] cursor-pointer shadow-sm min-w-[140px]"
+                        value={sortBy}
+                        onChange={(e) => setSortBy(e.target.value)}
+                    >
+                        <option value="DATE_DESC">Newest First</option>
+                        <option value="DATE_ASC">Oldest First</option>
+                        <option value="AMOUNT_DESC">Highest Amount</option>
+                        <option value="AMOUNT_ASC">Lowest Amount</option>
+                    </select>
+
+                    <button 
+                        onClick={() => {
+                            setSearchTerm('');
+                            setStatusFilter('ALL');
+                            setSortBy('DATE_DESC');
+                            setStartDate('');
+                            setEndDate('');
+                        }}
+                        className="flex items-center gap-2 px-3 py-1.5 text-[11px] font-bold text-gray-500 hover:text-[#ff9100] transition-colors"
+                    >
+                        <RotateCcw size={14} /> RESET
+                    </button>
+                </div>
+            </div>
+
+            {/* Stats Overview */}
+            <div className="grid grid-cols-4 gap-6 mb-8">
+                {[
+                    { label: 'Total Requests', val: claims.length, icon: Receipt, color: 'text-blue-500', bg: 'bg-blue-50' },
+                    { label: 'Pending Review', val: claims.filter(c => c.status === 'PENDING' || c.status === 'MANAGER_APPROVED').length, icon: Clock, color: 'text-orange-500', bg: 'bg-orange-50' },
+                    { label: 'Settled', val: claims.filter(c => c.status === 'ACCOUNTS_SETTLED').length, icon: CheckCircle, color: 'text-green-500', bg: 'bg-green-50' },
+                    { label: 'Total Payout', val: `₹${claims.reduce((s, c) => s + (c.accountsApprovedAmount || 0), 0).toLocaleString()}`, icon: TrendingUp, color: 'text-purple-500', bg: 'bg-purple-50' }
+                ].map((stat, i) => (
+                    <div key={i} className="ux-card flex items-center gap-4">
+                        <div className={`w-12 h-12 rounded-xl ${stat.bg} ${stat.color} flex items-center justify-center`}>
+                            <stat.icon size={24} />
+                        </div>
+                        <div>
+                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{stat.label}</p>
+                            <p className="text-xl font-bold text-gray-900">{stat.val}</p>
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            {/* Main Table Card */}
+            <div className="ux-card p-0 overflow-x-auto shadow-md">
+                <table className="ux-table min-w-full">
+                    <thead>
+                        <tr>
+                            <th className="pl-6">Req ID</th>
+                            <th>Employee Details</th>
+                            <th>Reason</th>
+                            <th>Travel Period</th>
+                            <th>Submitted</th>
+                            <th className="text-right">Total Amount</th>
+                            <th className="text-right">Advance Amount</th>
+                            <th className="text-right">Due Amount</th>
+                            <th className="text-center">Status</th>
+                            <th className="pr-6 text-right">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {processedClaims.map((claim) => (
+                            <tr key={claim.id} className="hover:bg-gray-50/50 transition-all group">
+                                <td className="pl-6 text-sm font-bold text-gray-400 tracking-tight">#{String(claim.id).padStart(5, '0')}</td>
+                                <td>
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-400 group-hover:bg-[#fff4e5] group-hover:text-[#ff9100] transition-colors">
+                                            <User size={18} />
+                                        </div>
+                                        <div>
+                                            <p className="text-sm font-bold text-gray-900 leading-tight">{claim.employeeName}</p>
+                                            <p className="text-[10px] text-gray-400 font-bold uppercase mt-0.5">
+                                                {claim.employeeCode} <span className="opacity-20 mx-1">|</span> {claim.username || 'N/A'}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <p className="text-sm font-black text-gray-900 leading-tight uppercase min-w-[200px]">{claim.reasonForTravel}</p>
+                                </td>
+                                <td>
+                                    <div className="text-[11px] font-bold text-gray-500 tracking-tight leading-normal whitespace-nowrap">
+                                        {(() => {
+                                            const f = (d) => {
+                                                if (!d) return 'N/A';
+                                                const parts = d.split('-');
+                                                if (parts.length === 3) return `${parts[2]}-${parts[1]}-${parts[0].slice(-2)}`;
+                                                return d;
+                                            };
+                                            return `${f(claim.travelStartDate)} To ${f(claim.travelEndDate)}`;
+                                        })()}
+                                    </div>
+                                </td>
+                                <td>
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-9 h-9 min-w-[36px] rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 border border-gray-100">
+                                            <ClipboardList size={16} />
+                                        </div>
+                                        <p className="text-xs font-bold text-gray-500 whitespace-nowrap">
+                                            {claim.submissionDate ? claim.submissionDate.split('-').reverse().join('-') : 'N/A'}
+                                        </p>
+                                    </div>
+                                </td>
+                                <td className="text-right text-sm font-black text-gray-900">
+                                    ₹{(claim.totalAmountClaimed || claim.totalClaimed || 0).toLocaleString()}
+                                </td>
+                                <td className="text-right text-sm font-black text-red-500">
+                                    ₹{(claim.advanceAmount || 0).toLocaleString()}
+                                </td>
+                                <td className="text-right text-sm font-black text-gray-900">
+                                    ₹{Math.abs(claim.amountToReturn || 0).toLocaleString()}
+                                </td>
+                                <td className="text-center">
+                                    <span className={`ux-badge ${getStatusTheme(claim.status)}`}>
+                                        {claim.status === 'PENDING' ? 'Pending' : 
+                                         (['MANAGER_APPROVED', 'ACCOUNTS_SETTLED'].includes(claim.status) ? 'Approved' : 'Reject')}
+                                    </span>
+                                </td>
+                                <td className="pr-6 text-right">
+                                    <button 
+                                        onClick={() => navigate(`/reimbursement/view/${claim.id}`)}
+                                        className="ux-btn-ghost text-xs group-hover:bg-[#fff4e5] group-hover:text-[#ff9100]"
+                                    >
+                                        Review Details <ArrowRight size={14} />
+                                    </button>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+
+                {processedClaims.length === 0 && (
+                    <div className="p-20 text-center">
+                        <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-dashed border-gray-200">
+                            <Search size={32} className="text-gray-300" />
+                        </div>
+                        <h3 className="text-lg font-bold text-gray-900">No Records Found</h3>
+                        <p className="text-sm text-gray-500">We couldn't find any reimbursement requests matching your criteria.</p>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};
+
+export default AdminReimbursementDashboard;

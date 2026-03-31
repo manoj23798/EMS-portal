@@ -871,3 +871,129 @@ tr:hover td {
 .reimbursement-form .text-right { text-align: right; }
 .reimbursement-form .whitespace-nowrap { white-space: nowrap; }
 .reimbursement-form .uppercase { text-transform: uppercase; }
+
+/* ==========================================================================
+   MODERN UI SCOPE (UI&UX_design Reference)
+   Apply this class to wraps in reimbursement module for safety.
+   ========================================================================== */
+
+.ux-modern {
+  --ux-primary: #ff9100;
+  --ux-primary-light: #fff4e5;
+  --ux-bg: #f9fafb;
+  --ux-card: #ffffff;
+  --ux-border: #e2e8f0;
+  --ux-text: #0f172a;
+  --ux-text-muted: #64748b;
+  
+  font-family: 'Inter', sans-serif;
+  color: var(--ux-text);
+  min-height: 100%;
+}
+
+.ux-modern .ux-card {
+  background: var(--ux-card);
+  border: 1px solid var(--ux-border);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05);
+}
+
+.ux-modern .ux-heading {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: var(--ux-text);
+  letter-spacing: -0.025em;
+  margin-bottom: 8px;
+}
+
+.ux-modern .ux-subtext {
+  color: var(--ux-text-muted);
+  font-size: 0.875rem;
+}
+
+.ux-modern .ux-btn-primary {
+  background: var(--ux-primary);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s;
+  text-decoration: none;
+}
+
+.ux-modern .ux-btn-primary:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.ux-modern .ux-btn-ghost {
+  background: transparent;
+  color: var(--ux-text-muted);
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  text-decoration: none;
+}
+
+.ux-modern .ux-btn-ghost:hover {
+  background: #f1f5f9;
+  color: var(--ux-text);
+}
+
+.ux-modern .ux-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.ux-modern .ux-table th {
+  text-align: left;
+  padding: 12px 16px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--ux-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--ux-border);
+  background: #fcfcfc;
+}
+
+.ux-modern .ux-table td {
+  padding: 16px;
+  border-bottom: 1px solid #f8fafc;
+  font-size: 0.875rem;
+}
+
+.ux-modern .ux-badge {
+  padding: 2px 10px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.ux-modern .badge-pending { background: #f1f5f9; color: #475569; }
+.ux-modern .badge-warning { background: #fffbeb; color: #d97706; }
+.ux-modern .badge-success { background: #ecfdf5; color: #059669; }
+.ux-modern .badge-danger { background: #fef2f2; color: #dc2626; }
+
+.ux-modern .flex { display: flex; }
+.ux-modern .items-center { align-items: center; }
+.ux-modern .justify-between { justify-content: space-between; }
+.ux-modern .gap-2 { gap: 8px; }
+.ux-modern .gap-3 { gap: 12px; }
+.ux-modern .mb-8 { margin-bottom: 32px; }
+.ux-modern .mb-6 { margin-bottom: 24px; }
+.ux-modern .grid { display: grid; }
+.ux-modern .grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
+.ux-modern .lg-grid-cols-3 { grid-template-columns: repeat(3, 1fr); }

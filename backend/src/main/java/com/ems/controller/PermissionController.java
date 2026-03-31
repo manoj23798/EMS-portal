@@ -27,7 +27,7 @@ public class PermissionController {
     }
 
     @GetMapping("/permissions/my")
-    public ResponseEntity<List<PermissionRequestResponse>> getMyPermissions(@RequestParam Long employeeId) {
+    public ResponseEntity<List<PermissionRequestResponse>> getMyPermissions(@RequestParam("employeeId") Long employeeId) {
         return ResponseEntity.ok(permissionService.getMyPermissions(employeeId));
     }
 
@@ -40,15 +40,15 @@ public class PermissionController {
 
     @PutMapping("/manager/permissions/{id}/approve")
     public ResponseEntity<PermissionRequestResponse> approvePermission(
-            @PathVariable Long id,
-            @RequestParam Long managerId) {
+            @PathVariable("id") Long id,
+            @RequestParam("managerId") Long managerId) {
         return ResponseEntity.ok(permissionService.approvePermission(id, managerId));
     }
 
     @PutMapping("/manager/permissions/{id}/reject")
     public ResponseEntity<PermissionRequestResponse> rejectPermission(
-            @PathVariable Long id,
-            @RequestParam Long managerId) {
+            @PathVariable("id") Long id,
+            @RequestParam("managerId") Long managerId) {
         return ResponseEntity.ok(permissionService.rejectPermission(id, managerId));
     }
 

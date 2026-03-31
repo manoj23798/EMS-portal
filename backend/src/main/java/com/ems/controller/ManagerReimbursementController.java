@@ -27,7 +27,7 @@ public class ManagerReimbursementController {
     @PutMapping("/{id}/approve")
     @PreAuthorize("hasAnyRole('MANAGER', 'PROJECT_MANAGER', 'IT_MANAGER', 'HR', 'ADMIN')")
     public ResponseEntity<ReimbursementResponse> approveOrRejectReimbursement(
-            @PathVariable Long id,
+            @PathVariable("id") Long id,
             @RequestBody Map<String, Boolean> payload) {
         boolean approve = payload.getOrDefault("approve", false);
         return ResponseEntity.ok(reimbursementService.managerApproveOrReject(id, approve));
@@ -35,7 +35,7 @@ public class ManagerReimbursementController {
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('MANAGER', 'PROJECT_MANAGER', 'IT_MANAGER', 'HR', 'ADMIN')")
-    public ResponseEntity<ReimbursementResponse> getReimbursementById(@PathVariable Long id) {
+    public ResponseEntity<ReimbursementResponse> getReimbursementById(@PathVariable("id") Long id) {
         return ResponseEntity.ok(reimbursementService.getReimbursementById(id));
     }
 }
