@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../services/api';
-import { Eye, Check, X, AlertTriangle } from 'lucide-react';
+import { Eye, Check, X, AlertTriangle, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
 
 export default function ManagerReimbursementDashboard() {
     const [pendingClaims, setPendingClaims] = useState([]);
@@ -8,6 +8,10 @@ export default function ManagerReimbursementDashboard() {
     const [error, setError] = useState(null);
     const [selectedClaim, setSelectedClaim] = useState(null);
     const [processing, setProcessing] = useState(false);
+    
+    // Pagination
+    const [currentPage, setCurrentPage] = useState(1);
+    const rowsPerPage = 8;
 
     useEffect(() => {
         fetchPending();
@@ -18,6 +22,7 @@ export default function ManagerReimbursementDashboard() {
             setLoading(true);
             const response = await api.get('/manager/reimbursement/pending');
             setPendingClaims(response.data);
+            setCurrentPage(1);
             setError(null);
         } catch (err) {
             setError(err.response?.data?.message || 'Failed to fetch pending reimbursements');
@@ -52,15 +57,15 @@ export default function ManagerReimbursementDashboard() {
             
             {error && <div className="error-alert mb-4">{error}</div>}
 
-            <div className="card shadow-sm border border-gray-200">
-                <div className="overflow-x-auto">
+            <div className="card shadow-sm border border-gray-200" style={{ minHeight: '480px', display: 'flex', flexDirection: 'column' }}>
+                <div className="overflow-x-auto" style={{ flex: 1 }}>
                     <table className="data-table w-full">
                         <thead className="bg-gray-50">
                             <tr>
                                 <th>Tracking ID</th>
                                 <th>Employee</th>
                                 <th>Submission Date</th>
-                                <th>Travel Reason</th>
+                                <th>Project/Reason</th>
                                 <th>Total Claimed</th>
                                 <th className="text-center">Action</th>
                             </tr>
@@ -74,7 +79,7 @@ export default function ManagerReimbursementDashboard() {
                                     </td>
                                 </tr>
                             ) : (
-                                pendingClaims.map((claim) => (
+                                pendingClaims.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage).map((claim) => (
                                     <tr key={claim.id} className="hover:bg-orange-50 transition-colors">
                                         <td className="font-mono text-xs font-semibold text-gray-600">REQ-{claim.id.toString().padStart(5, '0')}</td>
                                         <td>
@@ -82,7 +87,14 @@ export default function ManagerReimbursementDashboard() {
                                             <div className="text-xs text-gray-500">{claim.employeeCode} - {claim.designation}</div>
                                         </td>
                                         <td>{new Date(claim.submissionDate).toLocaleDateString()}</td>
-                                        <td className="max-w-xs truncate" title={claim.reasonForTravel}>{claim.reasonForTravel}</td>
+                                        <td className="max-w-xs" title={claim.reasonForTravel}>
+                                            <div className="font-bold">{claim.reasonForTravel}</div>
+                                            {(claim.travelStartDate || claim.travelEndDate) && (
+                                                <div className="text-[10px] text-gray-500 font-semibold mt-1">
+                                                    {claim.travelStartDate?.split('-').reverse().join('-') || '...'} - {claim.travelEndDate?.split('-').reverse().join('-') || '...'}
+                                                </div>
+                                            )}
+                                        </td>
                                         <td className="font-mono font-bold text-orange-600">₹{(claim.totalClaimed || 0).toFixed(2)}</td>
                                         <td className="text-center">
                                             <button 
@@ -98,6 +110,68 @@ export default function ManagerReimbursementDashboard() {
                         </tbody>
                     </table>
                 </div>
+
+                {/* Pagination Controls */}
+                {pendingClaims.length > 0 && (
+                    <div style={{ padding: '4px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1.5px solid #fed7aa', background: 'white' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <button 
+                                disabled={currentPage === 1} 
+                                onClick={() => setCurrentPage(1)} 
+                                style={{ width: '24px', height: '24px', borderRadius: '50%', border: '1.5px solid #fed7aa', background: 'white', color: '#431407', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', opacity: currentPage === 1 ? 0.3 : 1 }}
+                            >
+                                <ChevronsLeft size={14} />
+                            </button>
+                            <button 
+                                disabled={currentPage === 1} 
+                                onClick={() => setCurrentPage(p => p - 1)} 
+                                style={{ width: '24px', height: '24px', borderRadius: '50%', border: '1.5px solid #fed7aa', background: 'white', color: '#431407', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', opacity: currentPage === 1 ? 0.3 : 1 }}
+                            >
+                                <ChevronLeft size={14} />
+                            </button>
+
+                            {Array.from({ length: Math.ceil(pendingClaims.length / rowsPerPage) }, (_, i) => i + 1)
+                                .filter(p => p === 1 || p === Math.ceil(pendingClaims.length / rowsPerPage) || (p >= currentPage - 1 && p <= currentPage + 1))
+                                .map((p, i, arr) => (
+                                    <React.Fragment key={p}>
+                                        {i > 0 && arr[i-1] !== p - 1 && <span style={{ color: '#fed7aa', fontSize: '10px' }}>...</span>}
+                                        <button 
+                                            onClick={() => setCurrentPage(p)}
+                                            style={{
+                                                width: '24px', height: '24px', borderRadius: '50%', border: '1.5px solid',
+                                                borderColor: currentPage === p ? '#f97316' : '#fed7aa',
+                                                background: currentPage === p ? '#f97316' : 'white',
+                                                color: currentPage === p ? 'white' : '#431407',
+                                                fontSize: '10px', fontWeight: 900, cursor: 'pointer', transition: '0.2s',
+                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                boxShadow: currentPage === p ? '0 4px 10px rgba(249,115,22,0.2)' : 'none'
+                                            }}
+                                        >
+                                            {p}
+                                        </button>
+                                    </React.Fragment>
+                                ))}
+
+                            <button 
+                                disabled={currentPage === Math.ceil(pendingClaims.length / rowsPerPage)} 
+                                onClick={() => setCurrentPage(p => p + 1)} 
+                                style={{ width: '24px', height: '24px', borderRadius: '50%', border: '1.5px solid #fed7aa', background: 'white', color: '#431407', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', opacity: currentPage === Math.ceil(pendingClaims.length / rowsPerPage) ? 0.3 : 1 }}
+                            >
+                                <ChevronRight size={14} />
+                            </button>
+                            <button 
+                                disabled={currentPage === Math.ceil(pendingClaims.length / rowsPerPage)} 
+                                onClick={() => setCurrentPage(Math.ceil(pendingClaims.length / rowsPerPage))} 
+                                style={{ width: '24px', height: '24px', borderRadius: '50%', border: '1.5px solid #fed7aa', background: 'white', color: '#431407', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', opacity: currentPage === Math.ceil(pendingClaims.length / rowsPerPage) ? 0.3 : 1 }}
+                            >
+                                <ChevronsRight size={14} />
+                            </button>
+                        </div>
+                        <div style={{ fontSize: '10px', fontWeight: 950, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                            ( {Math.min(rowsPerPage, pendingClaims.length - (currentPage - 1) * rowsPerPage)} of {pendingClaims.length} )
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* Manager Review Modal */}

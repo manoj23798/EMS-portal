@@ -15,6 +15,8 @@ public interface LeaveRequestRepository extends JpaRepository<LeaveRequest, Long
 
     List<LeaveRequest> findByEmployeeOrderByCreatedAtDesc(Employee employee);
 
+    List<LeaveRequest> findByEmployee(Employee employee);
+
     List<LeaveRequest> findByStatusOrderByCreatedAtDesc(String status);
 
     // For detecting overlapping leave requests

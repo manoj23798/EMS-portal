@@ -54,6 +54,7 @@ public class ReimbursementServiceImpl implements ReimbursementService {
                 t.setAmountExpression(tDto.getAmountExpression());
                 t.setPerson(tDto.getPerson());
                 t.setTicketAvailable(tDto.getTicketAvailable() != null ? tDto.getTicketAvailable() : false);
+                t.setTicketFile(tDto.getBillImage());
                 rm.addTicket(t);
                 totalClaimed += t.getAmount();
             }
@@ -63,7 +64,8 @@ public class ReimbursementServiceImpl implements ReimbursementService {
         if (request.getLodgings() != null) {
             for (ReimbursementRequest.LodgingDto lDto : request.getLodgings()) {
                 ReimbursementLodging l = new ReimbursementLodging();
-                l.setDateRange(lDto.getDateRange());
+                l.setFromDate(lDto.getFromDate());
+                l.setToDate(lDto.getToDate());
                 l.setLocation(lDto.getLocation());
                 l.setDays(lDto.getDays() != null ? lDto.getDays() : 0);
                 l.setPersons(lDto.getPersons() != null ? lDto.getPersons() : 0);
@@ -72,6 +74,7 @@ public class ReimbursementServiceImpl implements ReimbursementService {
                 double calcAmount = l.getDays() * l.getPersons() * l.getRatePerPerson();
                 l.setAmount(calcAmount);
                 l.setBillAvailable(lDto.getBillAvailable() != null ? lDto.getBillAvailable() : false);
+                l.setBillFile(lDto.getBillImage());
                 rm.addLodging(l);
                 totalClaimed += calcAmount;
             }
@@ -87,6 +90,7 @@ public class ReimbursementServiceImpl implements ReimbursementService {
                 c.setModeOfTravel(cDto.getModeOfTravel());
                 c.setAmount(cDto.getAmount() != null ? cDto.getAmount() : 0.0);
                 c.setTicketAvailable(cDto.getTicketAvailable() != null ? cDto.getTicketAvailable() : false);
+                c.setTicketFile(cDto.getBillImage());
                 rm.addConveyance(c);
                 totalClaimed += c.getAmount();
             }
@@ -104,6 +108,7 @@ public class ReimbursementServiceImpl implements ReimbursementService {
                 f.setGst(fDto.getGst());
                 f.setSgst(fDto.getSgst());
                 f.setBillAvailable(fDto.getBillAvailable() != null ? fDto.getBillAvailable() : false);
+                f.setBillFile(fDto.getBillImage());
                 // Hard Backend Recalculation
                 double foodTotal = f.getMorning() + f.getAfternoon() + f.getEvening() + f.getNight();
                 f.setTotal(foodTotal);
@@ -120,6 +125,7 @@ public class ReimbursementServiceImpl implements ReimbursementService {
                 o.setDescription(oDto.getDescription());
                 o.setAmount(oDto.getAmount() != null ? oDto.getAmount() : 0.0);
                 o.setBillAvailable(oDto.getBillAvailable() != null ? oDto.getBillAvailable() : false);
+                o.setBillFile(oDto.getBillImage());
                 rm.addOther(o);
                 totalClaimed += o.getAmount();
             }
@@ -151,6 +157,7 @@ public class ReimbursementServiceImpl implements ReimbursementService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ReimbursementResponse> getMyReimbursements() {
         Long employeeId = getLoggedInEmployeeId();
         return masterRepository.findByEmployeeId(employeeId).stream()
@@ -159,6 +166,7 @@ public class ReimbursementServiceImpl implements ReimbursementService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ReimbursementResponse> getAllPendingForManager() {
         return masterRepository.findByStatus("PENDING").stream()
                 .map(this::mapToResponse)
@@ -166,6 +174,7 @@ public class ReimbursementServiceImpl implements ReimbursementService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ReimbursementResponse> getAllForAccounts() {
         return masterRepository.findAll().stream()
                 .map(this::mapToResponse)
@@ -173,6 +182,7 @@ public class ReimbursementServiceImpl implements ReimbursementService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ReimbursementResponse getReimbursementById(Long id) {
         ReimbursementMaster rm = masterRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Reimbursement record not found"));
@@ -189,7 +199,7 @@ public class ReimbursementServiceImpl implements ReimbursementService {
             throw new RuntimeException("Reimbursement is not in PENDING state");
         }
 
-        rm.setStatus(approve ? "MANAGER_APPROVED" : "REJECTED");
+        rm.setStatus(approve ? "APPROVED" : "REJECTED");
         rm.setManagerApprovalDate(LocalDate.now());
         rm.setManagerApprovalBy(getLoggedInUsername());
         
@@ -198,16 +208,23 @@ public class ReimbursementServiceImpl implements ReimbursementService {
 
     @Override
     @Transactional
-    public ReimbursementResponse accountsSettle(Long id, Double approvedAmount, String reason) {
+    public ReimbursementResponse accountsSettle(Long id, Double approvedAmount, String reason, boolean approve) {
         ReimbursementMaster rm = masterRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Reimbursement record not found"));
         
-        if (!rm.getStatus().equals("MANAGER_APPROVED") && !rm.getStatus().equals("PENDING")) {
-            throw new RuntimeException("Reimbursement must be PENDING or MANAGER_APPROVED for settlement");
+        if (!rm.getStatus().equals("APPROVED") && !rm.getStatus().equals("PENDING") && 
+            !rm.getStatus().equals("REJECTED")) {
+            throw new RuntimeException("Reimbursement status invalid for settlement action");
         }
 
-        rm.setStatus("ACCOUNTS_SETTLED");
-        rm.setAccountsApprovedAmount(approvedAmount != null ? approvedAmount : rm.getTotalAmountClaimed());
+        if (approve) {
+            rm.setStatus("APPROVED");
+            rm.setAccountsApprovedAmount(approvedAmount != null ? approvedAmount : rm.getTotalAmountClaimed());
+        } else {
+            rm.setStatus("REJECTED");
+            rm.setAccountsApprovedAmount(0.0);
+        }
+        
         rm.setAccountsReason(reason);
         rm.setAccountsApprovalDate(LocalDate.now());
         rm.setAccountsApprovalBy(getLoggedInUsername());
@@ -284,7 +301,8 @@ public class ReimbursementServiceImpl implements ReimbursementService {
             res.setLodgings(rm.getLodgings().stream().map(l -> {
                 ReimbursementResponse.LodgingDto dto = new ReimbursementResponse.LodgingDto();
                 dto.setId(l.getId());
-                dto.setDateRange(l.getDateRange());
+                dto.setFromDate(l.getFromDate());
+                dto.setToDate(l.getToDate());
                 dto.setLocation(l.getLocation());
                 dto.setDays(l.getDays());
                 dto.setPersons(l.getPersons());
@@ -380,5 +398,18 @@ public class ReimbursementServiceImpl implements ReimbursementService {
         org.springframework.security.core.userdetails.UserDetails userDetails = 
           (org.springframework.security.core.userdetails.UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return userDetails.getUsername();
+    }
+    @Override
+    @Transactional
+    public void deleteReimbursement(Long id) {
+        ReimbursementMaster rm = masterRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Reimbursement record not found"));
+        
+        // Safety check: Only allow deleting if PENDING
+        if (!"PENDING".equals(rm.getStatus())) {
+            throw new RuntimeException("Only pending claims can be cancelled.");
+        }
+        
+        masterRepository.delete(rm);
     }
 }

@@ -6,7 +6,7 @@ export default function Layout() {
     const location = useLocation();
     const isHandbook = location.pathname.startsWith('/handbook');
     const isReimbursement = location.pathname.startsWith('/reimbursement/apply');
-    const noPadding = isHandbook || isReimbursement;
+    const noPadding = isHandbook || isReimbursement || location.pathname.startsWith('/leave') || location.pathname.startsWith('/permission');
 
     return (
         <div className="app-container">

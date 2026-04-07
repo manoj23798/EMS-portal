@@ -11,11 +11,11 @@ import com.ems.repository.AttendanceRepository;
 import com.ems.repository.EmployeeRepository;
 import com.ems.repository.LeaveBalanceRepository;
 import com.ems.repository.LeaveRequestRepository;
+import com.ems.repository.LeaveTypeRepository;
 import com.ems.service.LeaveService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -29,49 +29,76 @@ public class LeaveServiceImpl implements LeaveService {
     private final LeaveBalanceRepository leaveBalanceRepository;
     private final AttendanceRepository attendanceRepository;
     private final EmployeeRepository employeeRepository;
+    private final LeaveTypeRepository leaveTypeRepository;
 
     @Override
     @Transactional
     public LeaveRequestResponse applyLeave(LeaveApplyRequest request) {
         Employee employee = getEmployeeOrThrow(request.getEmployeeId());
+        com.ems.entity.LeaveType leaveType = leaveTypeRepository.findById(request.getLeaveTypeId())
+                .orElseThrow(() -> new RuntimeException("Leave type not found"));
 
-        // Validate end date >= start date
         if (request.getEndDate().isBefore(request.getStartDate())) {
             throw new RuntimeException("End date must be on or after start date.");
         }
 
-        // Check for overlapping leave requests
         List<LeaveRequest> overlapping = leaveRequestRepository.findOverlapping(
                 employee, request.getStartDate(), request.getEndDate());
         if (!overlapping.isEmpty()) {
             throw new RuntimeException("Overlapping leave request already exists for the selected dates.");
         }
 
-        int totalDays = (int) ChronoUnit.DAYS.between(request.getStartDate(), request.getEndDate()) + 1;
+        double totalDays = (double) ChronoUnit.DAYS.between(request.getStartDate(), request.getEndDate()) + 1;
 
-        // Check leave balance
-        int currentYear = request.getStartDate().getYear();
-        LeaveBalance balance = leaveBalanceRepository
-                .findByEmployeeAndLeaveTypeAndYear(employee, request.getLeaveType(), currentYear)
-                .orElse(null);
+        // Custom Accrual & LOP Engine
+        double accrued = calculateTotalAccrued(employee);
+        double taken = leaveRequestRepository.findByEmployee(employee).stream()
+                .filter(lr -> "Approved".equals(lr.getStatus()) && !lr.isLop())
+                .map(LeaveRequest::getTotalDays)
+                .mapToDouble(d -> d != null ? d : 0.0)
+                .sum();
+        
+        double available = Math.max(0, accrued - taken);
+        double lopCount = 0.0;
+        boolean isLop = false;
 
-        if (balance != null && balance.getRemainingLeaves() < totalDays
-                && !request.getLeaveType().equalsIgnoreCase("Unpaid Leave")) {
-            throw new RuntimeException("Insufficient leave balance. Available: " + balance.getRemainingLeaves() + " days.");
+        if (totalDays > available) {
+            lopCount = totalDays - available;
+            isLop = true;
         }
 
         LeaveRequest leaveRequest = LeaveRequest.builder()
                 .employee(employee)
-                .leaveType(request.getLeaveType())
+                .leaveType(leaveType)
                 .startDate(request.getStartDate())
                 .endDate(request.getEndDate())
                 .totalDays(totalDays)
                 .reason(request.getReason())
                 .attachmentUrl(request.getAttachmentUrl())
                 .status("Pending")
+                .isLop(isLop)
+                .lopCount(lopCount)
                 .build();
 
         return mapToResponse(leaveRequestRepository.save(leaveRequest));
+    }
+
+    private double calculateTotalAccrued(Employee employee) {
+        LocalDate joinDate = employee.getJoiningDate();
+        LocalDate now = LocalDate.now();
+        
+        long totalMonths = ChronoUnit.MONTHS.between(joinDate.withDayOfMonth(1), now.withDayOfMonth(1)) + 1;
+        if (totalMonths <= 0) return 0.0;
+
+        double accrued = 0.0;
+        for (int i = 0; i < totalMonths; i++) {
+            if (i < 6) {
+                accrued += 1.0;
+            } else {
+                accrued += 1.5;
+            }
+        }
+        return accrued;
     }
 
     @Override
@@ -86,16 +113,24 @@ public class LeaveServiceImpl implements LeaveService {
     public List<LeaveBalanceResponse> getMyBalance(Long employeeId) {
         Employee employee = getEmployeeOrThrow(employeeId);
         int currentYear = LocalDate.now().getYear();
-        return leaveBalanceRepository.findByEmployeeAndYear(employee, currentYear).stream()
-                .map(b -> LeaveBalanceResponse.builder()
-                        .id(b.getId())
-                        .leaveType(b.getLeaveType())
-                        .totalLeaves(b.getTotalLeaves())
-                        .usedLeaves(b.getUsedLeaves())
-                        .remainingLeaves(b.getRemainingLeaves())
-                        .year(b.getYear())
-                        .build())
-                .collect(Collectors.toList());
+        
+        // Calculate dynamic balance vs cached balance
+        double accrued = calculateTotalAccrued(employee);
+        double taken = leaveRequestRepository.findByEmployee(employee).stream()
+                .filter(lr -> "Approved".equals(lr.getStatus()) && !lr.isLop())
+                .map(LeaveRequest::getTotalDays)
+                .mapToDouble(d -> d != null ? d : 0.0)
+                .sum();
+        
+        double available = Math.max(0.0, accrued - taken);
+
+        return List.of(LeaveBalanceResponse.builder()
+                .leaveType("Casual Leave")
+                .totalLeaves(accrued)
+                .usedLeaves(taken)
+                .remainingLeaves(available)
+                .year(currentYear)
+                .build());
     }
 
     @Override
@@ -128,16 +163,15 @@ public class LeaveServiceImpl implements LeaveService {
         leaveRequest.setRemarks(remarks);
 
         // ===== ATTENDANCE INTEGRATION =====
-        // Create attendance records with status "Leave" for each day
         Employee employee = leaveRequest.getEmployee();
         LocalDate current = leaveRequest.getStartDate();
         while (!current.isAfter(leaveRequest.getEndDate())) {
-            // Only create if no existing record
-            if (attendanceRepository.findByEmployeeAndDate(employee, current).isEmpty()) {
+            final LocalDate dateToSearch = current;
+            if (attendanceRepository.findByEmployeeAndDate(employee, dateToSearch).isEmpty()) {
                 Attendance leaveAttendance = Attendance.builder()
                         .employee(employee)
-                        .date(current)
-                        .status("Leave")
+                        .date(dateToSearch)
+                        .status(leaveRequest.isLop() ? "LOP" : "Leave")
                         .breakDuration(0L)
                         .totalHours(0L)
                         .build();
@@ -146,16 +180,30 @@ public class LeaveServiceImpl implements LeaveService {
             current = current.plusDays(1);
         }
 
-        // ===== DEDUCT LEAVE BALANCE =====
+        // ===== DEDUCT LEAVE BALANCE (Only if not full LOP) =====
+        double accrued = calculateTotalAccrued(employee);
+        double taken = leaveRequestRepository.findByEmployee(employee).stream()
+                .filter(lr -> "Approved".equals(lr.getStatus()) && !lr.isLop())
+                .map(LeaveRequest::getTotalDays)
+                .mapToDouble(d -> d != null ? d : 0.0)
+                .sum();
+        
+        double available = Math.max(0.0, accrued - taken);
+
+        // Update or Create cached balance
         int currentYear = leaveRequest.getStartDate().getYear();
         LeaveBalance balance = leaveBalanceRepository
-                .findByEmployeeAndLeaveTypeAndYear(employee, leaveRequest.getLeaveType(), currentYear)
-                .orElse(null);
-        if (balance != null) {
-            balance.setUsedLeaves(balance.getUsedLeaves() + leaveRequest.getTotalDays());
-            balance.setRemainingLeaves(balance.getTotalLeaves() - balance.getUsedLeaves());
-            leaveBalanceRepository.save(balance);
-        }
+                .findByEmployeeAndLeaveTypeAndYear(employee, leaveRequest.getLeaveType().getName(), currentYear)
+                .orElse(LeaveBalance.builder()
+                        .employee(employee)
+                        .leaveType(leaveRequest.getLeaveType().getName())
+                        .year(currentYear)
+                        .build());
+        
+        balance.setTotalLeaves(accrued);
+        balance.setUsedLeaves(taken);
+        balance.setRemainingLeaves(available);
+        leaveBalanceRepository.save(balance);
 
         return mapToResponse(leaveRequestRepository.save(leaveRequest));
     }
@@ -184,11 +232,22 @@ public class LeaveServiceImpl implements LeaveService {
     }
 
     private LeaveRequestResponse mapToResponse(LeaveRequest lr) {
+        Employee employee = lr.getEmployee();
+        double accrued = calculateTotalAccrued(employee);
+        double taken = leaveRequestRepository.findByEmployee(employee).stream()
+                .filter(req -> "Approved".equals(req.getStatus()) && !req.isLop())
+                .map(LeaveRequest::getTotalDays)
+                .mapToDouble(d -> d != null ? d : 0.0)
+                .sum();
+        double available = Math.max(0.0, accrued - taken);
+
         return LeaveRequestResponse.builder()
                 .id(lr.getId())
                 .employeeId(lr.getEmployee().getId())
                 .employeeName(lr.getEmployee().getFirstName() + " " + lr.getEmployee().getLastName())
-                .leaveType(lr.getLeaveType())
+                .leaveType(lr.getLeaveType().getName())
+                .leaveTypeColor(lr.getLeaveType().getColor())
+                .isLop(lr.isLop())
                 .startDate(lr.getStartDate())
                 .endDate(lr.getEndDate())
                 .totalDays(lr.getTotalDays())
@@ -197,7 +256,11 @@ public class LeaveServiceImpl implements LeaveService {
                 .status(lr.getStatus())
                 .approvedByName(lr.getApprovedBy() != null ?
                         lr.getApprovedBy().getFirstName() + " " + lr.getApprovedBy().getLastName() : null)
+                .designation(lr.getEmployee().getDesignation() != null ? lr.getEmployee().getDesignation().getTitle() : "N/A")
+                .department(lr.getEmployee().getDepartment() != null ? lr.getEmployee().getDepartment().getName() : "N/A")
                 .remarks(lr.getRemarks())
+                .lopCount(lr.getLopCount())
+                .leaveBalance(available)
                 .createdAt(lr.getCreatedAt())
                 .build();
     }

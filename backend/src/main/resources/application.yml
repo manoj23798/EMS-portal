@@ -8,7 +8,7 @@ spring:
     password: pass123 # Replace with actual password or externalize
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: none # Temporarily none to allow DatabaseRepairConfig to run
     show-sql: true
     properties:
       hibernate:

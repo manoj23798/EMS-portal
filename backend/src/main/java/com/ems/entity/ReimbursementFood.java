@@ -34,6 +34,6 @@ public class ReimbursementFood {
     @Column(name = "bill_available")
     private Boolean billAvailable;
     
-    @Column(name = "bill_file")
+    @Column(name = "bill_file", columnDefinition = "TEXT")
     private String billFile;
 }

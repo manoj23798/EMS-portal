@@ -33,7 +33,9 @@ public class ReimbursementRequest {
 
     @Data
     public static class LodgingDto {
-        private String dateRange;
+        private Long id;
+        private String fromDate;
+        private String toDate;
         private String location;
         private Integer days;
         private Integer persons;

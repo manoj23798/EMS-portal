@@ -32,6 +32,9 @@ public class ReimbursementTicket {
     @Column(name = "ticket_available")
     private Boolean ticketAvailable;
     
-    @Column(name = "ticket_file")
+    @Column(name = "ticket_file", columnDefinition = "TEXT")
     private String ticketFile;
+
+    @Column(name = "bill_file", columnDefinition = "TEXT")
+    private String billFile;
 }

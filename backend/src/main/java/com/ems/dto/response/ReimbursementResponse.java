@@ -67,7 +67,8 @@ public class ReimbursementResponse {
     @Data
     public static class LodgingDto {
         private Long id;
-        private String dateRange;
+        private String fromDate;
+        private String toDate;
         private String location;
         private Integer days;
         private Integer persons;

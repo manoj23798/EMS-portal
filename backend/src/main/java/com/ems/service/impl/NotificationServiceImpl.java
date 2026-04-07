@@ -44,9 +44,14 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public List<NotificationResponse> getMyNotifications(Long employeeId) {
-        return notificationRepository.findMyNotifications(employeeId).stream()
-                .map(this::mapToResponse)
-                .collect(Collectors.toList());
+        try {
+            return notificationRepository.findMyNotifications(employeeId).stream()
+                    .map(this::mapToResponse)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            System.err.println("❌ ERROR: Failed to fetch notifications: " + e.getMessage());
+            return java.util.Collections.emptyList();
+        }
     }
 
     @Override

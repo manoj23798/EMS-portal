@@ -11,5 +11,6 @@ public interface ReimbursementService {
     List<ReimbursementResponse> getAllForAccounts();
     ReimbursementResponse getReimbursementById(Long id);
     ReimbursementResponse managerApproveOrReject(Long id, boolean approve);
-    ReimbursementResponse accountsSettle(Long id, Double approvedAmount, String reason);
+    ReimbursementResponse accountsSettle(Long id, Double approvedAmount, String reason, boolean approve);
+    void deleteReimbursement(Long id);
 }

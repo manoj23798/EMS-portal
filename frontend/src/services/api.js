@@ -104,7 +104,24 @@ export const LeaveAPI = {
     apply: (data) => api.post('/leaves/apply', data),
     getMy: (employeeId) => api.get(`/leaves/my?employeeId=${employeeId}`),
     getBalance: (employeeId) => api.get(`/leaves/balance?employeeId=${employeeId}`),
-    getAll: () => api.get('/admin/leaves'), // Admin endpoint
+    getAll: () => api.get('/admin/leaves'),
+};
+
+export const LeaveConfigAPI = {
+    // Types
+    getTypes: () => api.get('/leave-config/types'),
+    createType: (data) => api.post('/leave-config/types', data),
+    updateType: (id, data) => api.put(`/leave-config/types/${id}`, data),
+    deleteType: (id) => api.delete(`/leave-config/types/${id}`),
+    // Holidays
+    getHolidays: (params) => api.get('/leave-config/holidays', { params }),
+    createHoliday: (data) => api.post('/leave-config/holidays', data),
+    deleteHoliday: (id) => api.delete(`/leave-config/holidays/${id}`),
+};
+
+export const LeaveStatsAPI = {
+    getAnalytics: (params) => api.get('/leave/stats/analytics', { params }),
+    getCalendar: (params) => api.get('/leave/stats/calendar', { params }),
 };
 
 export const PermissionAPI = {
@@ -151,13 +168,19 @@ export const ReimbursementAPI = {
     create: (data) => api.post('/reimbursement/create', data),
     getMyClaims: () => api.get('/reimbursement/my'),
     getManagerPending: () => api.get('/manager/reimbursement/pending'),
-    getAdminAll: () => api.get('/admin/reimbursement/all'),
     getById: (id) => api.get(`/reimbursement/${id}`),
     managerAction: (id, approve) => api.put(`/manager/reimbursement/${id}/approve`, { approve }),
-    financeSettle: (id, approvedAmount, reason) => api.put(`/admin/reimbursement/${id}/settle`, { 
+    financeSettle: (id, approvedAmount, reason, approve) => api.put(`/admin/reimbursement/${id}/settle`, { 
         approvedAmount, 
-        reason 
-    })
+        reason,
+        approve
+    }),
+    
+    // Advanced Analytics Endpoints
+    getAnalytics: (params) => api.get('/admin/reimbursements/analytics/dashboard', { params }),
+    getAnalyticsEmployees: () => api.get('/admin/reimbursements/analytics/filters/employees'),
+    getAnalyticsProjects: () => api.get('/admin/reimbursements/analytics/filters/projects'),
+    delete: (id) => api.delete(`/reimbursement/${id}`)
 };
 
 export default api;

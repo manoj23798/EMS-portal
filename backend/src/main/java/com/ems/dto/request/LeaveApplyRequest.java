@@ -12,8 +12,8 @@ public class LeaveApplyRequest {
     @NotNull(message = "Employee ID is required")
     private Long employeeId;
 
-    @NotBlank(message = "Leave type is required")
-    private String leaveType;
+    @NotNull(message = "Leave type ID is required")
+    private Long leaveTypeId;
 
     @NotNull(message = "Start date is required")
     private LocalDate startDate;

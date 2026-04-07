@@ -1,0 +1,18 @@
+﻿                 <div style={{ padding: '16px 24px', borderBottom: '1.5px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                     <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 950, color: '#1e293b' }}>Audit Pipeline & Claims Intelligence</h3>
+                     <div style={{ position: 'relative', width: '320px' }}>
+                         <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#f97316' }} />
+                         <input 
+                             placeholder="Search everything..." 
+                             value={globalSearch}
+                             onChange={(e) => setGlobalSearch(e.target.value)}
+                             style={{ 
+                                 width: '100%', padding: '10px 14px 10px 38px', borderRadius: '12px', 
+                                 border: '1.5px solid #fed7aa', fontSize: '12px', fontWeight: 700, 
+                                 background: 'white', outline: 'none', color: '#1e293b',
+                                 boxShadow: '0 4px 12px rgba(249,115,22,0.05)'
+                             }} 
+                         />
+                     </div>
+                </div>
+                <div style={{ overflowX: 'auto', flex: 1 }}>

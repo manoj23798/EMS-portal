@@ -18,7 +18,11 @@ public class ReimbursementLodging {
     @JoinColumn(name = "reimbursement_id", nullable = false)
     private ReimbursementMaster reimbursementMaster;
 
-    private String dateRange;
+    @Column(name = "from_date")
+    private String fromDate;
+
+    @Column(name = "to_date")
+    private String toDate;
     private String location;
     
     private Integer days;
@@ -33,6 +37,6 @@ public class ReimbursementLodging {
     @Column(name = "bill_available")
     private Boolean billAvailable;
     
-    @Column(name = "bill_file")
+    @Column(name = "bill_file", columnDefinition = "TEXT")
     private String billFile;
 }

@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100;200;300;400;500;600;700;800;900&display=swap');
+
 :root {
   /* Brand Colors */
   --primary: #f97316;
@@ -8,49 +10,39 @@
   /* Very soft orange backing */
 
   /* UI Colors */
-  --background: #fafafa;
-  /* Extremely light warm white */
+  --background: #ffffff;
   --surface: #ffffff;
-  /* Pure white components */
 
-  /* Typography - Warm tones for legibility that match the orange theme */
-  --text-main: #431407;
-  /* Very deep warm brown/orange for high contrast */
-  --text-muted: #9a3412;
-  /* Medium warm tone for secondary text */
+  /* Typography */
+  --text-main: #1e293b;
+  --text-muted: #64748b;
 
   /* Structural Elements */
-  --border: #fed7aa;
-  /* Soft orange border */
+  --border: #cbd5e1;
   --sidebar-bg: #ffffff;
-  --sidebar-active: #ffedd5;
-
-  /* Status Colors */
-  --success: #10b981;
-  --danger: #ef4444;
-  --warning: #f59e0b;
+  --sidebar-active: #f1f5f9;
 
   /* Aesthetics */
-  --shadow-sm: 0 2px 4px rgba(234, 88, 12, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(234, 88, 12, 0.1), 0 2px 4px -1px rgba(234, 88, 12, 0.06);
-  --shadow-lg: 0 10px 15px -3px rgba(234, 88, 12, 0.1), 0 4px 6px -2px rgba(234, 88, 12, 0.05);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.08);
+  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
 
   /* Glassmorphism */
-  --glass-bg: rgba(255, 255, 255, 0.85);
-  --glass-border: rgba(254, 215, 170, 0.5);
+  --glass-bg: rgba(255, 255, 255, 0.95);
+  --glass-border: rgba(226, 232, 240, 0.5);
 
   /* Metrics */
-  --radius-md: 10px;
-  --radius-lg: 16px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
   --radius-full: 9999px;
-  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition: all 0.2s ease-in-out;
 }
 
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: 'Outfit', sans-serif;
 }
 
 html, body {
@@ -71,7 +63,7 @@ body {
   height: 100vh;
   width: 100vw;
   overflow: hidden;
-  background: linear-gradient(135deg, var(--background) 0%, #fff7ed 100%);
+  background: white;
 }
 
 .sidebar {
@@ -163,9 +155,39 @@ body {
 
 .page-content {
   flex: 1;
-  padding: 16px 32px 32px 32px;
+  padding: 0;
   overflow-y: auto;
   animation: fadeIn 0.5s ease-out forwards;
+}
+
+/* Themed Scrollbar for Page Content */
+.page-content::-webkit-scrollbar {
+  width: 6px !important;
+  display: block !important;
+}
+
+.page-content::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1 !important;
+  border-radius: 10px !important;
+}
+
+.page-content::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+.page-content {
+  scrollbar-width: thin !important;
+  scrollbar-color: #cbd5e1 transparent !important;
+}
+
+/* Specific scrollbar hiding for root elements only if needed */
+html::-webkit-scrollbar, 
+body::-webkit-scrollbar {
+  display: none !important;
+}
+
+html, body {
+  scrollbar-width: none !important;
 }
 
 /* Card Component */

@@ -15,6 +15,10 @@ import LeaveApply from './pages/leave/LeaveApply';
 import LeaveHistory from './pages/leave/LeaveHistory';
 import PermissionApply from './pages/permission/PermissionApply';
 import ManagerApprovalPage from './pages/manager/ManagerApprovalPage';
+import LeaveTypeManagement from './pages/leave/admin/LeaveTypeManagement';
+import HolidayManagement from './pages/leave/admin/HolidayManagement';
+import AdminLeaveDashboard from './pages/leave/admin/AdminLeaveDashboard';
+import LeaveCalendarView from './pages/leave/LeaveCalendarView';
 
 
 import AdminCommunicationDashboard from './pages/communications/AdminCommunicationDashboard';
@@ -29,8 +33,8 @@ import PolicyEditor from './pages/handbook/PolicyEditor';
 
 import ReimbursementApply from './pages/reimbursement/ReimbursementApply';
 import ReimbursementHistory from './pages/reimbursement/ReimbursementHistory';
-import AdminReimbursementDashboard from './pages/reimbursement/AdminReimbursementDashboard';
 import ReimbursementView from './pages/reimbursement/ReimbursementView';
+import AdvancedAnalytics from './pages/reimbursement/AdvancedAnalytics';
 
 import './index.css';
 
@@ -61,6 +65,12 @@ function App() {
             <Route path="leave/history" element={<RoleGuard allowedRoles={['ADMIN', 'HR', 'PROJECT_MANAGER', 'IT_MANAGER', 'EMPLOYEE']}><LeaveHistory /></RoleGuard>} />
             <Route path="permission/apply" element={<RoleGuard allowedRoles={['ADMIN', 'HR', 'PROJECT_MANAGER', 'IT_MANAGER', 'EMPLOYEE']}><PermissionApply /></RoleGuard>} />
             <Route path="manager/leave-requests" element={<RoleGuard allowedRoles={['ADMIN', 'HR', 'PROJECT_MANAGER', 'IT_MANAGER']}><ManagerApprovalPage /></RoleGuard>} />
+            
+            {/* Enterprise Leave Extensions */}
+            <Route path="admin/leave-dashboard" element={<RoleGuard allowedRoles={['ADMIN', 'HR']}><AdminLeaveDashboard /></RoleGuard>} />
+            <Route path="admin/leave-types" element={<RoleGuard allowedRoles={['ADMIN', 'HR']}><LeaveTypeManagement /></RoleGuard>} />
+            <Route path="admin/holidays" element={<RoleGuard allowedRoles={['ADMIN', 'HR']}><HolidayManagement /></RoleGuard>} />
+            <Route path="leave/calendar" element={<RoleGuard allowedRoles={['ADMIN', 'HR', 'PROJECT_MANAGER', 'IT_MANAGER', 'EMPLOYEE']}><LeaveCalendarView /></RoleGuard>} />
 
             {/* Communications Modules */}
             <Route path="communications" element={<RoleGuard allowedRoles={['ADMIN', 'HR', 'PROJECT_MANAGER', 'IT_MANAGER', 'EMPLOYEE']}><EmployeeCommunicationDashboard /></RoleGuard>} />
@@ -79,8 +89,9 @@ function App() {
             <Route path="reimbursement/apply" element={<RoleGuard allowedRoles={['ADMIN', 'HR', 'PROJECT_MANAGER', 'IT_MANAGER', 'EMPLOYEE']}><ReimbursementApply /></RoleGuard>} />
             <Route path="reimbursement/history" element={<RoleGuard allowedRoles={['ADMIN', 'HR', 'PROJECT_MANAGER', 'IT_MANAGER', 'EMPLOYEE']}><ReimbursementHistory /></RoleGuard>} />
             <Route path="reimbursement/view/:id" element={<RoleGuard allowedRoles={['ADMIN', 'HR', 'PROJECT_MANAGER', 'IT_MANAGER', 'EMPLOYEE']}><ReimbursementView /></RoleGuard>} />
-            <Route path="manager/reimbursements" element={<RoleGuard allowedRoles={['ADMIN', 'HR', 'PROJECT_MANAGER', 'IT_MANAGER']}><AdminReimbursementDashboard /></RoleGuard>} />
-            <Route path="admin/reimbursements" element={<RoleGuard allowedRoles={['ADMIN', 'HR']}><AdminReimbursementDashboard /></RoleGuard>} />
+            <Route path="manager/reimbursements" element={<RoleGuard allowedRoles={['ADMIN', 'HR', 'PROJECT_MANAGER', 'IT_MANAGER']}><AdvancedAnalytics /></RoleGuard>} />
+            <Route path="admin/reimbursements" element={<RoleGuard allowedRoles={['ADMIN', 'HR']}><AdvancedAnalytics /></RoleGuard>} />
+            <Route path="admin/reimbursement-dashboard" element={<RoleGuard allowedRoles={['ADMIN', 'HR']}><AdvancedAnalytics /></RoleGuard>} />
 
           </Route>
         </Route>

@@ -25,7 +25,7 @@ public class Notification {
     @JoinColumn(name = "recipient_id")
     private Employee recipient; // If null, this is a global broadcast
 
-    @Column(nullable = false, length = 500)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String message;
 
     @Column(name = "is_read", nullable = false)

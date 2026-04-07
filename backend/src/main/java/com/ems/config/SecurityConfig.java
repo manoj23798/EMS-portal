@@ -49,7 +49,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/hr/**").hasAnyAuthority("HR", "ADMIN") // HR APIs
                 .requestMatchers("/api/manager/**").hasAnyAuthority("PROJECT_MANAGER", "ADMIN", "HR") // Project Manager APIs (and HR/Admin)
                 .requestMatchers("/api/it/**").hasAnyAuthority("IT_MANAGER", "ADMIN") // IT Manager APIs
-                .requestMatchers("/api/employee/**", "/api/attendance/**", "/api/leaves/**", "/api/permissions/**", "/api/communications/**", "/api/handbook/**", "/api/notifications/**", "/api/departments/**", "/api/designations/**", "/api/roles/**").hasAnyAuthority("EMPLOYEE", "ADMIN", "HR", "PROJECT_MANAGER", "IT_MANAGER") // Core endpoints accessible by everyone
+                .requestMatchers("/api/employee/**", "/api/attendance/**", "/api/leaves/**", "/api/permissions/**", "/api/communications/**", "/api/handbook/**", "/api/notifications/**", "/api/departments/**", "/api/designations/**", "/api/roles/**", "/api/reimbursement/**").hasAnyAuthority("EMPLOYEE", "ADMIN", "HR", "PROJECT_MANAGER", "IT_MANAGER") // Core endpoints accessible by everyone
                 .anyRequest().authenticated() // All other endpoints require authentication
             )
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

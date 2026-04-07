@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { Users, Clock, History, ShieldCheck, Briefcase, Calendar, FileText, UserCheck, MessageSquare, Megaphone, BookOpen, FileBadge } from 'lucide-react';
+import { Users, Clock, History, ShieldCheck, Briefcase, Calendar, FileText, UserCheck, MessageSquare, Megaphone, BookOpen, FileBadge, Globe, Settings, MapPin } from 'lucide-react';
 import { tokenManager } from '../utils/tokenManager';
 
 export default function Sidebar() {
@@ -44,25 +44,45 @@ export default function Sidebar() {
                     </NavLink>
                 )}
 
-                {/* Module 3: Leave & Permission */}
-                <div style={{ borderTop: '1px solid var(--border)', margin: '8px 0' }} />
+                {/* Module 3: Leave & Permission (Enterprise Upgrade) */}
+                <div style={{ borderTop: '1px solid var(--border)', margin: '16px 0 8px 0' }} />
+                <p className="sidebar-group-title" style={{ fontSize: '9px', fontWeight: 950, color: '#94a3b8', padding: '0 20px', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '8px' }}>Leave & Planning</p>
+                
                 <NavLink to="/leave"
                     className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
-                    <Calendar size={20} />
-                    <span>Leave Dashboard</span>
+                    <Calendar size={18} />
+                    <span>My Dashboard</span>
                 </NavLink>
-                <NavLink to="/leave/history"
+                <NavLink to="/leave/calendar"
                     className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
-                    <FileText size={20} />
-                    <span>Leave History</span>
+                    <Globe size={18} />
+                    <span>Org Calendar</span>
                 </NavLink>
 
                 {isManager && (
-                    <NavLink to="/manager/leave-requests"
-                        className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
-                        <UserCheck size={20} />
-                        <span>Manager Approvals</span>
-                    </NavLink>
+                    <>
+                        <div style={{ margin: '8px 0' }} />
+                        <p className="sidebar-group-title" style={{ fontSize: '9px', fontWeight: 950, color: '#94a3b8', padding: '0 20px', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '8px' }}>Management Center</p>
+                        <NavLink to="/manager/leave-requests"
+                            className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
+                            <ShieldCheck size={18} />
+                            <span>Approvals Portal</span>
+                        </NavLink>
+                        {isHRorAdmin && (
+                            <>
+                                <NavLink to="/admin/leave-types"
+                                    className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
+                                    <Settings size={18} />
+                                    <span>Policy Engine</span>
+                                </NavLink>
+                                <NavLink to="/admin/holidays"
+                                    className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
+                                    <MapPin size={18} />
+                                    <span>Holidays</span>
+                                </NavLink>
+                            </>
+                        )}
+                    </>
                 )}
 
                 {/* Module 5: Employee Communications */}

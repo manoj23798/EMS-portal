@@ -18,12 +18,6 @@ public class AdminReimbursementController {
     @Autowired
     private ReimbursementService reimbursementService;
 
-    @GetMapping("/all")
-    @PreAuthorize("hasAnyRole('HR', 'ADMIN')")
-    public ResponseEntity<List<ReimbursementResponse>> getAllReimbursements() {
-        return ResponseEntity.ok(reimbursementService.getAllForAccounts());
-    }
-
     @PutMapping("/{id}/settle")
     @PreAuthorize("hasAnyRole('HR', 'ADMIN')")
     public ResponseEntity<ReimbursementResponse> settleReimbursement(
@@ -35,8 +29,19 @@ public class AdminReimbursementController {
             approvedAmount = Double.valueOf(payload.get("approvedAmount").toString());
         }
         String reason = (String) payload.get("reason");
+        
+        // Robust boolean parsing
+        Boolean approve = true;
+        Object approveObj = payload.get("approve");
+        if (approveObj != null) {
+            if (approveObj instanceof Boolean) {
+                approve = (Boolean) approveObj;
+            } else {
+                approve = Boolean.parseBoolean(approveObj.toString());
+            }
+        }
 
-        return ResponseEntity.ok(reimbursementService.accountsSettle(id, approvedAmount, reason));
+        return ResponseEntity.ok(reimbursementService.accountsSettle(id, approvedAmount, reason, approve));
     }
 
     @GetMapping("/{id}")

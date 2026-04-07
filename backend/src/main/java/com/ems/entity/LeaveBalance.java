@@ -28,14 +28,14 @@ public class LeaveBalance {
     private String leaveType;
 
     @Column(name = "total_leaves", nullable = false)
-    private Integer totalLeaves;
+    private Double totalLeaves;
 
     @Column(name = "used_leaves", nullable = false)
     @Builder.Default
-    private Integer usedLeaves = 0;
+    private Double usedLeaves = 0.0;
 
     @Column(name = "remaining_leaves", nullable = false)
-    private Integer remainingLeaves;
+    private Double remainingLeaves;
 
     @Column(nullable = false)
     private Integer year;

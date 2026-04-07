@@ -27,8 +27,16 @@ public class LeaveRequest {
     @JoinColumn(name = "employee_id", nullable = false)
     private Employee employee;
 
-    @Column(name = "leave_type", nullable = false, length = 50)
-    private String leaveType; // Casual Leave, Sick Leave, Paid Leave, Unpaid Leave, Work From Home
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "leave_type_id", nullable = false)
+    private LeaveType leaveType;
+
+    @Builder.Default
+    private boolean isLop = false; // Kept as boolean for quick status filtering
+    
+    @Column(name = "lop_count")
+    @Builder.Default
+    private Double lopCount = 0.0; // Actual partial LOP days (e.g. 0.5)
 
     @Column(name = "start_date", nullable = false)
     private LocalDate startDate;
@@ -37,7 +45,7 @@ public class LeaveRequest {
     private LocalDate endDate;
 
     @Column(name = "total_days", nullable = false)
-    private Integer totalDays;
+    private Double totalDays;
 
     @Column(columnDefinition = "TEXT")
     private String reason;

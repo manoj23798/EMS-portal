@@ -8,8 +8,8 @@ import lombok.Data;
 public class LeaveBalanceResponse {
     private Long id;
     private String leaveType;
-    private Integer totalLeaves;
-    private Integer usedLeaves;
-    private Integer remainingLeaves;
+    private Double totalLeaves;
+    private Double usedLeaves;
+    private Double remainingLeaves;
     private Integer year;
 }

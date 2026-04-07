@@ -13,13 +13,19 @@ public class LeaveRequestResponse {
     private Long employeeId;
     private String employeeName;
     private String leaveType;
+    private String leaveTypeColor;
+    private boolean isLop;
     private LocalDate startDate;
     private LocalDate endDate;
-    private Integer totalDays;
+    private Double totalDays;
     private String reason;
     private String attachmentUrl;
     private String status;
     private String approvedByName;
+    private String designation;
+    private String department;
     private String remarks;
+    private Double lopCount;
+    private Double leaveBalance;
     private LocalDateTime createdAt;
 }

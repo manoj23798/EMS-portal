@@ -34,6 +34,6 @@ public class ReimbursementLocalConveyance {
     @Column(name = "ticket_available")
     private Boolean ticketAvailable;
     
-    @Column(name = "ticket_file")
+    @Column(name = "ticket_file", columnDefinition = "TEXT")
     private String ticketFile;
 }
