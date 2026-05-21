@@ -24,7 +24,7 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
 
         if (user.getRole() == null) {
-            throw new RuntimeException("User has no assigned role");
+            throw new UsernameNotFoundException("User has no assigned role");
         }
 
         String roleName = user.getRole().getRoleName();

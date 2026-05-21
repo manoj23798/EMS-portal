@@ -60,33 +60,32 @@ public class DataInitializer implements CommandLineRunner {
         }
 
         // Seed an Admin Employee if none exists securely
-        if (userRepository.findByUsername("admin").isEmpty()) {
-            Role adminRole = roleRepository.findByRoleName("ADMIN").get();
+        Role adminRole = roleRepository.findByRoleName("ADMIN").orElseThrow();
+        User adminUser = userRepository.findByUsername("admin").orElseGet(User::new);
 
-            // Check if there is already an employee 'admin' from legacy code we can link,
-            // or create a mock one.
-            Employee adminEmployee = employeeRepository.findByEmail("admin@company.com").orElseGet(() -> {
-                Employee newEmp = new Employee();
-                newEmp.setEmployeeId("EMP0001");
-                newEmp.setFirstName("Super");
-                newEmp.setLastName("Admin");
-                newEmp.setEmail("admin@company.com");
-                newEmp.setJoiningDate(LocalDate.now());
-                newEmp.setStatus("ACTIVE");
-                return employeeRepository.save(newEmp);
-            });
+        // Check if there is already an employee 'admin' from legacy code we can link,
+        // or create a mock one.
+        Employee adminEmployee = employeeRepository.findByEmail("admin@company.com").orElseGet(() -> {
+            Employee newEmp = new Employee();
+            newEmp.setEmployeeId("EMP0001");
+            newEmp.setFirstName("Super");
+            newEmp.setLastName("Admin");
+            newEmp.setEmail("admin@company.com");
+            newEmp.setJoiningDate(LocalDate.now());
+            newEmp.setStatus("ACTIVE");
+            return employeeRepository.save(newEmp);
+        });
 
-            User adminUser = User.builder()
-                    .username("admin")
-                    .email("admin@company.com")
-                    .passwordHash(passwordEncoder.encode("admin123")) // Default password
-                    .role(adminRole)
-                    .employee(adminEmployee)
-                    .status("ACTIVE")
-                    .build();
-
-            userRepository.save(adminUser);
-            System.out.println("✅ Database seeded with default ADMIN account. Username: admin, Password: admin123");
+        adminUser.setUsername("admin");
+        adminUser.setEmail("admin@company.com");
+        adminUser.setRole(adminRole);
+        adminUser.setEmployee(adminEmployee);
+        adminUser.setStatus("ACTIVE");
+        if (adminUser.getPasswordHash() == null || adminUser.getPasswordHash().isBlank()) {
+            adminUser.setPasswordHash(passwordEncoder.encode("admin123"));
         }
+
+        userRepository.save(adminUser);
+        System.out.println("✅ Database seeded with default ADMIN account. Username: admin, Password: admin123");
     }
 }

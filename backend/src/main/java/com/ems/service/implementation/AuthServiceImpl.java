@@ -13,6 +13,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +24,7 @@ public class AuthServiceImpl implements AuthService {
     private final AuthenticationManager authenticationManager;
 
     @Override
+        @Transactional(readOnly = true)
     public LoginResponse login(LoginRequest loginRequest) {
         // Authenticate via Spring Security
         Authentication authentication = authenticationManager.authenticate(
@@ -33,6 +35,10 @@ public class AuthServiceImpl implements AuthService {
 
         User user = userRepository.findByUsername(loginRequest.getUsername())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        if (user.getRole() == null) {
+            throw new UsernameNotFoundException("User has no assigned role");
+        }
 
         // Generate Tokens
         String jwt = jwtUtil.generateToken(user.getUsername(), user.getId(), user.getRole().getRoleName());
@@ -50,11 +56,16 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+        @Transactional(readOnly = true)
     public LoginResponse refreshToken(String refreshToken) {
         // Validate Refresh Token
         String username = jwtUtil.extractUsername(refreshToken);
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+                if (user.getRole() == null) {
+                        throw new UsernameNotFoundException("User has no assigned role");
+                }
                 
         // In a real app we'd also verify the refresh token hasn't expired, is active in the DB, etc.
 
@@ -73,9 +84,14 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+        @Transactional(readOnly = true)
     public LoginResponse getMe(String username) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+                if (user.getRole() == null) {
+                        throw new UsernameNotFoundException("User has no assigned role");
+                }
 
         return LoginResponse.builder()
                 .id(user.getId())
