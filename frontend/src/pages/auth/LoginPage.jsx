@@ -133,11 +133,7 @@ export default function LoginPage() {
                         </button>
                     </form>
                     
-                    {/* Dev tip: can remove in prod */}
-                    <div style={{ marginTop: 32, padding: 16, background: '#f8fafc', borderRadius: 'var(--radius-md)', fontSize: '0.85rem', color: '#64748b' }}>
-                        <p style={{ margin: 0, fontWeight: 600, color: '#475569' }}>Development Access</p>
-                        <p style={{ margin: '4px 0 0 0' }}>Admin Default: <strong>admin</strong> / <strong>admin123</strong></p>
-                    </div>
+                    {/* Development credentials removed for production */}
 
                 </div>
             </div>
