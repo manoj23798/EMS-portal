@@ -84,6 +84,12 @@ const getSubmittedTimestamp = (request) => {
     return Number.isFinite(time) ? time : 0;
 };
 
+const getActionTimestamp = (request) => {
+    const actionValue = request?.approvedAt || request?.rejectedAt || request?.updatedAt;
+    const time = actionValue ? new Date(actionValue).getTime() : 0;
+    return Number.isFinite(time) ? time : 0;
+};
+
 const getLeavePaidDays = (request) => Math.max(0, (Number(request.totalDays) || 0) - (Number(request.lopCount) || 0));
 
 const getLeaveTotalDays = (request) => Number(request?.totalDays) || 0;
@@ -337,6 +343,8 @@ const ManagerApprovalPage = () => {
         { value: 'Casual Leave', label: 'Casual Leave' }
     ]), []);
 
+    const showLopCountColumn = filters.status === 'LOP';
+
     const filteredRequests = useMemo(() => {
         const search = searchTerm.trim().toLowerCase();
         const fromDate = filters.dateFrom ? toDateOnly(filters.dateFrom) : null;
@@ -358,7 +366,10 @@ const ManagerApprovalPage = () => {
             ].some((value) => String(value || '').toLowerCase().includes(search));
 
             const matchesEmployee = !filters.employeeId || String(request.employeeId || '') === String(filters.employeeId);
-            const matchesStatus = filters.status === 'ALL' || request.status === filters.status;
+            const matchesStatus = filters.status === 'ALL'
+                || (filters.status === 'LOP'
+                    ? (Number(request.lopCount) || 0) > 0
+                    : request.status === filters.status);
             const matchesType = !filters.leaveType || String(request.leaveType || '').toLowerCase() === filters.leaveType.toLowerCase();
             const matchesFrom = !fromDate || (requestEnd ? requestEnd >= fromDate : requestStart && requestStart >= fromDate);
             const matchesTo = !toDate || (requestStart ? requestStart <= toDate : requestEnd && requestEnd <= toDate);
@@ -1741,6 +1752,7 @@ const ManagerApprovalPage = () => {
                                     <option value="Pending">Pending</option>
                                     <option value="Approved">Approved</option>
                                     <option value="Rejected">Rejected</option>
+                                    <option value="LOP">LOP</option>
                                     <option value="Canceled">Canceled</option>
                                 </select>
                             </div>
@@ -1771,6 +1783,7 @@ const ManagerApprovalPage = () => {
                             <th>Employee</th>
                             <th>Leave Type</th>
                             <th>Reason</th>
+                            {showLopCountColumn && <th style={{ textAlign: 'center' }}>LOP Count</th>}
                             <th>Submitted On</th>
                             <th>Dates</th>
                             <th style={{ textAlign: 'center' }}>Total Days</th>
@@ -1812,6 +1825,11 @@ const ManagerApprovalPage = () => {
                                         </div>
                                     )}
                                 </td>
+                                {showLopCountColumn && (
+                                    <td style={{ textAlign: 'center', fontSize: '13px', fontWeight: 950, color: (Number(lr.lopCount) || 0) > 0 ? '#ef4444' : '#64748b' }}>
+                                        {typeof lr.lopCount === 'number' ? lr.lopCount.toFixed(1).replace(/\.0$/, '') : 0}
+                                    </td>
+                                )}
                                 <td style={{ color: '#64748b' }}>{new Date(lr.createdAt || Date.now()).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}</td>
                                 <td>{new Date(lr.startDate).getDate()} - {new Date(lr.endDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</td>
                                 <td style={{ textAlign: 'center' }}>{typeof lr.totalDays === 'number' ? lr.totalDays.toFixed(1).replace(/\.0$/, '') : lr.totalDays} Days</td>
@@ -1819,14 +1837,14 @@ const ManagerApprovalPage = () => {
                                     {lr.status === 'Approved' ? (
                                         <div style={{ textAlign: 'center' }}>
                                             <span className="ma-status-label" style={{ background: '#ecfdf5', color: '#059669' }}>Approved</span>
-                                            {lr.updatedAt && <div style={{ fontSize: '9px', fontWeight: 900, color: '#94a3b8', marginTop: '4px', textTransform: 'uppercase' }}>{new Date(lr.updatedAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}</div>}
+                                            {getActionTimestamp(lr) > 0 && <div style={{ fontSize: '9px', fontWeight: 900, color: '#94a3b8', marginTop: '4px', textTransform: 'uppercase' }}>Approved on {new Date(getActionTimestamp(lr)).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}</div>}
                                         </div>
                                     ) : lr.status === 'Canceled' ? (
                                         <span className="ma-status-label" style={{ background: '#f1f5f9', color: '#475569' }}>Canceled</span>
                                     ) : lr.status === 'Rejected' ? (
                                         <div style={{ textAlign: 'center' }}>
                                             <span className="ma-status-label" style={{ background: '#fef2f2', color: '#dc2626' }}>Rejected</span>
-                                            {lr.updatedAt && <div style={{ fontSize: '9px', fontWeight: 900, color: '#94a3b8', marginTop: '4px', textTransform: 'uppercase' }}>{new Date(lr.updatedAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}</div>}
+                                            {getActionTimestamp(lr) > 0 && <div style={{ fontSize: '9px', fontWeight: 900, color: '#94a3b8', marginTop: '4px', textTransform: 'uppercase' }}>Rejected on {new Date(getActionTimestamp(lr)).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}</div>}
                                         </div>
                                     ) : (
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -1843,7 +1861,7 @@ const ManagerApprovalPage = () => {
                         ))}
                         {filteredRequests.length === 0 && (
                             <tr>
-                                <td colSpan="7" style={{ padding: '100px 0', textAlign: 'center' }}>
+                                <td colSpan={showLopCountColumn ? 8 : 7} style={{ padding: '100px 0', textAlign: 'center' }}>
                                     <ShieldCheck size={64} style={{ color: '#f1f5f9', marginBottom: '20px' }} />
                                     <div style={{ fontSize: '12px', fontWeight: 950, color: '#64748b', textTransform: 'uppercase', letterSpacing: '4px' }}>No requests found</div>
                                 </td>
