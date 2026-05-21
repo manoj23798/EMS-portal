@@ -19,7 +19,7 @@ import java.util.function.Function;
 public class JwtUtil {
 
     // Application-wide secret key
-    @Value("${jwt.secret:XGjqsYml7zjpIYEQUwI7UeAZc6Wt5GKb86onW6AjfeM=}")
+    @Value("${jwt.secret:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}")
     private String secretString;
 
     private SecretKey getSecretKey() {
@@ -29,10 +29,11 @@ public class JwtUtil {
 
     // Tokens valid for 1 hour by default if not specified
     private static final long DEFAULT_TOKEN_VALIDITY = 1000 * 60 * 60; // 1 Hour
-    
-    // Access token validity: 24 hours (for testing purposes to prevent frequent logouts)
+
+    // Access token validity: 24 hours (for testing purposes to prevent frequent
+    // logouts)
     private static final long ACCESS_TOKEN_VALIDITY = 1000 * 60 * 60 * 24;
-    
+
     // Refresh token validity: 7 days (requested in requirements)
     private static final long REFRESH_TOKEN_VALIDITY = 1000L * 60 * 60 * 24 * 7;
 

@@ -19,86 +19,87 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
-    private final UserRepository userRepository;
-    private final JwtUtil jwtUtil;
-    private final AuthenticationManager authenticationManager;
+        private final UserRepository userRepository;
+        private final JwtUtil jwtUtil;
+        private final AuthenticationManager authenticationManager;
 
-    @Override
+        @Override
         @Transactional(readOnly = true)
-    public LoginResponse login(LoginRequest loginRequest) {
-        // Authenticate via Spring Security
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword())
-        );
+        public LoginResponse login(LoginRequest loginRequest) {
+                // Authenticate via Spring Security
+                Authentication authentication = authenticationManager.authenticate(
+                                new UsernamePasswordAuthenticationToken(loginRequest.getUsername(),
+                                                loginRequest.getPassword()));
 
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+                SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        User user = userRepository.findByUsername(loginRequest.getUsername())
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+                User user = userRepository.findByUsername(loginRequest.getUsername())
+                                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        if (user.getRole() == null) {
-            throw new UsernameNotFoundException("User has no assigned role");
+                if (user.getRole() == null) {
+                        throw new UsernameNotFoundException("User has no assigned role");
+                }
+
+                // Generate Tokens
+                String jwt = jwtUtil.generateToken(user.getUsername(), user.getId(), user.getRole().getRoleName());
+                String refreshToken = jwtUtil.generateRefreshToken(user.getUsername());
+
+                return LoginResponse.builder()
+                                .token(jwt)
+                                .refreshToken(refreshToken)
+                                .id(user.getId())
+                                .username(user.getUsername())
+                                .email(user.getEmail())
+                                .role(user.getRole().getRoleName())
+                                .employeeId(user.getEmployee() != null ? user.getEmployee().getId() : null)
+                                .build();
         }
 
-        // Generate Tokens
-        String jwt = jwtUtil.generateToken(user.getUsername(), user.getId(), user.getRole().getRoleName());
-        String refreshToken = jwtUtil.generateRefreshToken(user.getUsername());
-
-        return LoginResponse.builder()
-                .token(jwt)
-                .refreshToken(refreshToken)
-                .id(user.getId())
-                .username(user.getUsername())
-                .email(user.getEmail())
-                .role(user.getRole().getRoleName())
-                .employeeId(user.getEmployee() != null ? user.getEmployee().getId() : null)
-                .build();
-    }
-
-    @Override
+        @Override
         @Transactional(readOnly = true)
-    public LoginResponse refreshToken(String refreshToken) {
-        // Validate Refresh Token
-        String username = jwtUtil.extractUsername(refreshToken);
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-
-                if (user.getRole() == null) {
-                        throw new UsernameNotFoundException("User has no assigned role");
-                }
-                
-        // In a real app we'd also verify the refresh token hasn't expired, is active in the DB, etc.
-
-        String newJwt = jwtUtil.generateToken(user.getUsername(), user.getId(), user.getRole().getRoleName());
-        String newRefreshToken = jwtUtil.generateRefreshToken(user.getUsername());
-
-        return LoginResponse.builder()
-                .token(newJwt)
-                .refreshToken(newRefreshToken)
-                .id(user.getId())
-                .username(user.getUsername())
-                .email(user.getEmail())
-                .role(user.getRole().getRoleName())
-                .employeeId(user.getEmployee() != null ? user.getEmployee().getId() : null)
-                .build();
-    }
-
-    @Override
-        @Transactional(readOnly = true)
-    public LoginResponse getMe(String username) {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        public LoginResponse refreshToken(String refreshToken) {
+                // Validate Refresh Token
+                String username = jwtUtil.extractUsername(refreshToken);
+                User user = userRepository.findByUsername(username)
+                                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
                 if (user.getRole() == null) {
                         throw new UsernameNotFoundException("User has no assigned role");
                 }
 
-        return LoginResponse.builder()
-                .id(user.getId())
-                .username(user.getUsername())
-                .email(user.getEmail())
-                .role(user.getRole().getRoleName())
-                .employeeId(user.getEmployee() != null ? user.getEmployee().getId() : null)
-                .build();
-    }
+                // In a real app we'd also verify the refresh token hasn't expired, is active in
+                // the DB, etc.
+
+                String newJwt = jwtUtil.generateToken(user.getUsername(), user.getId(), user.getRole().getRoleName());
+                String newRefreshToken = jwtUtil.generateRefreshToken(user.getUsername());
+
+                return LoginResponse.builder()
+                                .token(newJwt)
+                                .refreshToken(newRefreshToken)
+                                .id(user.getId())
+                                .username(user.getUsername())
+                                .email(user.getEmail())
+                                .role(user.getRole().getRoleName())
+                                .employeeId(user.getEmployee() != null ? user.getEmployee().getId() : null)
+                                .build();
+        }
+
+        @Override
+        @Transactional(readOnly = true)
+        public LoginResponse getMe(String username) {
+                User user = userRepository.findByUsername(username)
+                                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+                if (user.getRole() == null) {
+                        throw new UsernameNotFoundException("User has no assigned role");
+                }
+
+                return LoginResponse.builder()
+                                .id(user.getId())
+                                .username(user.getUsername())
+                                .email(user.getEmail())
+                                .role(user.getRole().getRoleName())
+                                .employeeId(user.getEmployee() != null ? user.getEmployee().getId() : null)
+                                .build();
+        }
 }

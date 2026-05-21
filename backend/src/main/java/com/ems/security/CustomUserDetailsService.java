@@ -30,14 +30,15 @@ public class CustomUserDetailsService implements UserDetailsService {
         String roleName = user.getRole().getRoleName();
         boolean isPrivileged = "ADMIN".equalsIgnoreCase(roleName) || "HR".equalsIgnoreCase(roleName);
 
-        if (!isPrivileged && !"ACTIVE".equalsIgnoreCase(user.getStatus()) && !"ONBOARDING".equalsIgnoreCase(user.getStatus())) {
-            throw new DisabledException("User account is " + (user.getStatus() == null ? "INACTIVE" : user.getStatus()));
+        if (!isPrivileged && !"ACTIVE".equalsIgnoreCase(user.getStatus())
+                && !"ONBOARDING".equalsIgnoreCase(user.getStatus())) {
+            throw new DisabledException(
+                    "User account is " + (user.getStatus() == null ? "INACTIVE" : user.getStatus()));
         }
 
         return new org.springframework.security.core.userdetails.User(
                 user.getUsername(),
                 user.getPasswordHash(),
-                Collections.singletonList(new SimpleGrantedAuthority(user.getRole().getRoleName()))
-        );
+                Collections.singletonList(new SimpleGrantedAuthority(user.getRole().getRoleName())));
     }
 }
