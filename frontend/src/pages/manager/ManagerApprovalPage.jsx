@@ -1771,7 +1771,6 @@ const ManagerApprovalPage = () => {
                             <th>Employee</th>
                             <th>Leave Type</th>
                             <th>Reason</th>
-                            <th>LOP Count</th>
                             <th>Submitted On</th>
                             <th>Dates</th>
                             <th style={{ textAlign: 'center' }}>Total Days</th>
@@ -1813,7 +1812,6 @@ const ManagerApprovalPage = () => {
                                         </div>
                                     )}
                                 </td>
-                                <td><span style={{ fontWeight: 800, color: lr.lopCount > 0 ? '#ef4444' : '#64748b' }}>{typeof lr.lopCount === 'number' ? lr.lopCount.toFixed(1).replace(/\.0$/, '') : 0} Days</span></td>
                                 <td style={{ color: '#64748b' }}>{new Date(lr.createdAt || Date.now()).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}</td>
                                 <td>{new Date(lr.startDate).getDate()} - {new Date(lr.endDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</td>
                                 <td style={{ textAlign: 'center' }}>{typeof lr.totalDays === 'number' ? lr.totalDays.toFixed(1).replace(/\.0$/, '') : lr.totalDays} Days</td>
@@ -1845,7 +1843,7 @@ const ManagerApprovalPage = () => {
                         ))}
                         {filteredRequests.length === 0 && (
                             <tr>
-                                <td colSpan="8" style={{ padding: '100px 0', textAlign: 'center' }}>
+                                <td colSpan="7" style={{ padding: '100px 0', textAlign: 'center' }}>
                                     <ShieldCheck size={64} style={{ color: '#f1f5f9', marginBottom: '20px' }} />
                                     <div style={{ fontSize: '12px', fontWeight: 950, color: '#64748b', textTransform: 'uppercase', letterSpacing: '4px' }}>No requests found</div>
                                 </td>
