@@ -160,6 +160,10 @@ body {
   animation: fadeIn 0.5s ease-out forwards;
 }
 
+.page-content.no-padding {
+  padding: 0 !important;
+}
+
 /* Themed Scrollbar for Page Content */
 .page-content::-webkit-scrollbar {
   width: 6px !important;
@@ -391,6 +395,7 @@ th {
   font-size: 0.875rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  background-color: #e2e8f0 !important;
 }
 
 tr:hover td {
@@ -466,9 +471,7 @@ tr:hover td {
 .a4-live-editor-wrapper {
   background: #e2e8f0;
   padding: 40px;
-  height: 75vh;
-  overflow-y: auto;
-  overflow-x: auto;
+  /* Removed fixed height and overflow to allow page-level scrolling and sticky toolbar to work */
   border-radius: var(--radius-lg);
   border: 1px solid var(--border);
   box-shadow: inset 0 4px 6px -1px rgba(0, 0, 0, 0.1);
@@ -514,8 +517,6 @@ tr:hover td {
 .a4-live-editor-wrapper {
   background: #f1f5f9; /* Solid desk color */
   padding: 60px 40px;
-  min-height: 80vh;
-  overflow-y: auto;
   border-radius: var(--radius-lg);
   display: flex;
   flex-direction: column;
@@ -525,9 +526,6 @@ tr:hover td {
 .a4-live-editor-wrapper {
   background: #cbd5e1; /* Deep grey desk color */
   padding: 40px;
-  height: 75vh;
-  overflow-y: auto;
-  overflow-x: auto;
   border-radius: var(--radius-lg);
   display: flex;
   flex-direction: column;
@@ -545,9 +543,6 @@ tr:hover td {
 .a4-live-editor-wrapper {
   background: #e2e8f0;
   padding: 20px;
-  height: 85vh;
-  overflow-y: auto;
-  overflow-x: auto;
   border-radius: var(--radius-lg);
   display: flex;
   flex-direction: column;
@@ -1018,4 +1013,4 @@ tr:hover td {
 .ux-modern .mb-6 { margin-bottom: 24px; }
 .ux-modern .grid { display: grid; }
 .ux-modern .grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
-.ux-modern .lg-grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
+.ux-modern .lg-grid-cols-3 { grid-template-columns: repeat(3, 1fr); }

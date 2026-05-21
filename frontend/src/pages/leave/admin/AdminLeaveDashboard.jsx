@@ -13,7 +13,7 @@ import {
 } from 'recharts';
 import { LeaveStatsAPI, DepartmentAPI, EmployeeAPI, LeaveAPI } from '../../../services/api';
 
-const MiniCalendar = () => {
+const MiniCalendar = ({ leaves = [] }) => {
     const [currentDate] = useState(new Date());
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
@@ -36,13 +36,30 @@ const MiniCalendar = () => {
         cells.push({ day: i, isCurrentMonth: false });
     }
 
+    const leaveDates = useMemo(() => {
+        const map = new Set();
+
+        leaves.forEach((leave) => {
+            const start = new Date(leave.startDate);
+            const end = new Date(leave.endDate);
+            const cursor = new Date(start);
+
+            while (cursor <= end) {
+                map.add(cursor.toISOString().split('T')[0]);
+                cursor.setDate(cursor.getDate() + 1);
+            }
+        });
+
+        return map;
+    }, [leaves]);
+
     return (
         <div className="mini-cal-premium">
             <div className="cal-head-premium">
                 {currentDate.toLocaleString('default', { month: 'long' })} {year}
                 <div style={{ display: 'flex', gap: '8px' }}>
-                    <ChevronLeft size={14} style={{ color: '#94a3b8' }} />
-                    <ChevronRight size={14} style={{ color: '#94a3b8' }} />
+                    <ChevronLeft size={14} style={{ color: '#64748b' }} />
+                    <ChevronRight size={14} style={{ color: '#64748b' }} />
                 </div>
             </div>
             <div className="cal-grid-premium">
@@ -50,6 +67,9 @@ const MiniCalendar = () => {
                 {cells.map((c, i) => (
                     <div key={i} className={`cal-cell ${c.isCurrentMonth ? '' : 'cal-muted'}`}>
                         {c.day}
+                        {c.isCurrentMonth && leaveDates.has(new Date(year, month, c.day).toISOString().split('T')[0]) && (
+                            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#f97316', position: 'absolute', bottom: '3px' }} />
+                        )}
                     </div>
                 ))}
             </div>
@@ -58,26 +78,66 @@ const MiniCalendar = () => {
 };
 
 const AdminLeaveDashboard = () => {
+    const formatLeaveTypeLabel = (leaveType) => {
+        const normalized = String(leaveType || '').trim().toLowerCase();
+        return normalized === 'urgent leave' ? 'Unplanned Leave' : (leaveType || 'Leave');
+    };
     const [stats, setStats] = useState(null);
+    const [employeeStats, setEmployeeStats] = useState(null);
     const [loading, setLoading] = useState(true);
     const [history, setHistory] = useState([]);
-    const [filters, setFilters] = useState({
-        startDate: new Date(new Date().getFullYear(), 0, 1).toISOString().split('T')[0],
-        endDate: new Date(new Date().getFullYear(), 11, 31).toISOString().split('T')[0]
-    });
+    const [selectedEmployeeId, setSelectedEmployeeId] = useState('');
+    const [dateFrom, setDateFrom] = useState('');
+    const [dateTo, setDateTo] = useState('');
+
+    const getSubmittedTimestamp = (leave) => {
+        const submittedValue = leave?.createdAt || leave?.submissionDate || leave?.submittedAt || leave?.appliedDate || leave?.startDate;
+        const time = submittedValue ? new Date(submittedValue).getTime() : 0;
+        return Number.isFinite(time) ? time : 0;
+    };
 
     useEffect(() => {
         fetchData();
-    }, []);
+    }, [selectedEmployeeId, dateFrom, dateTo]);
+
+    const employeeOptions = useMemo(() => {
+        const seen = new Map();
+        seen.set('', { value: '', label: 'All Employees' });
+
+        history.forEach((leave) => {
+            const value = String(leave.employeeId || '');
+            if (!value || seen.has(value)) return;
+            seen.set(value, {
+                value,
+                label: `${leave.employeeName || 'Employee'} (EMP-${value.slice(-4)})`
+            });
+        });
+
+        return Array.from(seen.values());
+    }, [history]);
 
     const fetchData = async () => {
         try {
             setLoading(true);
-            const [statsRes, historyRes] = await Promise.all([
-                LeaveStatsAPI.getAnalytics(filters),
+            const employeeIdParam = selectedEmployeeId ? Number(selectedEmployeeId) : undefined;
+            const startParam = dateFrom ? dateFrom : undefined;
+            const endParam = dateTo ? dateTo : undefined;
+
+            const [statsRes, employeeStatsRes, historyRes] = await Promise.all([
+                LeaveStatsAPI.getAnalytics({
+                    employeeId: employeeIdParam,
+                    start: startParam,
+                    end: endParam
+                }),
+                LeaveStatsAPI.getAnalytics({
+                    employeeId: employeeIdParam,
+                    start: startParam,
+                    end: endParam
+                }),
                 LeaveAPI.getAll()
             ]);
             setStats(statsRes.data);
+            setEmployeeStats(employeeStatsRes.data);
             setHistory(historyRes.data || []);
         } catch (err) {
             console.error("Dashboard Sync Error", err);
@@ -88,14 +148,40 @@ const AdminLeaveDashboard = () => {
 
     const COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6'];
 
-    const pieData = useMemo(() => {
-        if (!stats?.distribution) return [];
-        return Object.entries(stats.distribution).map(([name, value]) => ({ name, value }));
-    }, [stats]);
-
     const velocityData = useMemo(() => {
-        return stats?.velocity || [];
-    }, [stats]);
+        return employeeStats?.velocity || [];
+    }, [employeeStats]);
+
+    const selectedEmployeeHistory = useMemo(() => {
+        if (!selectedEmployeeId) return history;
+        return history.filter((leave) => String(leave.employeeId || '') === selectedEmployeeId);
+    }, [history, selectedEmployeeId]);
+
+    const visibleHistory = useMemo(() => {
+        const from = dateFrom ? new Date(dateFrom) : null;
+        const to = dateTo ? new Date(dateTo) : null;
+
+        return selectedEmployeeHistory.filter((leave) => {
+            const start = new Date(leave.startDate);
+            const end = new Date(leave.endDate);
+            const matchesFrom = !from || end >= from;
+            const matchesTo = !to || start <= to;
+            return matchesFrom && matchesTo;
+        }).sort((a, b) => getSubmittedTimestamp(b) - getSubmittedTimestamp(a));
+    }, [selectedEmployeeHistory, dateFrom, dateTo]);
+
+    const pieData = useMemo(() => {
+        const approvedLeaves = visibleHistory.filter((leave) => leave?.status === 'Approved');
+        if (!approvedLeaves.length) return [];
+
+        const map = new Map();
+        approvedLeaves.forEach((leave) => {
+            const key = formatLeaveTypeLabel(leave.leaveType || 'Leave');
+            map.set(key, (map.get(key) || 0) + 1);
+        });
+
+        return Array.from(map.entries()).map(([name, value]) => ({ name, value }));
+    }, [visibleHistory]);
 
     return (
         <div className="premium-dashboard">
@@ -109,6 +195,66 @@ const AdminLeaveDashboard = () => {
                     font-family: 'Outfit', sans-serif;
                     color: #1e293b;
                     overflow-x: hidden;
+                }
+
+                .filters-shell {
+                    background: white;
+                    border: 1.5px solid #f1f5f9;
+                    border-radius: 24px;
+                    padding: 16px 18px;
+                    display: grid;
+                    grid-template-columns: 1.2fr 1fr 1fr auto;
+                    gap: 12px;
+                    align-items: end;
+                    margin-bottom: 18px;
+                    box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+                }
+
+                .filter-group {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 6px;
+                }
+
+                .filter-group label {
+                    font-size: 10px;
+                    font-weight: 900;
+                    color: #64748b;
+                    text-transform: uppercase;
+                    letter-spacing: 1.2px;
+                }
+
+                .filter-group select,
+                .filter-group input {
+                    height: 40px;
+                    border-radius: 12px;
+                    border: 1.5px solid #dbe4ef;
+                    background: #fff;
+                    padding: 0 12px;
+                    font-size: 12px;
+                    font-weight: 800;
+                    color: #1e293b;
+                    outline: none;
+                }
+
+                .filter-group select:focus,
+                .filter-group input:focus {
+                    border-color: #ea580c;
+                    box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.08);
+                }
+
+                .filters-clear-btn {
+                    height: 40px;
+                    border-radius: 12px;
+                    border: 1.5px solid #dbe4ef;
+                    background: white;
+                    padding: 0 14px;
+                    font-size: 11px;
+                    font-weight: 900;
+                    text-transform: uppercase;
+                    letter-spacing: 1px;
+                    cursor: pointer;
+                    color: #64748b;
                 }
 
                 .top-cards-row {
@@ -169,7 +315,7 @@ const AdminLeaveDashboard = () => {
                 .card-unit {
                     font-size: 12px;
                     font-weight: 700;
-                    color: #94a3b8;
+                    color: #64748b;
                 }
 
                 .card-percentage-pill {
@@ -231,7 +377,7 @@ const AdminLeaveDashboard = () => {
                 .cal-day-name {
                     font-size: 9px;
                     font-weight: 900;
-                    color: #cbd5e1;
+                    color: #64748b;
                     padding-bottom: 8px;
                 }
 
@@ -243,6 +389,7 @@ const AdminLeaveDashboard = () => {
                     align-items: center;
                     justify-content: center;
                     border-radius: 8px;
+                    position: relative;
                 }
 
                 .cal-muted { color: #e2e8f0; }
@@ -314,7 +461,7 @@ const AdminLeaveDashboard = () => {
                 .donut-tag {
                     font-size: 9px;
                     font-weight: 900;
-                    color: #94a3b8;
+                    color: #64748b;
                     text-transform: uppercase;
                     letter-spacing: 1px;
                 }
@@ -345,7 +492,7 @@ const AdminLeaveDashboard = () => {
                     padding: 16px 35px;
                     font-size: 10px;
                     font-weight: 900;
-                    color: #94a3b8;
+                    color: #64748b;
                     text-transform: uppercase;
                     letter-spacing: 1.5px;
                     background: #fcfcfc;
@@ -367,6 +514,36 @@ const AdminLeaveDashboard = () => {
                     text-transform: uppercase;
                 }
             `}</style>
+
+            <section className="filters-shell">
+                <div className="filter-group">
+                    <label>Employee</label>
+                    <select value={selectedEmployeeId} onChange={(e) => setSelectedEmployeeId(e.target.value)}>
+                        {employeeOptions.map((employee) => (
+                            <option key={employee.value} value={employee.value}>{employee.label}</option>
+                        ))}
+                    </select>
+                </div>
+                <div className="filter-group">
+                    <label>From Date</label>
+                    <input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} />
+                </div>
+                <div className="filter-group">
+                    <label>To Date</label>
+                    <input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} />
+                </div>
+                <button
+                    type="button"
+                    className="filters-clear-btn"
+                    onClick={() => {
+                        setSelectedEmployeeId('');
+                        setDateFrom('');
+                        setDateTo('');
+                    }}
+                >
+                    Clear
+                </button>
+            </section>
 
             <div className="top-cards-row">
                 <div className="metric-card-glass" style={{ background: '#f0fdf4', borderColor: '#dcfce7' }}>
@@ -430,7 +607,8 @@ const AdminLeaveDashboard = () => {
                 <div className="panel-glass">
                     <div className="panel-title-premium">Leave Activity</div>
                     <div style={{ height: '280px' }}>
-                        <ResponsiveContainer width="100%" height="100%">
+                        <div style={{ height: '220px', minWidth: 0 }}>
+                            <ResponsiveContainer width="100%" height="100%">
                             <AreaChart data={velocityData}>
                                 <defs>
                                     <linearGradient id="velocityGrad" x1="0" y1="0" x2="0" y2="1">
@@ -439,20 +617,21 @@ const AdminLeaveDashboard = () => {
                                     </linearGradient>
                                 </defs>
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                                <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 10, fontWeight: 900}} />
-                                <YAxis axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 10, fontWeight: 900}} />
+                                <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 10, fontWeight: 900}} />
+                                <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 10, fontWeight: 900}} />
                                 <RechartsTooltip 
                                     contentStyle={{ borderRadius: '20px', border: 'none', boxShadow: '0 10px 40px rgba(0,0,0,0.1)', fontFamily: 'Outfit', fontWeight: 900, fontSize: '13px' }}
                                 />
                                 <Area type="monotone" dataKey="count" stroke="#10b981" strokeWidth={4} fill="url(#velocityGrad)" />
                                 <Bar dataKey="count" fill="#f1f5f9" barSize={30} radius={[6, 6, 0, 0]} />
                             </AreaChart>
-                        </ResponsiveContainer>
+                            </ResponsiveContainer>
+                        </div>
                     </div>
                 </div>
 
                 <div className="panel-glass">
-                    <MiniCalendar />
+                            <MiniCalendar leaves={selectedEmployeeHistory} />
                     <div style={{ marginTop: '20px', fontSize: '12px', fontWeight: 900, color: '#1e293b' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
                             <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#cbd5e1' }}></div> Leave
@@ -466,7 +645,7 @@ const AdminLeaveDashboard = () => {
                 <div className="panel-glass">
                     <div className="panel-title-premium" style={{ marginBottom: '15px' }}>Live Presence</div>
                     <div className="presence-list">
-                        {stats?.onLeaveEmployees?.length > 0 ? stats.onLeaveEmployees.map((emp, i) => (
+                        {employeeStats?.onLeaveEmployees?.length > 0 ? employeeStats.onLeaveEmployees.map((emp, i) => (
                             <div key={i} className="presence-item">
                                 <img src={emp.photo || `https://i.pravatar.cc/150?u=${i}`} className="presence-avatar" alt="" />
                                 <div className="presence-info">
@@ -487,13 +666,15 @@ const AdminLeaveDashboard = () => {
                     <div className="panel-title-premium">By Category</div>
                     <div style={{ height: '220px' }}>
                         {pieData.length > 0 ? (
-                            <ResponsiveContainer width="100%" height="100%">
+                            <div style={{ height: '220px', minWidth: 0 }}>
+                                <ResponsiveContainer width="100%" height="100%">
                                 <PieChart>
                                     <Pie data={pieData} innerRadius={65} outerRadius={90} paddingAngle={5} dataKey="value" stroke="none">
                                         {pieData.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
                                     </Pie>
                                 </PieChart>
-                            </ResponsiveContainer>
+                                </ResponsiveContainer>
+                            </div>
                         ) : (
                             <div style={{ textAlign: 'center', padding: '60px 0', opacity: 0.1 }}>
                                 <PieIcon size={64} />
@@ -515,12 +696,12 @@ const AdminLeaveDashboard = () => {
                         </div>
                         <div>
                             <h4 style={{ margin: 0, fontSize: '16px', fontWeight: 900 }}>Leave History</h4>
-                            <p style={{ margin: 0, fontSize: '11px', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '1px' }}>All employee leave records</p>
+                            <p style={{ margin: 0, fontSize: '11px', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '1px' }}>All employee leave records</p>
                         </div>
                     </div>
                     <div style={{ display: 'flex', gap: '10px' }}>
                         <div style={{ position: 'relative' }}>
-                            <Search size={14} style={{ position: 'absolute', left: '12px', top: '12px', color: '#cbd5e1' }} />
+                            <Search size={14} style={{ position: 'absolute', left: '12px', top: '12px', color: '#64748b' }} />
                             <input type="text" placeholder="Search Request..." style={{ padding: '10px 15px 10px 35px', borderRadius: '12px', border: '1.5px solid #f1f5f9', outline: 'none', fontSize: '11px', fontWeight: 800 }} />
                         </div>
                         <button style={{ padding: '10px 20px', background: '#1e293b', color: 'white', border: 'none', borderRadius: '12px', fontSize: '10px', fontWeight: 900, textTransform: 'uppercase', cursor: 'pointer' }}>Generate Report</button>
@@ -533,7 +714,6 @@ const AdminLeaveDashboard = () => {
                                 <th>Employee</th>
                                 <th>Type</th>
                                 <th>LOP</th>
-                                <th>Balance</th>
                                 <th>Dates</th>
                                 <th>Days</th>
                                 <th>Status</th>
@@ -541,25 +721,22 @@ const AdminLeaveDashboard = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {history.length > 0 ? history.map((lr) => (
+                            {visibleHistory.length > 0 ? visibleHistory.map((lr) => (
                                 <tr key={lr.id}>
                                     <td>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                             <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 900 }}>{lr.employeeName?.[0]}</div>
                                             <div>
                                                 <div style={{ fontSize: '12px', fontWeight: 900 }}>{lr.employeeName}</div>
-                                                <div style={{ fontSize: '10px', color: '#94a3b8' }}>ID: EMP-{String(lr.employeeId).slice(-4)}</div>
+                                                <div style={{ fontSize: '10px', color: '#64748b' }}>ID: EMP-{String(lr.employeeId).slice(-4)}</div>
                                             </div>
                                         </div>
                                     </td>
                                     <td>
-                                        <span style={{ color: lr.leaveTypeColor || '#3b82f6', fontWeight: 900 }}>{lr.leaveType}</span>
+                                        <span style={{ color: lr.leaveTypeColor || '#3b82f6', fontWeight: 900 }}>{formatLeaveTypeLabel(lr.leaveType)}</span>
                                     </td>
                                     <td>
                                         <span style={{ fontWeight: 800, color: lr.lopCount > 0 ? '#ef4444' : '#64748b' }}>{lr.lopCount || 0}</span>
-                                    </td>
-                                    <td>
-                                        <span style={{ fontWeight: 800, color: '#1e293b' }}>{lr.leaveBalance || 0}</span>
                                     </td>
                                     <td>
                                         <div style={{ fontSize: '11px', fontWeight: 800 }}>{lr.startDate} → {lr.endDate}</div>
@@ -572,16 +749,21 @@ const AdminLeaveDashboard = () => {
                                         }}>
                                             {lr.status}
                                         </span>
+                                        {['Approved', 'Rejected'].includes(String(lr.status || '')) && (lr.updatedAt || lr.approvedAt || lr.rejectedAt) && (
+                                            <div style={{ fontSize: '9px', fontWeight: 900, color: '#94a3b8', marginTop: '4px', textTransform: 'uppercase' }}>
+                                                {new Date(lr.updatedAt || lr.approvedAt || lr.rejectedAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}
+                                            </div>
+                                        )}
                                     </td>
                                     <td>
-                                        <button style={{ background: 'none', border: 'none', color: '#cbd5e1', cursor: 'pointer' }}><MoreHorizontal size={18}/></button>
+                                        <button style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer' }}><MoreHorizontal size={18}/></button>
                                     </td>
                                 </tr>
                             )) : (
                                 <tr>
-                                    <td colSpan="8" style={{ padding: '80px 0', textAlign: 'center' }}>
+                                    <td colSpan="7" style={{ padding: '80px 0', textAlign: 'center' }}>
                                         <ShieldCheck size={64} style={{ color: '#f1f5f9', marginBottom: '15px' }} />
-                                        <div style={{ fontSize: '11px', fontWeight: 900, color: '#cbd5e1', textTransform: 'uppercase', letterSpacing: '4px' }}>No records found</div>
+                                        <div style={{ fontSize: '11px', fontWeight: 900, color: '#64748b', textTransform: 'uppercase', letterSpacing: '4px' }}>No records found</div>
                                     </td>
                                 </tr>
                             )}

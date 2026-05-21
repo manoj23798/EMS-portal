@@ -1,0 +1,361 @@
+Employee Joining Check List
+Employee Name   Date of Joining
+Resume
+
+ID Proof (Yes/NO)
+
+Voter Id
+Aadhar Card
+Pan Card
+Photo
+Passport
+
+Education Proof
+
+10th Mark sheet
+12th Mark Sheet
+Diploma Prov
+Conv
+UG Prov
+Conv
+PG Prov
+Conv
+
+TC
+
+Agreement to be signed
+
+NDA Form
+NCA Form
+Onsite Agreement
+Employee Emergency form
+Appointment Letter issued
+Bank Account
+Uniform Size Pant  
+Shirt  
+Employee Proof to be collected
+
+Previous Company Offer Letter
+Experience Certificate
+Relieving Letter
+Pay Slip (3 months)
+Bank Statement
+
+Induction
+
+Induction Orientation Date
+Induction Orientation Conducted
+By  
+Background Verification
+Initiate Date  
+Initiate By  
+Receiving Date  
+Mode of verification Mail Positive Negative
+Oral Positive Negative
+Mail &amp; System Details
+
+Employee Joining Check List
+
+Request for Official Mail id and
+user id-initiated date Initiated By
+Official mail id created date Created By&amp;
+Date
+
+Mail id :elintsys/Integro
+VPN request date
+
+Created by &amp;
+Date, VPN
+Details
+Filled By Filled Date
+
+
+
+
+
+
+Employee Relieving Check List
+
+Employee Details
+
+Employee ID Employee Name Designation Department
+ ETIPL-207  Vignesh HR -executive  HR 
+
+Nature of Separation
+
+Resignation Termination/Relieved by Elintsys Abscond
+Resignation Letter Reason for Termination/Relieving Show Cause Notice Sent
+Yes No Did not report to office since 13/5/2023 Yes No
+Resignation Letter Submitted
+
+Date Termination/Relieving Letter Sent Show Cause Notice Sent
+Date
+  Yes No  
+
+Resignation Acceptance
+Email/Date Termination/Relieving Date Response from Employee
+  9/6/2023  Yes No
+
+NOC Details
+
+NOC from Project Manager
+of Knowledge transfer Name of the Project Manager Date of NOC
+Yes No Sumitha 9/6/2023 
+
+Exit Formalities
+
+Exit Interview Process Employee Surrender office property&#39;s
+
+Property
+Surrender
+To
+
+Surrender
+Date
+
+Yes No ID Card Key laptop Gate Entry Pass Property at
+
+office only NA 
+Mail Blocked Mail Blocked Date Mail Blocked By
+Yes No   Raman
+
+Exit Documents to Employee
+
+Relieving
+Letter &amp;
+Date
+
+Service
+Letter &amp; date Pay Slip Appraisal Letter PF Exit&amp;
+Date
+
+Final
+Settlement
+Yes No Yes NA Yes No NA NA NA NA Yes No
+
+
+
+
+
+
+
+Induction feedback form
+Employee name Designation
+Employee Id Department
+
+Pre-Employment Comment
+1. How were you recruited to Elintsys?
+2. How satisfied were you with the
+number of interviews/rounds
+conducted by Elintsys?
+3. How satisfied were you with the
+organization and scheduling of your
+interviews?
+4. How satisfied were you with the
+length of time it took from the time
+you applied to the time you were
+hired?
+5. Overall, how satisfied were you with
+Elintsys interview process?
+
+New employee Induction Comment
+6. How satisfied were you with your
+first day of induction?
+7. How satisfied were you with the
+welcome you received from your HR
+team?
+8. Did you undergo joining
+procedure/formalities before
+induction?
+9. Were you informed about company
+history during induction?
+
+10.Were you inducted on Vision,
+mission, code of conduct of Elintsys?
+11. Were you inducted on organization
+structure &amp; business overview?
+12.Were your job description &amp;
+responsibilities informed?
+13.Inducted on HR policies &amp;
+procedures of Elintsys?
+14. Were you inducted on process
+flow/SDLC of Elintsys?
+15.Were you inducted on office
+etiquettes?
+16.Were you informed on reporting
+procedure?
+17.How satisfied on Inter department
+induction?
+18.How satisfied are you with
+infrastructure/system allocation
+/stationery /phone provide to you to
+complete job.
+
+Training Comments
+
+19.How satisfied were you with your
+manager&#39;s ability to lead and provide
+direction to you?
+20. When you were hired, what percentage
+of your skills matched those required to
+perform your job?
+21. How satisfied were you with the
+Technical training?
+22. How satisfied were you with the
+flexibility and ease of completing the
+technical training?
+
+23. How satisfied were you with the
+assistance provided by your manager to
+complete your training?
+24. How satisfied were you with the
+availability of your mentor or co-worker to
+assist you in completing your training?
+25. How satisfied were you with the length
+of time given to complete training during
+
+
+
+
+Candidate Information Form
+
+Candidate Name:   Date  
+DOB       Gender M F Marital
+Status  
+
+Candidate Photo
+
+Email Id  
+Contact
+No   Alternate No  
+Current
+CTC   Notice
+
+Period MM Total Yrs Of
+
+Experience MM YY
+
+Address for
+Communication  
+Did you apply at Elintsys earlier? YES / NO. If yes, share details:
+Do you have any relative working in Elintsys? If yes, Name:
+Dept   Division   Location   Relationship  
+
+How did you know about this Open Position:
+
+Internal
+Employee
+Ref
+
+Job Portal Paper Ad Consultants Job Fair Friends Walk –in Others
+
+Work History
+
+Name Of the
+Employer Designation From To Salary Reason For
+Leaving
+           
+           
+           
+
+Academic Performance
+
+Course SSLC/10th +2/Inter./Dip Under Graduation Post-Graduation
+Academic %        
+Specialization        
+Institute Name        
+University        
+Yr. of Completion        
+
+Job Details
+
+Job
+Applied
+For
+
+Mode of
+Interview Interviewer Date Interviewer By
+
+Status
+
+As Candidate Joined Remarks
+
+Pass Fail
+
+ 
+
+Online
+Test/Oral        
+
+Yes No  
+
+Machine Test        
+HR Round        
+Bank
+Details
+
+A/C Holder
+Name
+
+Bank
+name A/C Number Branch IFSC code PF Number
+
+
+
+
+
+
+Employee Background Verification Form
+
+Details Employee Details As per your records
+Applicant Name    Please Specify
+Employee Code/ID   Please Specify
+Designation   Please Specify
+Date of Joining   Please Specify
+Date of Relieving (Last
+Working Day)   Please Specify
+Remunerations, Please
+Specify   Please Specify
+Reported to (Supervisor)   Please Specify
+Reason for Leaving   Please Specify
+Candidate eligible to Rehire?
+(Please Specify Yes/No) Please Specify
+If No, please specify the
+reason? 
+
+As per Company policy Please Specify
+Any Other Reason (Please Specify)  Please Specify
+
+Exit Formalities Status
+
+Please Specify
+
+(Please Specify Pending or
+Completed)
+If Pending, please specify
+status?
+
+Pending with Employer Please Specify
+Pending with Employee (Please Specify the
+dues)  Please Specify
+
+Are the Attached Documents
+
+Please Specify
+
+Genuine? (If No, please
+specify the reason – for e.g. is
+the document forged,
+manipulated or any other
+reason)
+Any issues reported during the
+tenure towards work ethics,
+credibility or reputation?
+
+Please Specify
+Additional Remarks, if any Please Specify
+
+Respondent Details
+
+Name &amp; Designation Please Specify
+Contact Details Please Specify

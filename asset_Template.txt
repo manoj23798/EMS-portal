@@ -1,0 +1,51 @@
+server:
+PC NAME	User Name	Department	IP ADDRESS	MAKE	MODEL	CPU	RAM	HDD and Type	OS	Remarks
+
+
+IT aaset :
+SL NO	ASSET CLASS	PRODUCT NAME	ASSET CODE	USER	DEPARTMENT	RESPONSIBILITY	MAKE	MODEL	DESCRIPTION	STATUS	LAST MAINTENANCE	ADDITIONAL SUPPORT 	Remarks
+
+Fixturres : 
+SL NO	ASSET CLASS	PRODUCT NAME	ASSET CODE	USER	DEPARTMENT	RESPONSIBILITY	MAKE	MODEL	DESCRIPTION	STATUS
+
+
+stock maintenence :
+
+Ram				
+S.No	Type of Ram & MB	NAME	Qty	
+
+HDD				
+S.No	Type of HDD	Capacity	QTY	
+
+Drive				
+S.No	Materials	NAME	Qty	
+
+Wifi Adapter				
+S.No	Meterials	Name	Qty	
+
+Mobiles				
+S.No	Meterials	Name	Qty	
+
+GPS Tracker				
+S.No	Materials	Name	Qty	
+
+Devices				
+S.No	Meterials	Name	Qty	
+
+Network Switch & Router				
+S.No	Meterials	Name	Qty	
+
+Tools				
+S.No	Materials	Name	NAME	
+
+Other Equipments				
+S.No	Materials	Name	Qty	
+
+
+
+NOC Team Asset	:
+
+Safety Equipements 				
+S.No	Particulers 	Brand	Qty	
+
+SNO	Name	using 	Stock 	

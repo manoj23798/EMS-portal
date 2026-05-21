@@ -13,6 +13,11 @@ export default defineConfig({
         target: 'http://localhost:8087',
         changeOrigin: true,
         secure: false
+      },
+      '/uploads': {
+        target: 'http://localhost:8087',
+        changeOrigin: true,
+        secure: false
       }
     }
   }

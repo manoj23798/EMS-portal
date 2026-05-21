@@ -13,6 +13,9 @@ export const handbookService = {
     archivePolicy: (id) => {
         return api.delete(`/admin/handbook/policy/${id}`);
     },
+    uploadPolicyDocument: (id, formData) => {
+        return api.post(`/admin/handbook/policy/${id}/document`, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+    },
 
     createCategory: (data) => {
         return api.post('/admin/handbook/category', data);

@@ -56,7 +56,7 @@ export default function EmployeeEditPage() {
                 aadhaar: data.aadhaar || '',
                 pan: data.pan || '',
                 username: data.username || '',
-                role: data.role || ''
+                role: data.role || 'Employee'
                 // We typically don't pre-fill password for editing
             });
         } catch (err) {
@@ -82,9 +82,32 @@ export default function EmployeeEditPage() {
         e.preventDefault();
         setSaving(true);
         try {
-            const payload = { ...formData };
+            const normalizedAadhaar = (formData.aadhaar || '').replace(/\D/g, '');
+            const normalizedPan = (formData.pan || '').replace(/\s+/g, '').toUpperCase();
+            const payload = {
+                ...formData,
+                firstName: formData.firstName?.trim() || employeeData?.firstName || '',
+                lastName: formData.lastName?.trim() || employeeData?.lastName || '',
+                email: formData.email?.trim() || employeeData?.email || '',
+                phoneNumber: formData.phoneNumber?.trim() || null,
+                dateOfBirth: formData.dateOfBirth || null,
+                joiningDate: formData.joiningDate || employeeData?.joiningDate || null,
+                employmentType: formData.employmentType || employeeData?.employmentType || 'Full-Time',
+                address: formData.address?.trim() || null,
+                emergencyContactName: formData.emergencyContactName?.trim() || null,
+                emergencyContactPhone: formData.emergencyContactPhone?.trim() || null,
+                workLocation: formData.workLocation?.trim() || null,
+                aadhaar: normalizedAadhaar || null,
+                pan: normalizedPan || null,
+                username: formData.username?.trim() || null,
+                role: formData.role?.trim() || 'Employee',
+                departmentId: formData.departmentId ? Number(formData.departmentId) : null,
+                designationId: formData.designationId ? Number(formData.designationId) : null
+            };
+
             if (!payload.departmentId) delete payload.departmentId;
             if (!payload.designationId) delete payload.designationId;
+            if (!payload.password) delete payload.password;
 
             await EmployeeAPI.update(id, payload);
             if (photoFile) {
@@ -93,7 +116,15 @@ export default function EmployeeEditPage() {
             navigate(`/employees/${id}`);
         } catch (err) {
             console.error(err);
-            alert('Error updating employee. Check the console for details.');
+            const responseData = err?.response?.data;
+            const validationMessage = responseData && typeof responseData === 'object' && !Array.isArray(responseData)
+                ? Object.entries(responseData).map(([field, msg]) => `${field}: ${msg}`).join('\n')
+                : null;
+            const message = err?.response?.data?.message
+                || (typeof responseData === 'string' ? responseData : null)
+                || validationMessage
+                || 'Error updating employee. Please check entered values.';
+            alert(message);
         } finally {
             setSaving(false);
         }
@@ -238,11 +269,11 @@ export default function EmployeeEditPage() {
                             <label className="form-label">Role *</label>
                             <select name="role" className="form-select" required onChange={handleChange} value={formData.role}>
                                 <option value="">Select Role</option>
-                                <option value="Employee">Employee</option>
+                                <option value="EMPLOYEE">Employee</option>
                                 <option value="HR">HR</option>
-                                <option value="Admin">Admin</option>
-                                <option value="PM">Project Manager</option>
-                                <option value="IT Manager">IT Manager</option>
+                                <option value="ADMIN">Admin</option>
+                                <option value="PROJECT_MANAGER">Project Manager</option>
+                                <option value="IT_MANAGER">IT Manager</option>
                             </select>
                         </div>
                         <div className="form-group">

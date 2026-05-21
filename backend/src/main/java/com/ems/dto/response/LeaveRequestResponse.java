@@ -12,6 +12,7 @@ public class LeaveRequestResponse {
     private Long id;
     private Long employeeId;
     private String employeeName;
+    private LocalDate joiningDate;
     private String leaveType;
     private String leaveTypeColor;
     private boolean isLop;
@@ -25,7 +26,9 @@ public class LeaveRequestResponse {
     private String designation;
     private String department;
     private String remarks;
+    private String cancelReason;
     private Double lopCount;
     private Double leaveBalance;
+    private String profilePhotoUrl;
     private LocalDateTime createdAt;
 }

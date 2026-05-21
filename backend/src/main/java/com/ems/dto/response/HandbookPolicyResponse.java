@@ -18,7 +18,10 @@ public class HandbookPolicyResponse {
     private String createdByName;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    
+
     // History of previous versions
     private List<HandbookVersionResponse> versionHistory;
+    // optional status after upload conversion: "converted", "not_converted", or
+    // error message
+    private String conversionStatus;
 }

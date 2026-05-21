@@ -193,7 +193,7 @@ const LeaveCalendarView = () => {
                     font-size: 10px !important;
                     font-weight: 800 !important;
                     text-transform: uppercase !important;
-                    color: #94a3b8 !important;
+                    color: #64748b !important;
                     letter-spacing: 1.5px !important;
                 }
 

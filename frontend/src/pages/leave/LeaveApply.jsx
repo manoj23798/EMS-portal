@@ -26,6 +26,15 @@ export default function LeaveApply() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    const [dateWarning, setDateWarning] = useState('');
+
+    const normalizeTypeName = (name) => (name || '').trim().toLowerCase();
+    const formatLeaveTypeLabel = (name) => (normalizeTypeName(name) === 'urgent leave' ? 'Unplanned Leave' : name);
+    const isPlannedType = (name) => normalizeTypeName(name) === 'planned leave';
+    const isUnplannedType = (name) => {
+        const normalized = normalizeTypeName(name);
+        return normalized === 'unplanned leave' || normalized === 'urgent leave';
+    };
 
     useEffect(() => {
         if (EMPLOYEE_ID) {
@@ -40,14 +49,43 @@ export default function LeaveApply() {
                 import('../../services/api').then(m => m.LeaveConfigAPI.getTypes())
             ]);
             setBalances(Array.isArray(balanceRes.data) ? balanceRes.data : []);
-            setLeaveTypes(typesRes.data || []);
+            const allowedTypes = (typesRes.data || []).filter(t => isPlannedType(t.name) || isUnplannedType(t.name));
+            setLeaveTypes(allowedTypes);
         } catch (err) {
             console.error("Initialization failure", err);
         }
     };
 
     const handleChange = (e) => {
-        setForm({ ...form, [e.target.name]: e.target.value });
+        const { name, value } = e.target;
+        setForm({ ...form, [name]: value });
+
+        // Real-time validation for date warning
+        if (name === 'startDate' || name === 'leaveTypeId') {
+            validateDateWarning({ ...form, [name]: value });
+        }
+    };
+
+    const validateDateWarning = (formData) => {
+        const selectedType = leaveTypes.find(t => t.id === parseInt(formData.leaveTypeId, 10));
+        
+        if (isPlannedType(selectedType?.name) && formData.startDate) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const start = new Date(formData.startDate);
+            start.setHours(0, 0, 0, 0);
+            const leadDays = Math.floor((start - today) / (1000 * 60 * 60 * 24));
+
+            if (leadDays >= 0 && leadDays < 5) {
+                setDateWarning(`⚠ Planned Leave requires 5 days advance notice. You have only ${leadDays} day${leadDays !== 1 ? 's' : ''} remaining.`);
+            } else if (leadDays < 0) {
+                setDateWarning('⚠ Cannot select a date in the past.');
+            } else {
+                setDateWarning('');
+            }
+        } else {
+            setDateWarning('');
+        }
     };
 
     const handleSubmit = async (e) => {
@@ -64,6 +102,23 @@ export default function LeaveApply() {
             return;
         }
 
+        const selectedType = leaveTypes.find(t => t.id === parseInt(form.leaveTypeId, 10));
+        if (!selectedType) {
+            setError('Please select a valid leave type.');
+            return;
+        }
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const start = new Date(form.startDate);
+        start.setHours(0, 0, 0, 0);
+
+
+        if (!isPlannedType(selectedType.name) && !isUnplannedType(selectedType.name)) {
+            setError('Only Planned Leave and Unplanned Leave are available.');
+            return;
+        }
+
         try {
             setLoading(true);
             await LeaveAPI.apply(form);
@@ -76,8 +131,10 @@ export default function LeaveApply() {
         }
     };
 
-    const selectedType = leaveTypes.find(t => t.id === parseInt(form.leaveTypeId));
-    const selectedBalance = selectedType ? balances.find(b => b.leaveType === selectedType.name) : null;
+    const selectedType = leaveTypes.find(t => t.id === parseInt(form.leaveTypeId, 10));
+    const selectedBalance = selectedType
+        ? balances.find((b) => b.leaveType === selectedType.name) || balances[0] || null
+        : balances[0] || null;
 
     return (
         <div className="leave-apply-container">
@@ -86,9 +143,9 @@ export default function LeaveApply() {
 
                 .leave-apply-container {
                     display: grid;
-                    grid-template-columns: 1fr 380px;
-                    gap: 32px;
-                    padding: 40px;
+                    grid-template-columns: 1fr 320px;
+                    gap: 24px;
+                    padding: 24px;
                     background: #f8fafc;
                     min-height: 100vh;
                     font-family: 'Outfit', sans-serif;
@@ -97,9 +154,9 @@ export default function LeaveApply() {
 
                 .main-form-card {
                     background: white;
-                    border-radius: 40px;
+                    border-radius: 24px;
                     border: 1.5px solid #e2e8f0;
-                    padding: 45px;
+                    padding: 28px;
                     box-shadow: 0 25px 60px rgba(0,0,0,0.03);
                     height: fit-content;
                 }
@@ -107,19 +164,19 @@ export default function LeaveApply() {
                 .header-flex {
                     display: flex;
                     align-items: center;
-                    gap: 25px;
-                    margin-bottom: 45px;
+                    gap: 16px;
+                    margin-bottom: 24px;
                 }
 
                 .btn-icon-nav {
-                    width: 52px;
-                    height: 52px;
+                    width: 40px;
+                    height: 40px;
                     display: flex;
                     align-items: center;
                     justify-content: center;
                     background: white;
                     border: 1.5px solid #e2e8f0;
-                    border-radius: 16px;
+                    border-radius: 12px;
                     color: #ea580c;
                     cursor: pointer;
                     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -132,26 +189,26 @@ export default function LeaveApply() {
                 }
 
                 .title-stack h1 {
-                    font-size: 32px;
+                    font-size: 24px;
                     font-weight: 900;
                     margin: 0;
-                    letter-spacing: -1px;
+                    letter-spacing: -0.5px;
                     color: #0f172a;
                 }
 
                 .subtitle-stack {
-                    font-size: 11px;
+                    font-size: 10px;
                     font-weight: 800;
-                    color: #94a3b8;
+                    color: #64748b;
                     text-transform: uppercase;
-                    letter-spacing: 5px;
+                    letter-spacing: 3px;
                     margin-top: 4px;
                 }
 
                 .form-grid-layout {
                     display: grid;
                     grid-template-columns: 1fr 1fr;
-                    gap: 35px;
+                    gap: 20px;
                 }
 
                 .input-block-premium {
@@ -159,23 +216,23 @@ export default function LeaveApply() {
                 }
 
                 .label-premium-ui {
-                    font-size: 11px;
+                    font-size: 10px;
                     font-weight: 900;
-                    color: #94a3b8;
+                    color: #64748b;
                     text-transform: uppercase;
-                    letter-spacing: 1.5px;
-                    margin-bottom: 12px;
+                    letter-spacing: 1px;
+                    margin-bottom: 8px;
                     display: block;
                 }
 
                 .input-premium-ui {
                     width: 100%;
-                    padding: 18px 24px;
-                    border-radius: 20px;
+                    padding: 12px 16px;
+                    border-radius: 14px;
                     border: 2px solid #f1f5f9;
                     background: #f8fafc;
                     font-family: inherit;
-                    font-size: 14px;
+                    font-size: 13px;
                     font-weight: 800;
                     color: #1e293b;
                     outline: none;
@@ -191,27 +248,27 @@ export default function LeaveApply() {
 
                 .textarea-premium-ui {
                     resize: none;
-                    height: 140px;
+                    height: 110px;
                 }
 
                 .btn-submit-premium {
                     background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
                     color: white;
-                    padding: 20px 40px;
-                    border-radius: 22px;
+                    padding: 14px 20px;
+                    border-radius: 16px;
                     font-weight: 900;
-                    font-size: 13px;
+                    font-size: 12px;
                     text-transform: uppercase;
-                    letter-spacing: 2px;
+                    letter-spacing: 1.2px;
                     border: none;
                     cursor: pointer;
                     transition: all 0.3s ease;
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    gap: 15px;
+                    gap: 10px;
                     width: 100%;
-                    margin-top: 40px;
+                    margin-top: 24px;
                     box-shadow: 0 15px 35px rgba(234, 88, 12, 0.25);
                 }
 
@@ -230,41 +287,41 @@ export default function LeaveApply() {
                 .sidebar-stack {
                     display: flex;
                     flex-direction: column;
-                    gap: 30px;
+                    gap: 18px;
                 }
 
                 .info-premium-card {
                     background: white;
-                    border-radius: 35px;
+                    border-radius: 24px;
                     border: 1.5px solid #e2e8f0;
-                    padding: 35px;
+                    padding: 24px;
                     box-shadow: 0 15px 40px rgba(0,0,0,0.02);
                 }
 
                 .balance-display-box {
                     border-left: 5px solid #ea580c;
-                    padding-left: 24px;
-                    margin: 30px 0;
+                    padding-left: 16px;
+                    margin: 18px 0;
                 }
 
                 .balance-label {
-                    font-size: 11px;
+                    font-size: 10px;
                     font-weight: 900;
-                    color: #94a3b8;
+                    color: #64748b;
                     text-transform: uppercase;
-                    letter-spacing: 2px;
+                    letter-spacing: 1.5px;
                 }
 
                 .balance-value-big {
-                    font-size: 48px;
+                    font-size: 36px;
                     font-weight: 900;
                     color: #0f172a;
-                    letter-spacing: -2px;
+                    letter-spacing: -1px;
                 }
 
                 .balance-unit {
-                    font-size: 14px;
-                    color: #94a3b8;
+                    font-size: 12px;
+                    color: #64748b;
                     margin-left: 8px;
                 }
 
@@ -291,8 +348,8 @@ export default function LeaveApply() {
                 .guideline-item {
                     display: flex;
                     gap: 12px;
-                    margin-bottom: 15px;
-                    font-size: 12px;
+                    margin-bottom: 12px;
+                    font-size: 11px;
                     font-weight: 800;
                     color: #64748b;
                     line-height: 1.5;
@@ -302,16 +359,17 @@ export default function LeaveApply() {
                     display: flex;
                     align-items: center;
                     gap: 15px;
-                    padding: 20px 25px;
-                    border-radius: 20px;
-                    font-size: 13px;
+                    padding: 14px 16px;
+                    border-radius: 14px;
+                    font-size: 12px;
                     font-weight: 800;
-                    margin-bottom: 35px;
+                    margin-bottom: 20px;
                     border: 1.5px solid;
                 }
 
                 .alert-success { background: #f0fdf4; color: #166534; border-color: #dcfce3; }
                 .alert-error { background: #fef2f2; color: #991b1b; border-color: #fee2e2; }
+                .alert-warning { background: #fffbeb; color: #92400e; border-color: #fef3c7; }
 
                 @keyframes spin {
                     to { transform: rotate(360deg); }
@@ -326,7 +384,6 @@ export default function LeaveApply() {
                     </button>
                     <div className="title-stack">
                         <h1>APPLY FOR LEAVE</h1>
-                        <div className="subtitle-stack">Leave Request</div>
                     </div>
                 </header>
 
@@ -339,12 +396,18 @@ export default function LeaveApply() {
                             <label className="label-premium-ui">Leave Type *</label>
                             <select name="leaveTypeId" className="input-premium-ui" value={form.leaveTypeId} onChange={handleChange}>
                                 <option value="">Select leave type...</option>
-                                {leaveTypes.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+                                {leaveTypes.map(t => <option key={t.id} value={t.id}>{formatLeaveTypeLabel(t.name)}</option>)}
                             </select>
                         </div>
 
                         <div className="input-block-premium">
                             <label className="label-premium-ui">Start Date *</label>
+                            {dateWarning && (
+                                <div className="alert-ui-premium alert-warning" style={{ marginBottom: '12px' }}>
+                                    <AlertCircle size={20} style={{ flexShrink: 0 }} />
+                                    {dateWarning}
+                                </div>
+                            )}
                             <input type="date" name="startDate" className="input-premium-ui" value={form.startDate} onChange={handleChange} />
                         </div>
 
@@ -393,60 +456,30 @@ export default function LeaveApply() {
                                 </div>
                             </div>
                             
-                             <div style={{ background: '#f8fafc', borderRadius: '25px', padding: '25px', border: '1.5px solid #f1f5f9' }}>
-                                <div className="entitlement-row-ui">
-                                    <span className="entitlement-label-ui">Total Days</span>
-                                    <span className="entitlement-val-ui">{selectedBalance?.totalLeaves || 0}</span>
-                                </div>
-                                <div className="entitlement-row-ui">
-                                    <span className="entitlement-label-ui">Days Used</span>
-                                    <span className="entitlement-val-ui">{selectedBalance?.usedLeaves || 0}</span>
-                                </div>
-                                
-                                <div style={{ marginTop: '20px', paddingTop: '20px', borderTop: '1.5px dashed #cbd5e1' }}>
-                                    <h4 style={{ margin: '0 0 15px 0', fontSize: '10px', fontWeight: 950, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '1.5px' }}>Rules</h4>
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                            <span style={{ fontSize: '11px', fontWeight: 800, color: '#64748b' }}>Needs Approval:</span>
-                                            <span style={{ fontSize: '11px', fontWeight: 900, color: selectedType?.requireApproval ? '#2563eb' : '#94a3b8' }}>{selectedType?.requireApproval ? 'YES' : 'NO'}</span>
-                                        </div>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                            <span style={{ fontSize: '11px', fontWeight: 800, color: '#64748b' }}>Needs Attachment:</span>
-                                            <span style={{ fontSize: '11px', fontWeight: 900, color: selectedType?.requireAttachment ? '#ea580c' : '#94a3b8' }}>{selectedType?.requireAttachment ? 'YES' : 'NO'}</span>
-                                        </div>
-                                        {selectedType?.applicableAfterMonths > 0 && (
-                                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                                <span style={{ fontSize: '11px', fontWeight: 800, color: '#64748b' }}>Available After:</span>
-                                                <span style={{ fontSize: '11px', fontWeight: 900, color: '#1e293b' }}>{selectedType?.applicableAfterMonths} MO.</span>
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
                         </div>
                     ) : (
-                        <div style={{ textAlign: 'center', padding: '60px 0', color: '#cbd5e1' }}>
-                            <HelpCircle size={60} style={{ opacity: 0.2, marginBottom: '20px' }} />
-                            <p style={{ margin: 0, fontSize: '11px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '2px' }}>Select leave type to see details</p>
+                        <div style={{ textAlign: 'center', padding: '28px 0', color: '#64748b' }}>
+                            <HelpCircle size={42} style={{ opacity: 0.2, marginBottom: '12px' }} />
+                            <p style={{ margin: 0, fontSize: '10px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '1.5px' }}>Select leave type to see details</p>
                         </div>
                     )}
                 </section>
 
-                <section className="info-premium-card" style={{ background: '#f8fafc', borderStyle: 'dashed', borderColor: '#cbd5e1' }}>
+                <section className="info-premium-card" style={{ background: '#f8fafc', borderStyle: 'dashed', borderColor: '#94a3b8' }}>
                     <h3 style={{ margin: '0 0 20px 0', fontSize: '12px', fontWeight: 900, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '2px', display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <Briefcase size={18} style={{ color: '#ea580c' }} /> REMINDERS
                     </h3>
                     <div className="guideline-item">
                         <CheckCircle size={16} style={{ color: '#ea580c', flexShrink: 0 }} />
-                        <span>Please apply at least 48 hours in advance.</span>
+                        <span>Planned Leave must be requested at least 5 days before the start date.</span>
                     </div>
                     <div className="guideline-item">
                         <CheckCircle size={16} style={{ color: '#ea580c', flexShrink: 0 }} />
-                        <span>Please attach documents (like medical notes) for Sick Leave.</span>
+                        <span>Unplanned Leave can be requested on the same day or any day.</span>
                     </div>
                     <div className="guideline-item">
                         <CheckCircle size={16} style={{ color: '#ea580c', flexShrink: 0 }} />
-                        <span>Requests are usually approved within 24 hours.</span>
+                        <span>Only Planned Leave and Unplanned Leave are available.</span>
                     </div>
                 </section>
             </aside>

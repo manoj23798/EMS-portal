@@ -1,6 +1,51 @@
 import React, { useState, useEffect } from 'react';
 import { AdminAttendanceAPI, EmployeeAPI } from '../services/api';
-import { Download } from 'lucide-react';
+import { Download, CalendarDays } from 'lucide-react';
+
+const SHIFT_START_HOUR = 9;
+const SHIFT_START_MINUTE = 0;
+const SHIFT_START_MINUTES = SHIFT_START_HOUR * 60 + SHIFT_START_MINUTE;
+
+// Custom Tooltip Component
+function Tooltip({ text, children, position = 'top' }) {
+    const [visible, setVisible] = useState(false);
+
+    return (
+        <div
+            style={{ position: 'relative', display: 'inline-block', width: '100%', height: '100%' }}
+            onMouseEnter={() => setVisible(true)}
+            onMouseLeave={() => setVisible(false)}
+        >
+            {children}
+            {visible && text && (
+                <div
+                    style={{
+                        position: 'absolute',
+                        bottom: position === 'top' ? '100%' : 'auto',
+                        top: position === 'bottom' ? '100%' : 'auto',
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        background: 'white',
+                        color: 'black',
+                        padding: '8px 12px',
+                        borderRadius: '6px',
+                        fontSize: '0.85rem',
+                        fontWeight: 500,
+                        whiteSpace: 'nowrap',
+                        zIndex: 1000,
+                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                        border: '1px solid #ddd',
+                        marginBottom: position === 'top' ? '4px' : '-4px',
+                        marginTop: position === 'bottom' ? '4px' : '-4px',
+                        pointerEvents: 'none'
+                    }}
+                >
+                    {text}
+                </div>
+            )}
+        </div>
+    );
+}
 
 export default function MonthlyAttendanceGrid() {
     const today = new Date();
@@ -15,24 +60,29 @@ export default function MonthlyAttendanceGrid() {
         fetchData();
     }, [selectedMonth]);
 
+    const formatLocalDate = (date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+
     const fetchData = async () => {
         try {
             setLoading(true);
-
-            // Calculate start and end dates based on selectedMonth (YYYY-MM)
             const [year, month] = selectedMonth.split('-');
             const startDate = `${year}-${month}-01`;
-            const endDate = new Date(year, month, 0).toISOString().split('T')[0]; // last day of month
+            const endDate = formatLocalDate(new Date(Number(year), Number(month), 0));
 
             const [empRes, attRes] = await Promise.all([
                 EmployeeAPI.getAll(),
                 AdminAttendanceAPI.getHistory(startDate, endDate)
             ]);
 
-            setEmployees(empRes.data);
-            setAttendanceRecords(attRes.data);
+            setEmployees(empRes.data || []);
+            setAttendanceRecords(attRes.data || []);
         } catch (err) {
-            console.error("Failed to fetch monthly data", err);
+            console.error('Failed to fetch monthly data', err);
         } finally {
             setLoading(false);
         }
@@ -42,7 +92,7 @@ export default function MonthlyAttendanceGrid() {
         try {
             const [year, month] = selectedMonth.split('-');
             const startDate = `${year}-${month}-01`;
-            const endDate = new Date(year, month, 0).toISOString().split('T')[0];
+            const endDate = formatLocalDate(new Date(Number(year), Number(month), 0));
 
             const res = await AdminAttendanceAPI.exportExcel(startDate, endDate);
             const url = window.URL.createObjectURL(new Blob([res.data]));
@@ -59,14 +109,13 @@ export default function MonthlyAttendanceGrid() {
         }
     };
 
-    // Calculate calendar days
     const getDaysArray = () => {
         if (!selectedMonth) return [];
         const [year, month] = selectedMonth.split('-');
         const daysInMonth = new Date(year, month, 0).getDate();
 
         const days = [];
-        for (let i = 1; i <= daysInMonth; i++) {
+        for (let i = 1; i <= daysInMonth; i += 1) {
             const d = new Date(year, month - 1, i);
             days.push({
                 date: i,
@@ -81,143 +130,331 @@ export default function MonthlyAttendanceGrid() {
     const formatTime = (timeStr) => {
         if (!timeStr) return '';
         const parts = timeStr.split(':');
-        let h = parseInt(parts[0]);
+        let h = parseInt(parts[0], 10);
         const m = parts[1];
         const ampm = h >= 12 ? 'pm' : 'am';
         h = h % 12 || 12;
         return `${String(h).padStart(2, '0')}.${m} ${ampm}`;
     };
 
+    const normalizeStatus = (status, inTime) => {
+        const value = String(status || '').trim().toLowerCase();
+        if (!value) return '';
+        if (value === 'absent') return 'Absent';
+        if (value.includes('leave') || value === 'lop' || value.includes('loss of pay')) return 'Leave';
+        if (value === 'holiday') return 'Holiday';
+        if (value === 'permission') return 'Permission';
+        if (inTime) {
+            const [hours, minutes] = String(inTime).split(':').map((part) => parseInt(part, 10));
+            const checkInMinutes = (Number.isNaN(hours) ? 0 : hours) * 60 + (Number.isNaN(minutes) ? 0 : minutes);
+            return checkInMinutes > SHIFT_START_MINUTES ? 'Late' : 'Present';
+        }
+        if (value === 'present') return 'Present';
+        if (value === 'late') return 'Late';
+        return String(status || '').trim();
+    };
+
     const days = getDaysArray();
 
-    // Group attendance by employee and date for O(1) lookup
     const attendanceMap = {};
-    attendanceRecords.forEach(record => {
-        if (!attendanceMap[record.employeeId]) {
-            attendanceMap[record.employeeId] = {};
+    attendanceRecords.forEach((record) => {
+        const employeeKey = record?.employeeId ?? record?.employee?.id ?? record?.employee?.employeeId;
+        const dateKey = record?.date ? String(record.date).substring(0, 10) : '';
+        if (!employeeKey || !dateKey) return;
+
+        const normalizedEmployeeKey = String(employeeKey);
+        if (!attendanceMap[normalizedEmployeeKey]) {
+            attendanceMap[normalizedEmployeeKey] = {};
         }
-        attendanceMap[record.employeeId][record.date] = record;
+        attendanceMap[normalizedEmployeeKey][dateKey] = record;
     });
 
+    const employeeRows = (() => {
+        const map = new Map();
+
+        employees.forEach((emp) => {
+            const key = emp?.id ?? emp?.employeeId;
+            if (key == null) return;
+            map.set(String(key), { ...emp });
+        });
+
+        attendanceRecords.forEach((record) => {
+            const key = record?.employeeId ?? record?.employee?.id ?? record?.employee?.employeeId;
+            if (key == null) return;
+            const normalizedKey = String(key);
+            const existing = map.get(normalizedKey);
+
+            if (existing) {
+                if (!existing.firstName && !existing.lastName && record?.employeeName) {
+                    map.set(normalizedKey, { ...existing, employeeName: record.employeeName });
+                }
+                return;
+            }
+
+            map.set(normalizedKey, {
+                id: key,
+                employeeId: record?.employeeCode ?? null,
+                firstName: '',
+                lastName: '',
+                employeeName: record?.employeeName || ''
+            });
+        });
+
+        return Array.from(map.values());
+    })();
+
+    const statusTotals = attendanceRecords.reduce(
+        (acc, record) => {
+            const normalized = normalizeStatus(record.status, record.inTime);
+            if (normalized === 'Present') acc.present += 1;
+            if (normalized === 'Late') {
+                acc.present += 1;
+                acc.late += 1;
+            }
+            if (normalized === 'Absent') acc.absent += 1;
+            if (normalized === 'Leave') acc.leave += 1;
+            return acc;
+        },
+        { present: 0, late: 0, absent: 0, leave: 0 }
+    );
+
     return (
-        <div className="card" style={{ marginTop: 24 }}>
-            <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
-                    <span className="card-title">Monthly View</span>
-                    <input
-                        type="month"
-                        value={selectedMonth}
-                        onChange={e => setSelectedMonth(e.target.value)}
-                        className="form-input"
-                        style={{ width: 180 }}
-                    />
+        <div className="card" style={{ marginTop: 0 }}>
+            <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, padding: '14px 16px', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+                    <span className="card-title" style={{ fontSize: '1rem' }}>Monthly View</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <CalendarDays size={15} color="var(--text-muted)" />
+                        <input
+                            type="month"
+                            value={selectedMonth}
+                            onChange={(e) => setSelectedMonth(e.target.value)}
+                            className="form-input"
+                            style={{ width: 170, padding: '8px 10px', fontSize: '0.9rem' }}
+                        />
+                    </div>
                 </div>
-                <button className="btn btn-secondary" onClick={handleExport} style={{ padding: '8px 16px' }}>
-                    <Download size={16} /> Download
+                <button className="btn btn-secondary" onClick={handleExport} style={{ padding: '8px 14px', fontSize: '0.88rem' }}>
+                    <Download size={15} /> Download
                 </button>
             </div>
 
-            <div className="card-body" style={{ padding: 0 }}>
+            <div className="card-body" style={{ padding: '12px 16px', borderBottom: '1px solid var(--border)', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 10 }}>
+                <div style={{ border: '1px solid var(--border)', borderRadius: 10, padding: '8px 10px' }}>
+                    <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Present</p>
+                    <p style={{ fontSize: '1rem', fontWeight: 700 }}>{statusTotals.present}</p>
+                </div>
+                <div style={{ border: '1px solid var(--border)', borderRadius: 10, padding: '8px 10px' }}>
+                    <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Late</p>
+                    <p style={{ fontSize: '1rem', fontWeight: 700 }}>{statusTotals.late}</p>
+                </div>
+                <div style={{ border: '1px solid var(--border)', borderRadius: 10, padding: '8px 10px' }}>
+                    <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Absent</p>
+                    <p style={{ fontSize: '1rem', fontWeight: 700 }}>{statusTotals.absent}</p>
+                </div>
+                <div style={{ border: '1px solid var(--border)', borderRadius: 10, padding: '8px 10px' }}>
+                    <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Leave</p>
+                    <p style={{ fontSize: '1rem', fontWeight: 700 }}>{statusTotals.leave}</p>
+                </div>
+            </div>
+
+            <div className="card-body" style={{ padding: 0, overflow: 'hidden' }}>
                 {loading ? (
-                    <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-muted)' }}>Loading month data...</div>
+                    <div style={{ padding: 30, textAlign: 'center', color: 'var(--text-muted)' }}>Loading month data...</div>
                 ) : (
-                    <div style={{ overflowX: 'auto', maxWidth: '100%' }}>
-                        <table style={{ borderCollapse: 'collapse', width: 'max-content', minWidth: '100%', fontSize: '0.8rem' }}>
+                    <div style={{ overflowX: 'auto', overflowY: 'hidden', width: '100%' }}>
+                        <table style={{ borderCollapse: 'collapse', width: 'max-content', minWidth: '100%', tableLayout: 'fixed', fontSize: '0.72rem' }}>
+                            <colgroup>
+                                <col style={{ width: '240px' }} />
+                                {days.map((d) => (
+                                    <col key={`col-${d.date}`} style={{ width: '44px' }} />
+                                ))}
+                            </colgroup>
                             <thead>
                                 <tr>
-                                    <th style={{ position: 'sticky', left: 0, background: '#222222', color: 'white', padding: '10px 16px', zIndex: 2, borderRight: '1px solid #444', minWidth: 150 }}>Days</th>
-                                    {days.map(d => (
-                                        <th key={`day-${d.date}`} style={{ background: '#222222', color: 'white', fontWeight: 'normal', textAlign: 'center', borderRight: '1px solid #444', minWidth: 60, padding: '4px' }}>
+                                    <th style={{ position: 'sticky', left: 0, background: '#1f2937', color: 'white', padding: '8px 10px', zIndex: 2, borderRight: '1px solid #334155' }}>Day</th>
+                                    {days.map((d) => (
+                                        <th
+                                            key={`day-${d.date}`}
+                                            style={{
+                                                background: '#1f2937',
+                                                color: 'white',
+                                                fontWeight: 500,
+                                                textAlign: 'center',
+                                                borderRight: '1px solid #334155',
+                                                padding: '8px 4px',
+                                                fontSize: '0.68rem',
+                                                whiteSpace: 'nowrap',
+                                                minWidth: '44px'
+                                            }}
+                                        >
                                             {d.dayName}
                                         </th>
                                     ))}
                                 </tr>
                                 <tr>
-                                    <th style={{ position: 'sticky', left: 0, background: '#f97316', color: 'white', padding: '10px 16px', zIndex: 2, borderRight: '1px solid #ea580c' }}>Names</th>
-                                    {days.map(d => (
-                                        <th key={`date-${d.date}`} style={{ background: '#f97316', color: 'white', textAlign: 'center', borderRight: '1px solid #ea580c', padding: '4px' }}>
+                                    <th style={{ position: 'sticky', left: 0, background: 'var(--primary)', color: 'white', padding: '8px 10px', zIndex: 2, borderRight: '1px solid #ea580c' }}>Employee</th>
+                                    {days.map((d) => (
+                                        <th
+                                            key={`date-${d.date}`}
+                                            style={{
+                                                background: 'var(--primary)',
+                                                color: 'white',
+                                                textAlign: 'center',
+                                                borderRight: '1px solid #ea580c',
+                                                padding: '8px 4px',
+                                                fontSize: '0.68rem',
+                                                minWidth: '44px'
+                                            }}
+                                        >
                                             {d.date}
                                         </th>
                                     ))}
                                 </tr>
                             </thead>
                             <tbody>
-                                {employees.map(emp => (
-                                    <tr key={emp.id}>
-                                        <td style={{ position: 'sticky', left: 0, background: 'var(--surface)', fontWeight: 600, padding: '12px 16px', borderRight: '1px solid var(--border)', zIndex: 1, boxShadow: '2px 0 5px rgba(0,0,0,0.05)' }}>
-                                            {emp.firstName} {emp.lastName}
+                                {employeeRows.map((emp) => {
+                                    const employeeKey = String(emp?.id ?? emp?.employeeId ?? 'unknown');
+                                    const employeeLabel = [emp?.firstName, emp?.lastName]
+                                        .filter((v) => Boolean(v && String(v).trim()))
+                                        .join(' ')
+                                        .trim() || emp?.employeeName || emp?.employeeId || `Employee ${employeeKey}`;
+
+                                    return (
+                                    <tr key={employeeKey}>
+                                        <td
+                                            style={{
+                                                position: 'sticky',
+                                                left: 0,
+                                                background: 'var(--surface)',
+                                                fontWeight: 600,
+                                                color: '#0f172a',
+                                                padding: '8px 12px',
+                                                width: '240px',
+                                                minWidth: '240px',
+                                                borderRight: '1px solid var(--border)',
+                                                zIndex: 1,
+                                                boxShadow: '2px 0 4px rgba(0,0,0,0.04)',
+                                                whiteSpace: 'nowrap',
+                                                overflow: 'hidden',
+                                                textOverflow: 'ellipsis'
+                                            }}
+                                            title={employeeLabel}
+                                        >
+                                            {employeeLabel}
                                         </td>
-                                        {days.map(d => {
-                                            const record = attendanceMap[emp.id]?.[d.fullDate];
+                                        {days.map((d) => {
+                                            const record = attendanceMap[employeeKey]?.[d.fullDate];
+                                            const status = normalizeStatus(record?.status, record?.inTime);
                                             let content = null;
                                             let bgStyle = {};
+                                            let tooltip = '';
+                                            let indicatorSize = 36; // Square size
 
-                                            // Determine cell appearance
                                             if (record) {
-                                                if (record.status === 'Leave') {
-                                                    bgStyle = { background: '#e81cff', color: 'white' }; // Pinkish
-                                                    content = <div style={{ fontWeight: 600 }}>L</div>;
-                                                } else if (record.status === 'Absent') {
-                                                    bgStyle = { background: '#ef4444', color: 'white' }; // Red
-                                                    content = <div style={{ fontWeight: 600 }}>A</div>;
-                                                } else if (record.status === 'Present' || record.status === 'Late') {
-                                                    bgStyle = { background: 'var(--primary-light)' };
-                                                    content = (
-                                                        <div style={{ display: 'flex', flexDirection: 'column', gap: 4, color: 'var(--text-main)' }}>
-                                                            <span>{formatTime(record.inTime)}</span>
-                                                            <span>{formatTime(record.outTime)}</span>
-                                                        </div>
-                                                    );
+                                                if (status === 'Leave') {
+                                                    bgStyle = { background: '#f3e8ff', color: '#6b21a8' };
+                                                    content = <div style={{ fontWeight: 700, fontSize: '1rem' }}>L</div>;
+                                                    tooltip = record.leaveType ? `Leave: ${record.leaveType}` : 'Leave';
+                                                } else if (status === 'Holiday') {
+                                                    bgStyle = { background: '#ffd7a8', color: '#92400e' };
+                                                    content = <div style={{ fontWeight: 700, fontSize: '1rem' }}>H</div>;
+                                                    tooltip = record.holidayName ? `Holiday: ${record.holidayName}` : 'Holiday';
+                                                } else if (status === 'Absent') {
+                                                    bgStyle = { background: '#fecaca', color: '#7f1d1d' };
+                                                    content = <div style={{ fontWeight: 700, fontSize: '1rem' }}>A</div>;
+                                                    tooltip = 'Absent';
+                                                } else if (status === 'Late') {
+                                                    bgStyle = { background: '#2b9053', color: '#ffffff' };
+                                                    content = <div style={{ fontWeight: 700, fontSize: '1rem' }}>L</div>;
+                                                    tooltip = `Late - In: ${formatTime(record.inTime)} Out: ${formatTime(record.outTime)}`;
+                                                } else if (status === 'Present') {
+                                                    bgStyle = { background: '#bbf7d0', color: '#15803d' };
+                                                    content = <div style={{ fontWeight: 700, fontSize: '1rem' }}>P</div>;
+                                                    tooltip = `In: ${formatTime(record.inTime)} Out: ${formatTime(record.outTime)}`;
                                                 }
+                                            } else if (d.isWeekend) {
+                                                bgStyle = { background: '#e2e8f0', color: '#334155' };
+                                                content = <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>WO</div>;
+                                                tooltip = 'Sunday/Saturday - Week Off';
                                             } else {
-                                                if (d.isWeekend) {
-                                                    bgStyle = { background: '#64748b', color: 'white' }; // Slate
-                                                    content = <div style={{ fontWeight: 600, alignSelf: 'flex-end', justifySelf: 'flex-end' }}>WO</div>;
-                                                } else {
-                                                    // No record, but weekday (could be Future, or Absent not marked yet)
-                                                    bgStyle = { background: '#f1f5f9' };
-                                                }
+                                                bgStyle = { background: '#f8fafc' };
                                             }
 
                                             return (
-                                                <td key={`${emp.id}-${d.date}`} style={{
-                                                    borderRight: '1px solid var(--border)',
-                                                    borderBottom: '1px solid var(--border)',
-                                                    textAlign: 'center',
-                                                    padding: '8px 4px',
-                                                    height: 60,
-                                                    ...bgStyle
-                                                }}>
-                                                    {content}
+                                                <td
+                                                    key={`${employeeKey}-${d.date}`}
+                                                    style={{
+                                                        borderRight: '1px solid var(--border)',
+                                                        borderBottom: '1px solid var(--border)',
+                                                        textAlign: 'center',
+                                                        padding: 0,
+                                                        height: 56,
+                                                        minWidth: '44px',
+                                                        overflow: 'hidden',
+                                                        cursor: tooltip ? 'help' : 'default',
+                                                        position: 'relative',
+                                                        background: '#f8fafc'
+                                                    }}
+                                                >
+                                                    <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                        {content || tooltip ? (
+                                                            <Tooltip text={tooltip} position="top">
+                                                                <div
+                                                                    style={{
+                                                                        width: 36,
+                                                                        height: 36,
+                                                                        borderRadius: '6px',
+                                                                        display: 'flex',
+                                                                        alignItems: 'center',
+                                                                        justifyContent: 'center',
+                                                                        flexShrink: 0,
+                                                                        ...bgStyle
+                                                                    }}
+                                                                >
+                                                                    {content}
+                                                                </div>
+                                                            </Tooltip>
+                                                        ) : null}
+                                                    </div>
                                                 </td>
                                             );
                                         })}
                                     </tr>
-                                ))}
+                                    );
+                                })}
                             </tbody>
                         </table>
                     </div>
                 )}
             </div>
 
-            <div className="card-body" style={{ background: 'var(--surface)', borderTop: '1px solid var(--border)', marginTop: 16 }}>
-                <p style={{ color: 'var(--text-main)', fontWeight: 500, marginBottom: 8 }}>Legend:</p>
-                <div style={{ display: 'flex', gap: 24, fontSize: '0.85rem' }}>
+            <div className="card-body" style={{ background: 'var(--surface)', borderTop: '1px solid var(--border)', padding: '12px 16px' }}>
+                <p style={{ color: 'var(--text-main)', fontWeight: 600, marginBottom: 8, fontSize: '0.9rem' }}>Legend</p>
+                <div style={{ display: 'flex', gap: 16, fontSize: '0.82rem', color: 'var(--text-main)', flexWrap: 'wrap' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <div style={{ width: 16, height: 16, background: '#64748b', borderRadius: 4 }}></div>
-                        Week Off (WO)
+                        <div style={{ width: 14, height: 14, background: '#bbf7d0', borderRadius: 4 }}></div>
+                        Present (P)
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <div style={{ width: 16, height: 16, background: '#e81cff', borderRadius: 4 }}></div>
-                        Leave (L)
+                        <div style={{ width: 14, height: 14, background: '#14532d', borderRadius: 4 }}></div>
+                        Late (L)
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <div style={{ width: 16, height: 16, background: '#ef4444', borderRadius: 4 }}></div>
+                        <div style={{ width: 14, height: 14, background: '#fecaca', borderRadius: 4 }}></div>
                         Absent (A)
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <div style={{ width: 16, height: 16, background: 'var(--primary-light)', borderRadius: 4, border: '1px solid var(--border)' }}></div>
-                        Present / Late
+                        <div style={{ width: 14, height: 14, background: '#f3e8ff', borderRadius: 4 }}></div>
+                        Leave (L)
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <div style={{ width: 14, height: 14, background: '#ffd7a8', borderRadius: 4 }}></div>
+                        Holiday (H)
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <div style={{ width: 14, height: 14, background: '#e2e8f0', borderRadius: 4 }}></div>
+                        Week Off (WO)
                     </div>
                 </div>
             </div>

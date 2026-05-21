@@ -1,11 +1,13 @@
 package com.ems.config;
 
-import com.ems.entity.Employee;
-import com.ems.entity.Role;
-import com.ems.entity.User;
-import com.ems.repository.EmployeeRepository;
-import com.ems.repository.RoleRepository;
-import com.ems.repository.UserRepository;
+import com.ems.entity.Employee.Employee;
+import com.ems.entity.Employee.Role;
+import com.ems.entity.Employee.User;
+import com.ems.entity.Employee.Designation;
+import com.ems.repository.Employee.DesignationRepository;
+import com.ems.repository.Employee.EmployeeRepository;
+import com.ems.repository.Employee.RoleRepository;
+import com.ems.repository.Employee.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -19,6 +21,7 @@ import java.time.LocalDate;
 public class DataInitializer implements CommandLineRunner {
 
     private final RoleRepository roleRepository;
+    private final DesignationRepository designationRepository;
     private final UserRepository userRepository;
     private final EmployeeRepository employeeRepository;
     private final PasswordEncoder passwordEncoder;
@@ -27,7 +30,7 @@ public class DataInitializer implements CommandLineRunner {
     @Transactional
     public void run(String... args) throws Exception {
         // Seed Roles
-        String[] roleNames = {"ADMIN", "HR", "EMPLOYEE", "PROJECT_MANAGER", "IT_MANAGER"};
+        String[] roleNames = { "ADMIN", "HR", "EMPLOYEE", "PROJECT_MANAGER", "IT_MANAGER" };
         for (String roleName : roleNames) {
             if (roleRepository.findByRoleName(roleName).isEmpty()) {
                 roleRepository.save(Role.builder()
@@ -37,11 +40,31 @@ public class DataInitializer implements CommandLineRunner {
             }
         }
 
+        // Seed commonly used designations
+        String[] designationTitles = {
+                "QA Engineer",
+                "Web Designer",
+                "Business Analyst",
+                "HR",
+                ".NET Developer",
+                "Java Developer",
+                "System Admin"
+        };
+
+        for (String title : designationTitles) {
+            if (designationRepository.findByTitle(title).isEmpty()) {
+                Designation designation = new Designation();
+                designation.setTitle(title);
+                designationRepository.save(designation);
+            }
+        }
+
         // Seed an Admin Employee if none exists securely
         if (userRepository.findByUsername("admin").isEmpty()) {
             Role adminRole = roleRepository.findByRoleName("ADMIN").get();
 
-            // Check if there is already an employee 'admin' from legacy code we can link, or create a mock one.
+            // Check if there is already an employee 'admin' from legacy code we can link,
+            // or create a mock one.
             Employee adminEmployee = employeeRepository.findByEmail("admin@company.com").orElseGet(() -> {
                 Employee newEmp = new Employee();
                 newEmp.setEmployeeId("EMP0001");

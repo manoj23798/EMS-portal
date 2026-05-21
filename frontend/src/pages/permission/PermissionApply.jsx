@@ -50,11 +50,11 @@ export default function PermissionApply() {
     };
 
     return (
-        <div style={{ padding: '0 24px 24px 24px', background: '#ffffff', minHeight: '100vh', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <div style={{ padding: '0 24px 24px 24px', background: 'transparent', minHeight: 'auto', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <style>{`
                 .node-card { background: white; border-radius: 24px; border: 1.5px solid #cbd5e1; box-shadow: 0 10px 40px rgba(0,0,0,0.04); overflow: hidden; width: 100%; max-width: 650px; margin-top: 24px; }
                 .input-group { margin-bottom: 20px; }
-                .input-label { font-size: 10px; fontWeight: 950; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block; }
+                .input-label { font-size: 10px; fontWeight: 950; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block; }
                 .styled-input { width: 100%; padding: 12px 16px; border-radius: 12px; border: 1.5px solid #cbd5e1; background: #f8fafc; font-size: 14px; fontWeight: 700; color: #1e293b; outline: none; transition: 0.2s; }
                 .styled-input:focus { border-color: #f97316; background: white; box-shadow: 0 0 0 4px rgba(249,115,22,0.1); }
                 .btn-submit { display: flex; width: 100%; justify-content: center; align-items: center; gap: 8px; background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: white; border: none; padding: 14px; border-radius: 12px; font-size: 11px; font-weight: 950; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; box-shadow: 0 4px 14px rgba(249,115,22,0.3); transition: 0.2s; margin-top: 10px; }
@@ -64,12 +64,11 @@ export default function PermissionApply() {
             <div className="node-card">
                 <div style={{ padding: '32px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '32px' }}>
-                        <button onClick={() => navigate('/leave')} style={{ background: 'none', border: 'none', color: '#f97316', cursor: 'pointer', padding: '8px', border: '1.5px solid #fed7aa', borderRadius: '12px' }}>
+                        <button onClick={() => navigate('/leave')} style={{ background: 'none', color: '#f97316', cursor: 'pointer', padding: '8px', border: '1.5px solid #fed7aa', borderRadius: '12px' }}>
                             <ArrowLeft size={18} />
                         </button>
                         <div>
                             <h1 style={{ margin: 0, fontSize: '24px', fontWeight: 950, color: '#431407', textTransform: 'uppercase', letterSpacing: '-0.8px' }}>Apply Permission</h1>
-                            <p style={{ margin: '2px 0 0 0', fontSize: '11px', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '1px' }}>Gate Pass / Early Exit Request</p>
                         </div>
                     </div>
 
@@ -78,7 +77,7 @@ export default function PermissionApply() {
 
                     <form onSubmit={handleSubmit}>
                         <div className="input-group">
-                            <label className="input-label">Scheduled Date *</label>
+                            <label className="input-label">Date *</label>
                             <input type="date" name="date" className="styled-input" value={form.date} onChange={handleChange} />
                         </div>
 
@@ -95,26 +94,17 @@ export default function PermissionApply() {
                         </div>
 
                         <div className="input-group">
-                            <label className="input-label">Contextual Reason</label>
+                            <label className="input-label">Reason</label>
                             <textarea name="reason" className="styled-input" rows="4" value={form.reason} onChange={handleChange}
-                                placeholder="State the reason for temporal leave context (e.g. Personal Work, Medical Emergency)..." style={{ resize: 'none' }} />
-                        </div>
-
-                        <div style={{ padding: '16px', background: '#fff7ed', borderRadius: '16px', border: '1.5px solid #fed7aa', marginBottom: '24px' }}>
-                            <h4 style={{ margin: '0 0 8px 0', fontSize: '11px', fontWeight: 950, color: '#f97316', textTransform: 'uppercase' }}>Attention Note</h4>
-                            <p style={{ margin: 0, fontSize: '11px', fontWeight: 700, color: '#7c2d12' }}>Permissions are limited to 2 hours per month. Excessive usage may impact performance metrics.</p>
+                                placeholder="Why do you need permission?..." style={{ resize: 'none' }} />
                         </div>
 
                         <button type="submit" className="btn-submit" disabled={loading}>
-                            {loading ? 'Transmitting Pipeline...' : <><Send size={16}/> Dispatch Request</>}
+                            {loading ? 'Submitting...' : <><Send size={16}/> Submit Request</>}
                         </button>
                     </form>
                 </div>
             </div>
-            
-            <p style={{ marginTop: '24px', fontSize: '11px', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '1px' }}>
-                Secure Gate Pass Authorization System • EMS v2.4
-            </p>
         </div>
     );
 }

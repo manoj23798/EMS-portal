@@ -13,8 +13,8 @@ export default function HandbookPage() {
     return (
         <div style={{ 
             display: 'flex', 
-            height: '100vh', 
-            background: 'var(--background)',
+            height: '100%', 
+            background: 'transparent',
             overflow: 'hidden'
         }}>
             {/* Column 2: Handbook Specific Sidebar (Hidden on Policy View/Create) */}
@@ -61,7 +61,7 @@ export default function HandbookPage() {
                 </header>
 
                 {/* Main Content Pane */}
-                <div style={{ flex: 1, padding: '40px', overflowY: 'auto' }}>
+                <div style={{ flex: 1, padding: '24px', overflowY: 'auto' }}>
                     {isMainPage ? (
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--text-muted)', textAlign: 'center' }}>
                             <BookIcon size={80} style={{ opacity: 0.1, marginBottom: 20 }} />

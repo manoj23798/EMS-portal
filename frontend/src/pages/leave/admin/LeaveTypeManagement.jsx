@@ -154,7 +154,7 @@ const LeaveTypeManagement = () => {
                 .subtitle-unit {
                     font-size: 11px;
                     font-weight: 800;
-                    color: #94a3b8;
+                    color: #64748b;
                     text-transform: uppercase;
                     letter-spacing: 5px;
                     margin-top: 4px;
@@ -240,7 +240,7 @@ const LeaveTypeManagement = () => {
                 .card-data-label {
                     font-size: 11px;
                     font-weight: 900;
-                    color: #94a3b8;
+                    color: #64748b;
                     text-transform: uppercase;
                     letter-spacing: 1.5px;
                 }
@@ -298,7 +298,7 @@ const LeaveTypeManagement = () => {
                 .label-premium-ui {
                     font-size: 11px;
                     font-weight: 900;
-                    color: #94a3b8;
+                    color: #64748b;
                     text-transform: uppercase;
                     letter-spacing: 1.5px;
                     margin-bottom: 10px;
@@ -404,7 +404,7 @@ const LeaveTypeManagement = () => {
             {loading && !leaveTypes.length ? (
                 <div style={{ padding: '150px 0', textAlign: 'center' }}>
                     <div style={{ width: '50px', height: '50px', border: '6px solid #f1f5f9', borderTopColor: '#ea580c', borderRadius: '50%', animation: 'spin 1s linear infinite', margin: '0 auto 20px' }}></div>
-                    <div style={{ fontSize: '12px', fontWeight: 900, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '2px' }}>Loading types...</div>
+                    <div style={{ fontSize: '12px', fontWeight: 900, color: '#64748b', textTransform: 'uppercase', letterSpacing: '2px' }}>Loading types...</div>
                 </div>
             ) : (
                 <div className="policy-cards-grid">
@@ -453,7 +453,7 @@ const LeaveTypeManagement = () => {
                          <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '120px', background: 'white', borderRadius: '45px', border: '2px dashed #e2e8f0' }}>
                             <Settings size={80} style={{ color: '#e2e8f0', marginBottom: '30px' }} />
                             <h3 style={{ fontSize: '20px', fontWeight: 900, color: '#1e293b' }}>Empty Policy Registry</h3>
-                            <p style={{ color: '#94a3b8', fontSize: '14px', fontWeight: 800 }}>Bootstrap your enterprise leave system by initializing policies.</p>
+                            <p style={{ color: '#64748b', fontSize: '14px', fontWeight: 800 }}>Bootstrap your enterprise leave system by initializing policies.</p>
                          </div>
                     )}
                 </div>
@@ -465,7 +465,7 @@ const LeaveTypeManagement = () => {
                         <div style={{ padding: '40px', background: '#fcfcfc', borderBottom: '1.5px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <div>
                                 <h2 style={{ margin: 0, fontSize: '24px', fontWeight: 900, letterSpacing: '-0.5px' }}>{editingType ? 'EDIT LEAVE TYPE' : 'NEW LEAVE TYPE'}</h2>
-                                <p style={{ margin: '4px 0 0 0', fontSize: '11px', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '2px' }}>Settings and rules</p>
+                                <p style={{ margin: '4px 0 0 0', fontSize: '11px', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '2px' }}>Settings and rules</p>
                             </div>
                             <button onClick={() => setShowModal(false)} style={{ width: '48px', height: '48px', borderRadius: '16px', background: 'white', border: '1.5px solid #e2e8f0', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b' }}> <X size={22} /> </button>
                         </div>
@@ -517,7 +517,7 @@ const LeaveTypeManagement = () => {
                             </div>
 
                              <div style={{ marginTop: '45px', display: 'flex', gap: '20px' }}>
-                                <button type="button" onClick={() => setShowModal(false)} style={{ flex: 1, padding: '20px', borderRadius: '22px', background: '#f8fafc', color: '#94a3b8', border: 'none', fontWeight: 900, cursor: 'pointer', textTransform: 'uppercase', fontSize: '12px', letterSpacing: '1px' }}>Cancel</button>
+                                <button type="button" onClick={() => setShowModal(false)} style={{ flex: 1, padding: '20px', borderRadius: '22px', background: '#f8fafc', color: '#64748b', border: 'none', fontWeight: 900, cursor: 'pointer', textTransform: 'uppercase', fontSize: '12px', letterSpacing: '1px' }}>Cancel</button>
                                 <button type="submit" disabled={loading} style={{ flex: 2, padding: '20px', borderRadius: '22px', background: '#ea580c', color: 'white', border: 'none', fontWeight: 900, cursor: 'pointer', textTransform: 'uppercase', fontSize: '12px', letterSpacing: '1.5px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '15px', boxShadow: '0 10px 25px rgba(234, 88, 12, 0.2)' }}>
                                     {loading ? 'Processing...' : (editingType ? 'Save Changes' : 'Add Leave Type')} <CheckCircle size={22} />
                                 </button>

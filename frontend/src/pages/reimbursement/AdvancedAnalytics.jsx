@@ -125,6 +125,8 @@ const AdvancedAnalytics = () => {
         employees: [],
         projects: []
     });
+    const [authError, setAuthError] = useState(null);
+    const [filterError, setFilterError] = useState(null);
     const [showDashboard, setShowDashboard] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const rowsPerPage = 10;
@@ -192,8 +194,15 @@ const AdvancedAnalytics = () => {
                 employees: empRes.data,
                 projects: projRes.data
             });
+            setFilterError(null);
+            setAuthError(null);
         } catch (err) {
             console.error("Error fetching filter options", err);
+            if (err?.response?.status === 403) {
+                setAuthError('You are not authorized to view analytics.');
+            } else {
+                setFilterError('Failed to load filter options.');
+            }
         }
     };
 
@@ -209,8 +218,12 @@ const AdvancedAnalytics = () => {
 
             const res = await ReimbursementAPI.getAnalytics(params);
             setAnalytics(res.data);
+            setAuthError(null);
         } catch (err) {
             console.error("Error fetching analytics", err);
+            if (err?.response?.status === 403) {
+                setAuthError('You are not authorized to view analytics.');
+            }
         } finally {
             setLoading(false);
         }
@@ -343,11 +356,26 @@ const AdvancedAnalytics = () => {
         return s;
     };
 
-    if (loading || !analytics) return (
-        <div style={{ padding: '80px', textAlign: 'center', background: '#ffffff', height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+    if (loading) return (
+        <div style={{ padding: '40px', textAlign: 'center', background: 'transparent', minHeight: '60vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
             <div className="spinner" style={{ border: '3px solid #fed7aa', borderTopColor: '#f97316', borderRadius: '50%', width: '40px', height: '40px', animation: 'spin 1s linear infinite' }}></div>
             <p style={{ marginTop: '16px', fontSize: '14px', fontWeight: 900, color: '#f97316', textTransform: 'uppercase', letterSpacing: '1px' }}>Synchronizing Analytics...</p>
             <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+        </div>
+    );
+
+    if (authError) return (
+        <div style={{ padding: '24px', textAlign: 'center', background: 'transparent', minHeight: '40vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ background: '#fff7ed', border: '1px solid #fed7aa', padding: '18px 22px', borderRadius: '12px', boxShadow: '0 8px 30px rgba(0,0,0,0.06)' }}>
+                <h3 style={{ margin: 0, color: '#f97316', fontWeight: 900 }}>Access Denied</h3>
+                <p style={{ marginTop: 8, color: '#475569' }}>{authError}</p>
+            </div>
+        </div>
+    );
+
+    if (!analytics) return (
+        <div style={{ padding: '24px', textAlign: 'center', background: 'transparent', minHeight: '40vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+            <p style={{ color: '#475569' }}>{filterError || 'No analytics data available.'}</p>
         </div>
     );
 
@@ -377,13 +405,14 @@ const AdvancedAnalytics = () => {
         });
 
     return (
-        <div style={{ padding: '0 20px 20px 20px', background: '#ffffff', minHeight: '100vh', fontFamily: "'Outfit', sans-serif", width: '100%' }}>
+        <div style={{ padding: '0 20px 20px 20px', background: 'transparent', minHeight: 'auto', fontFamily: "'Outfit', sans-serif", width: '100%' }}>
             <style>{`
                 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;900&display=swap');
                 select:focus, input:focus { border-color: #f97316 !important; box-shadow: 0 0 0 4px rgba(249,115,22,0.1); }
                 .glass-card { background: white; border-radius: 24px; transition: 0.3s; margin-bottom: 24px; width: 100%; border: none; box-shadow: 0 10px 40px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.04); }
                 .glass-card:hover { transform: translateY(-5px); box-shadow: 0 20px 50px rgba(0,0,0,0.12); }
                 .calendar-cell { height: 34px; width: 34px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; border-radius: 8px; transition: 0.1s; cursor: pointer; }
+                .glass-card { min-width: 0; }
                 .calendar-cell:hover { background: #f1f5f9; }
                 .dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; margin: 0 1px; }
                 .tooltip-box { 
@@ -478,36 +507,15 @@ const AdvancedAnalytics = () => {
                 .inline-filter-input:focus { border-color: #f97316; background: white; }
             `}</style>
 
-            {/* KPI Section */}
+            {/* Dashboard Analytics Section */}
             {showDashboard && (
                 <>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '12px', marginBottom: '20px' }}>
-                {[
-                    { label: 'Total Requests', val: analytics.totalRequests || 0, icon: FileSpreadsheet, color: '#3b82f6', bg: '#eff6ff' },
-                    { label: 'Approved', val: analytics.approvedCount || 0, icon: CheckCircle, color: '#10b981', bg: '#f0fdf4' },
-                    { label: 'Rejected', val: analytics.rejectedCount || 0, icon: XCircle, color: '#ef4444', bg: '#fef2f2' },
-                    { label: 'Pending Review', val: analytics.pendingReviewCount || 0, icon: Clock, color: '#f59e0b', bg: '#fffbeb' },
-                    { label: 'Total Payout', val: `₹${(analytics.approvedPayout || 0).toLocaleString()}`, icon: DollarSign, color: '#f97316', bg: '#fff7ed' },
-                    { label: 'Pending Audit', val: `₹${(analytics.pendingAuditAmount || 0).toLocaleString()}`, icon: ShieldCheck, color: '#a855f7', bg: '#faf5ff' }
-                ].map((s, i) => (
-                    <div key={i} className="glass-card" style={{ padding: '14px 18px', display: 'flex', alignItems: 'center', gap: '12px', marginBottom: 0 }}>
-                        <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: s.bg, color: s.color, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <s.icon size={18} />
-                        </div>
-                        <div>
-                            <p style={{ margin: 0, fontSize: '10px', fontWeight: 950, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.8px' }}>{s.label}</p>
-                            <h3 style={{ margin: '1px 0 0 0', fontSize: '19px', fontWeight: 950, color: '#1e293b' }}>{s.val}</h3>
-                        </div>
-                    </div>
-                ))}
-            </div>
-
             {/* THE FOUR COLUMN COMMAND CENTER */}
             <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1.4fr 3.4fr 1.25fr', gap: '16px', marginBottom: '16px', alignItems: 'stretch', position: 'relative', zIndex: 100 }}>
                 <div className="glass-card" style={{ padding: '14px', height: '100%', marginBottom: 0, display: 'flex', flexDirection: 'column' }}>
                     <h4 style={{ margin: '0 0 8px 0', fontSize: '12.5px', fontWeight: 950, color: '#1e293b', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Expense Category Breakdown</h4>
-                    <div style={{ height: '220px', flex: 1, display: 'flex', alignItems: 'center' }}>
-                        <ResponsiveContainer width="100%" height="100%">
+                            <div style={{ height: '220px', flex: 1, display: 'flex', alignItems: 'center', minHeight: 220, minWidth: 260 }}>
+                                <ResponsiveContainer width="100%" height="100%" minHeight={140}>
                             <PieChart>
                                 <Pie 
                                     data={Object.entries(analytics.categoryBreakdown || {}).map(([k, v]) => ({ name: k, value: v })).sort((a, b) => a.name.localeCompare(b.name))} 
@@ -538,8 +546,8 @@ const AdvancedAnalytics = () => {
 
                 <div className="glass-card" style={{ padding: '14px', height: '100%', marginBottom: 0, display: 'flex', flexDirection: 'column' }}>
                     <h4 style={{ margin: '0 0 12px 0', fontSize: '12.5px', fontWeight: 950, color: '#1e293b', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Audit Status Health</h4>
-                    <div style={{ height: '220px', flex: 1, display: 'flex', alignItems: 'center' }}>
-                        <ResponsiveContainer width="100%" height="100%">
+                    <div style={{ height: '220px', flex: 1, display: 'flex', alignItems: 'center', minHeight: 220, minWidth: 260 }}>
+                        <ResponsiveContainer width="100%" height="100%" minHeight={140}>
                             <PieChart>
                                 <Pie data={(() => {
                                     const raw = analytics.statusDistribution || {};
@@ -645,8 +653,8 @@ const AdvancedAnalytics = () => {
                             </button>
                         </div>
                     </div>
-                    <div style={{ height: '240px' }}>
-                        <ResponsiveContainer width="100%" height="100%">
+                    <div style={{ height: '240px', minHeight: 180 }}>
+                        <ResponsiveContainer width="100%" height="100%" minHeight={140}>
                             <AreaChart data={(() => {
                                 if (viewMode === 'YEAR') {
                                     return Object.entries(analytics.monthlyTrend || {}).map(([k, v]) => ({ name: k, amount: v }));
@@ -719,7 +727,7 @@ const AdvancedAnalytics = () => {
                     </div>
                     <div style={{ flex: 1 }}>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '2px', textAlign: 'center' }}>
-                            {['S','M','T','W','T','F','S'].map(d => <span key={d} style={{ fontSize: '10px', fontWeight: 900, color: '#94a3b8' }}>{d}</span>)}
+                            {['S','M','T','W','T','F','S'].map((d, i) => <span key={`dow-${i}`} style={{ fontSize: '10px', fontWeight: 900, color: '#94a3b8' }}>{d}</span>)}
                             {blanks.map((_, i) => <div key={`b-${i}`} className="calendar-cell" />)}
                             {calendarDays.map((date, i) => {
                                 const dateStr = date.toISOString().split('T')[0];
@@ -806,8 +814,32 @@ const AdvancedAnalytics = () => {
 
             {/* Simplified Audit Pipeline Table */}
             <div className="glass-card" style={{ overflow: 'hidden', display: 'flex', flexDirection: 'column', border: '1.5px solid #cbd5e1', boxShadow: '0 10px 40px rgba(0,0,0,0.06)', position: 'relative', zIndex: 1 }}>
-                 <div style={{ padding: '6px 20px', borderBottom: '1.5px solid #cbd5e1', display: 'flex', justifyContent: 'space-between', alignItems: 'center', minHeight: '48px' }}>
-                      <div></div>
+                 <div style={{ padding: '8px 20px', borderBottom: '1.5px solid #cbd5e1', display: 'flex', justifyContent: 'space-between', alignItems: 'center', minHeight: '60px', background: '#fcfdfe' }}>
+                      <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+                          {[
+                              { label: 'TOTAL REQUESTS', val: analytics.totalRequests || 0, icon: FileText, color: '#3b82f6', bg: '#eff6ff' },
+                              { label: 'APPROVED', val: analytics.approvedCount || 0, icon: CheckCircle, color: '#10b981', bg: '#f0fdf4' },
+                              { label: 'REJECTED', val: analytics.rejectedCount || 0, icon: XCircle, color: '#ef4444', bg: '#fef2f2' },
+                              { label: 'PENDING REVIEW', val: analytics.pendingReviewCount || 0, icon: Clock, color: '#f59e0b', bg: '#fffbeb' },
+                          ].map((card, idx) => (
+                              <div key={idx} style={{ 
+                                  display: 'flex', alignItems: 'center', gap: '10px', padding: '6px 14px', 
+                                  background: 'white', borderRadius: '12px', border: '1px solid #e2e8f0',
+                                  boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
+                              }}>
+                                  <div style={{ 
+                                      width: '32px', height: '32px', borderRadius: '8px', background: card.bg, 
+                                      color: card.color, display: 'flex', alignItems: 'center', justifyContent: 'center' 
+                                  }}>
+                                      <card.icon size={16} strokeWidth={2.5} />
+                                  </div>
+                                  <div>
+                                      <div style={{ fontSize: '9px', fontWeight: 900, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{card.label}</div>
+                                      <div style={{ fontSize: '15px', fontWeight: 950, color: '#1e293b', lineHeight: 1 }}>{card.val}</div>
+                                  </div>
+                              </div>
+                          ))}
+                      </div>
                       
                       <div style={{ display: 'flex', gap: '8px', position: 'relative', alignItems: 'center' }}>
                           {showFiltersInline && (
@@ -961,8 +993,8 @@ const AdvancedAnalytics = () => {
                 </div>
 
                 {/* Pagination Controls */}
-                {filteredClaims.length > 0 && (
-                    <div style={{ padding: '4px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1.5px solid #cbd5e1', background: 'white' }}>
+                    {filteredClaims.length > 0 && (
+                    <div style={{ padding: '4px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1.5px solid #cbd5e1', background: 'transparent' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                             <button 
                                 disabled={currentPage === 1} 

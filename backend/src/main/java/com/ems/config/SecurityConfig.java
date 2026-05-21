@@ -39,24 +39,37 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            .csrf(csrf -> csrf.disable())
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**").permitAll() // Login, Refresh, Logout
-                .requestMatchers("/api/admin/handbook/**").hasAnyAuthority("HR", "ADMIN") // HR can access handbook mappings
-                .requestMatchers("/api/admin/**").hasAnyAuthority("ADMIN", "HR") // Admin and HR
-                .requestMatchers("/api/hr/**").hasAnyAuthority("HR", "ADMIN") // HR APIs
-                .requestMatchers("/api/manager/**").hasAnyAuthority("PROJECT_MANAGER", "ADMIN", "HR") // Project Manager APIs (and HR/Admin)
-                .requestMatchers("/api/it/**").hasAnyAuthority("IT_MANAGER", "ADMIN") // IT Manager APIs
-                .requestMatchers("/api/employee/**", "/api/attendance/**", "/api/leaves/**", "/api/permissions/**", "/api/communications/**", "/api/handbook/**", "/api/notifications/**", "/api/departments/**", "/api/designations/**", "/api/roles/**", "/api/reimbursement/**").hasAnyAuthority("EMPLOYEE", "ADMIN", "HR", "PROJECT_MANAGER", "IT_MANAGER") // Core endpoints accessible by everyone
-                .anyRequest().authenticated() // All other endpoints require authentication
-            )
-            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .csrf(csrf -> csrf.disable())
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/auth/**", "/uploads/**").permitAll() // Login, Refresh, Logout, and
+                                                                                    // Static Uploads
+                        .requestMatchers("/api/admin/handbook/**").hasAnyAuthority("HR", "ADMIN") // HR can access
+                                                                                                  // handbook mappings
+                        .requestMatchers("/api/admin/**").hasAnyAuthority("ADMIN", "HR") // Admin and HR
+                        .requestMatchers("/api/hr/**").hasAnyAuthority("HR", "ADMIN") // HR APIs
+                        .requestMatchers("/api/manager/**").hasAnyAuthority("PROJECT_MANAGER", "ADMIN", "HR") // Project
+                                                                                                              // Manager
+                                                                                                              // APIs
+                                                                                                              // (and
+                                                                                                              // HR/Admin)
+                        .requestMatchers("/api/it/**").hasAnyAuthority("IT_MANAGER", "ADMIN") // IT Manager APIs
+                        .requestMatchers("/api/employee/**", "/api/employees/**", "/api/candidates/**",
+                                "/api/onboarding/**", "/api/attendance/**", "/api/leaves/**", "/api/permissions/**",
+                                "/api/communications/**", "/api/handbook/**", "/api/notifications/**",
+                                "/api/departments/**", "/api/designations/**", "/api/roles/**", "/api/reimbursement/**",
+                                "/api/reimbursements/**", "/api/exit/**")
+                        .hasAnyAuthority("EMPLOYEE", "ADMIN", "HR", "PROJECT_MANAGER", "IT_MANAGER") // Core endpoints
+                                                                                                     // accessible by
+                                                                                                     // everyone
+                        .anyRequest().authenticated() // All other endpoints require authentication
+                )
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
-    
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();

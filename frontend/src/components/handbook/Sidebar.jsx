@@ -37,28 +37,7 @@ export default function HandbookSidebar() {
                         <BookOpen size={20} color="var(--primary)" />
                         Hand Book
                     </h2>
-                    {isHRorAdmin && (
-                        <button 
-                            onClick={() => navigate('/handbook/editor')}
-                            style={{ 
-                                background: 'var(--primary)', 
-                                color: 'white', 
-                                border: 'none', 
-                                borderRadius: '4px', 
-                                padding: '6px 12px', 
-                                fontSize: '0.8rem',
-                                fontWeight: '500',
-                                cursor: 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '6px',
-                                justifyContent: 'center'
-                            }}
-                            title="Create Policy"
-                        >
-                            <Plus size={14} /> Create Policy
-                        </button>
-                    )}
+                    {/* Create/Edit disabled: handbook is view-only */}
                 </div>
             </div>
 

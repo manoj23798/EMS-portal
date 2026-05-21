@@ -109,8 +109,8 @@ const ReimbursementView = () => {
     );
 
     if (error || !claim) return (
-        <div style={{ background: '#fdf8f5', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <div style={{ background: 'white', padding: '40px', borderRadius: '24px', textAlign: 'center', boxShadow: '0 20px 40px rgba(0,0,0,0.1)', border: '1px solid #fee2e2' }}>
+            <div style={{ background: 'transparent', minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ background: 'white', padding: '40px', borderRadius: '24px', textAlign: 'center', boxShadow: '0 20px 40px rgba(0,0,0,0.1)', border: '1px solid #fee2e2' }}>
                 <AlertTriangle size={64} color="#ef4444" style={{ marginBottom: '20px' }} />
                 <h1 style={{ fontSize: '24px', fontWeight: 900, color: '#1f2937', textTransform: 'uppercase' }}>Review Hub Not Found</h1>
                 <p style={{ color: '#6b7280', margin: '12px 0 24px 0' }}>{error || 'The requested reimbursement ID does not exist.'}</p>

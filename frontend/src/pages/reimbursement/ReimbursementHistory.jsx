@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { ReimbursementAPI } from '../../services/api';
 import { useNavigate } from 'react-router-dom';
+import { tokenManager } from '../../utils/tokenManager';
 import * as XLSX from 'xlsx';
 
 const SearchableSelect = ({ label, options, value, onChange, placeholder, icon: Icon }) => {
@@ -129,11 +130,14 @@ const ReimbursementHistory = () => {
 
     const fetchUserClaims = async () => {
         try {
-            const response = await ReimbursementAPI.getMyClaims();
+            setLoading(true);
+            const empId = tokenManager.getUserData()?.employeeId;
+            const response = await ReimbursementAPI.getMy(empId);
             setClaims(response.data);
-            setLoading(false);
         } catch (err) {
             console.error('Error fetching claims:', err);
+            setClaims([]);
+        } finally {
             setLoading(false);
         }
     };
@@ -238,14 +242,14 @@ const ReimbursementHistory = () => {
     });
 
     if (loading) return (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: 'white' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', background: 'transparent' }}>
             <div style={{ width: '40px', height: '40px', border: '3px solid #f1f5f9', borderTopColor: '#f97316', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
             <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
         </div>
     );
 
     return (
-        <div style={{ padding: '0 24px 16px 24px', background: '#ffffff', minHeight: '100vh', fontFamily: "'Outfit', sans-serif", width: '100%' }}>
+        <div style={{ padding: '0 24px 16px 24px', background: 'transparent', minHeight: 'auto', fontFamily: "'Outfit', sans-serif", width: '100%' }}>
             <style>{`
                 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;900&display=swap');
                 .glass-card { background: white; border-radius: 20px; border: 1.5px solid #cbd5e1; box-shadow: 0 10px 40px rgba(0,0,0,0.03); overflow: hidden; display: flex; flex-direction: column; }

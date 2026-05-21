@@ -12,6 +12,10 @@ export const tokenManager = {
         }
     },
 
+    getToken() {
+        return localStorage.getItem(TOKEN_KEY);
+    },
+
     getAccessToken() {
         return localStorage.getItem(TOKEN_KEY);
     },

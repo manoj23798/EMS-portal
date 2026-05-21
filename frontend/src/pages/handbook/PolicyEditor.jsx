@@ -115,7 +115,7 @@ export default function PolicyEditor() {
         'link', 'image', 'align'
     ];
 
-    if (loading) return <div>Loading editor...</div>;
+    if (loading) return <div style={{ padding: 24, textAlign: 'center', color: 'var(--text-muted)' }}>Loading editor...</div>;
 
     const containerStyle = isFullScreen ? {
         position: 'fixed',
@@ -262,7 +262,7 @@ export default function PolicyEditor() {
                 {/* TOOLBAR OUTSIDE THE PAPER AREA */}
                 <div id="policy-toolbar" className="ql-toolbar ql-snow" style={{ 
                     position: 'sticky', 
-                    top: isFullScreen ? '72px' : '0', 
+                    top: isFullScreen ? '72px' : '-40px', 
                     zIndex: 1000, 
                     background: '#fff', 
                     border: '1px solid var(--border)', 

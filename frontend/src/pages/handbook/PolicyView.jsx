@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { handbookService } from '../../services/handbookService';
-import { ArrowLeft, Clock, User, CheckCircle, Maximize, Minimize, ZoomIn, ZoomOut, Edit, Archive } from 'lucide-react';
+import { ArrowLeft, Clock, User, CheckCircle, Maximize, Minimize, ZoomIn, ZoomOut, Archive, Download } from 'lucide-react';
 import { tokenManager } from '../../utils/tokenManager';
 
 export default function PolicyView() {
@@ -14,6 +14,10 @@ export default function PolicyView() {
     
     const userRole = tokenManager.getUserRole() || '';
     const isHRorAdmin = ['HR', 'ADMIN'].includes(userRole);
+    const [viewerHtml, setViewerHtml] = useState(null);
+    const [viewerPdfUrl, setViewerPdfUrl] = useState(null);
+    const [uploading, setUploading] = useState(false);
+    const [currentBlobUrl, setCurrentBlobUrl] = useState(null);
 
     const handleArchive = async () => {
         if (!window.confirm('Are you sure you want to archive this policy? Employees will no longer be able to see it.')) return;
@@ -25,8 +29,24 @@ export default function PolicyView() {
         }
     };
 
-    const handleEdit = () => {
-        navigate(`/handbook/editor/${id}`);
+    // Editing removed — no edit navigation
+
+    const handleDocxUpload = async (file) => {
+        if (!file) return;
+        setUploading(true);
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+            const res = await handbookService.uploadPolicyDocument(id, formData);
+            setPolicy(res.data);
+            setViewerHtml(null);
+            alert('Document uploaded successfully.');
+        } catch (err) {
+            console.error('Upload failed', err);
+            alert('Failed to upload document.');
+        } finally {
+            setUploading(false);
+        }
     };
 
     useEffect(() => {
@@ -37,6 +57,8 @@ export default function PolicyView() {
         }
         return () => document.body.classList.remove('hide-nav');
     }, [isFullScreen]);
+
+    // Do not force body background here — let global styles control page background
 
     useEffect(() => {
         const fetchPolicy = async () => {
@@ -53,6 +75,41 @@ export default function PolicyView() {
         fetchPolicy();
     }, [id]);
 
+    // When policy changes, if it has a PDF documentUrl, fetch it as a blob and create object URL
+    useEffect(() => {
+        let cancelled = false;
+        const loadPdf = async () => {
+            if (!policy || !policy.documentUrl) return;
+            const url = policy.documentUrl;
+            if (!url.toLowerCase().endsWith('.pdf')) {
+                // clear PDF viewer
+                if (currentBlobUrl) {
+                    URL.revokeObjectURL(currentBlobUrl);
+                    setCurrentBlobUrl(null);
+                    setViewerPdfUrl(null);
+                }
+                return;
+            }
+
+            try {
+                const fetchUrl = `${import.meta.env.VITE_API_URL || ''}${url}`;
+                const resp = await fetch(fetchUrl, { credentials: 'include' });
+                if (!resp.ok) throw new Error('Failed to fetch PDF');
+                const blob = await resp.blob();
+                if (cancelled) return;
+                const objUrl = URL.createObjectURL(blob);
+                // revoke previous
+                if (currentBlobUrl) URL.revokeObjectURL(currentBlobUrl);
+                setCurrentBlobUrl(objUrl);
+                setViewerPdfUrl(objUrl);
+            } catch (err) {
+                console.error('Failed to load PDF blob', err);
+            }
+        };
+        loadPdf();
+        return () => { cancelled = true; if (currentBlobUrl) { URL.revokeObjectURL(currentBlobUrl); setCurrentBlobUrl(null); setViewerPdfUrl(null);} };
+    }, [policy]);
+
     if (loading) return <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-muted)' }}>Loading document...</div>;
     if (!policy) return <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-muted)' }}>Policy document not found.</div>;
 
@@ -62,14 +119,17 @@ export default function PolicyView() {
         left: 0,
         width: '100vw',
         height: '100vh',
-        backgroundColor: '#f1f5f9',
+        backgroundColor: '#f8f8f8',
         zIndex: 9999,
         padding: '16px 24px',
         overflowY: 'auto',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center'
-    } : { maxWidth: '1200px', margin: '0 auto', paddingBottom: 40 };
+    } : { maxWidth: '1200px', margin: '0 auto', paddingBottom: 40, backgroundColor: '#ffffff', paddingTop: 16 };
+
+    // When not full screen, avoid forcing a full white page background so surrounding layout shows correctly
+    if (!isFullScreen) containerStyle.backgroundColor = 'transparent';
 
     return (
         <div style={containerStyle}>
@@ -182,14 +242,17 @@ export default function PolicyView() {
                     <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
                         {isHRorAdmin && (
                             <div style={{ display: 'flex', gap: 6 }}>
-                                <button onClick={handleEdit} className="btn btn-outline" style={{ padding: '0 10px', height: 32, fontSize: '0.8rem' }}>
-                                    <Edit size={14} /> Edit
-                                </button>
                                 <button onClick={handleArchive} className="btn" style={{ background: '#ef4444', color: 'white', padding: '0 10px', border: 'none', height: 32, fontSize: '0.8rem' }}>
                                     <Archive size={14} /> Delete
                                 </button>
                             </div>
                         )}
+
+                        {/* Document upload for viewing */}
+                        <label style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'var(--surface)', padding: '6px 10px', borderRadius: 6, border: '1px solid var(--border)', cursor: 'pointer' }}>
+                            <input type="file" accept=".docx,.doc,.pdf" style={{ display: 'none' }} onChange={(e) => handleDocxUpload(e.target.files?.[0])} />
+                            <span style={{ fontSize: '0.85rem' }}>{uploading ? 'Loading...' : 'Upload Document'}</span>
+                        </label>
 
                         <div style={{ display: 'flex', gap: 4, alignItems: 'center', background: 'var(--surface)', padding: '0 8px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', height: 32 }}>
                             <button onClick={() => setPageZoom(z => Math.max(0.5, z - 0.1))} style={{ background: 'transparent', border: 'none', color: 'inherit', cursor: 'pointer', display: 'flex' }}>
@@ -228,18 +291,66 @@ export default function PolicyView() {
                     <div style={{ 
                         width: '100%', 
                         maxWidth: '1000px', 
-                        backgroundColor: '#ffffff', 
-                        border: '1px solid var(--border)',
+                        backgroundColor: '#f5f5f5', 
+                        border: '1px solid #ddd',
                         borderRadius: 'var(--radius-md)',
-                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)',
+                        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.08)',
                         display: 'flex', 
                         flexDirection: 'column' 
                     }}>
-                        <div 
-                            className="document-content ql-editor" 
-                            style={{ padding: '40px 60px', paddingBottom: '20px', flex: 1, overflow: 'visible', fontSize: '1.1rem', lineHeight: 1.6, wordBreak: 'break-word', overflowWrap: 'break-word' }}
-                            dangerouslySetInnerHTML={{ __html: policy.content || '<p style="color:#aaa; text-align:center;">No content available for this policy.</p>' }} 
-                        />
+                        {policy.documentUrl && policy.documentUrl.toLowerCase().endsWith('.pdf') ? (
+                            <div style={{ width: '100%', height: isFullScreen ? 'calc(100vh - 120px)' : '80vh', display: 'flex', justifyContent: 'center', alignItems: 'center', backgroundColor: '#ffffff', padding: 20 }}>
+                                <iframe
+                                    title="Policy PDF"
+                                    src={viewerPdfUrl || `${import.meta.env.VITE_API_URL || ''}${policy.documentUrl}`}
+                                    style={{ width: '100%', height: '100%', border: 'none', backgroundColor: '#ffffff' }}
+                                />
+                            </div>
+                        ) : (
+                            // If not PDF, show download link for DOCX or fallback to policy content
+                            (policy.documentUrl && policy.documentUrl.toLowerCase().endsWith('.docx')) ? (
+                                <div style={{ padding: '40px 60px', paddingBottom: '20px', flex: 1, overflow: 'visible', fontSize: '1.1rem', lineHeight: 1.6 }}>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 16, alignItems: 'flex-start' }}>
+                                        <div>
+                                            <div style={{ fontWeight: 600, marginBottom: 8, fontSize: '1.05rem' }}>Uploaded Document (DOCX)</div>
+                                            <p style={{ color: 'var(--text-muted)', margin: '0 0 12px 0', lineHeight: 1.5 }}>
+                                                To display the document with exact formatting in the browser, the server needs LibreOffice installed for automatic PDF conversion.
+                                            </p>
+                                            <a
+                                                href={`${import.meta.env.VITE_API_URL || ''}${policy.documentUrl}`}
+                                                download
+                                                style={{
+                                                    display: 'inline-flex',
+                                                    alignItems: 'center',
+                                                    gap: 8,
+                                                    padding: '8px 12px',
+                                                    backgroundColor: 'var(--primary)',
+                                                    color: 'white',
+                                                    textDecoration: 'none',
+                                                    borderRadius: 6,
+                                                    cursor: 'pointer',
+                                                    fontSize: '0.95rem',
+                                                    fontWeight: 500
+                                                }}
+                                            >
+                                                <Download size={16} /> Download & Open in Word
+                                            </a>
+                                        </div>
+                                        <div style={{ padding: 12, backgroundColor: '#f0f4f8', borderRadius: 6, borderLeft: '3px solid var(--primary)' }}>
+                                            <div style={{ fontSize: '0.9rem', color: 'var(--text-main)', margin: 0 }}>
+                                                <strong>Tip:</strong> For automatic PDF conversion, install LibreOffice on the server (soffice must be on PATH). After installation, restart the backend and re-upload any DOCX to convert it to PDF automatically.
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div 
+                                    className="document-content ql-editor" 
+                                    style={{ padding: '40px 60px', paddingBottom: '20px', flex: 1, overflow: 'visible', fontSize: '1.1rem', lineHeight: 1.6, wordBreak: 'break-word', overflowWrap: 'break-word' }}
+                                    dangerouslySetInnerHTML={{ __html: (policy.content || '<p style="color:#aaa; text-align:center;">No content available for this policy.</p>') }} 
+                                />
+                            )
+                        )}
                         <div style={{ padding: '10px 60px 30px', color: '#94a3b8', fontSize: '0.85rem', textAlign: 'center', borderTop: '0px solid #f1f5f9', marginTop: 'auto' }}>
                             - End of Document -
                         </div>

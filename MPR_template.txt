@@ -1,0 +1,498 @@
+QA :(
+S.No	Activity	Responsibilities	Project Name	Rating	Remarks
+PART A	Requirement Gathering	effectively understands the requirement	Part sales management	3	
+		Preparing test cases,Test plan,Test scenario,	NMPR		
+		conformance to Software Requirement Specification document for the test cases			
+	Testing	Number of Test Cases Written	NMPR		280 test cases(133 yet upload in JIRA)
+		Number of Test Cases Run	Not for this month		
+		Updating test case result 	Not for this month		
+		Updating defects in JIRA	4M		Screen shots uploaded in JIRA
+		bug reports are free of spelling errors and very clear	Not for this month		
+		testers to communicate with developers about possible vulnerabilities	Not for this month		
+		QA Plan-estimates and set the milestone	Not for this month		
+		how many bugs were reassigned back to the developer	Not for this month		
+		Risk analysis and Static testing feedback	Not for this month		
+	Retesting	Number of critical defects (functional and validation)identifed by QA 	Not for this month		
+		Reoccurence of issues during successive test iterations	Not for this month		
+		how many of your bugs resulted in a valid fix	Not for this month		
+		Updating retesting results	Not for this month		
+	UAT & Go Live	Number of Defects Raised in Live Production	Not for this month		
+		Number of Defects Raised in UAT Production	Not for this month		
+		resolving the root cause of the complaints 	Not for this month		
+		Reopen of  closed  issue in production support	Not for this month		
+		Updation of Test pal,test case and test scenario based on change request and modification	Not for this month		
+	Working with QA team	contributions to other testers' bugs and Work within the QA team	Not for this month		
+		evaluating the test cases or test plans prepared by other tester with reference to the requirement document	Not for this month		
+	Automation testing	Learning & implementing Adapting new testing technology	Not for this month		
+		Implementation of Test automation & test tools	Not for this month		
+	Documents	Preparing MoM	Amruth-OSD,PO,Tand T ,NMPR		
+		Traceability Metrics document preparation	Not for this month		
+		Flowchart designing	Part sales management		
+		SRS	NMPR		
+		Preparing user manual	Not for this month		
+	Reporting	Usage of EPMS with detailed task description		3	Not requesting to add project,NMPR module not added,Lunch not added in EPMS
+		Reply to mails with in 15 mins to client/management		5	
+		Keep management informed about milestone delays		5	
+		Reporting to supervisor		5	
+	Client interaction	number of customer complaints received for the month	Not for this month		
+		responds timely to customer needs	Not for this month		
+		Delivers products and services on time	Not for this month		
+		Keepg management and client informed in advance when unable to deliver a requested product or service, 	Not for this month		
+		Provides to customers status reports and progress updates	Not for this month		
+		Seeks customer feedback  after delivery	Not for this month		
+		Handling adverse customer reactions	Not for this month		
+	Rework	Reason for failure to meet the specification			Flow chart was reworked with Sir
+		Number of rework			
+	Team work	 Helps teammates who need or ask for support or assistance			
+		sharing information or expertise, working together to solve problems			
+		Delegation of work within team			
+		cooperatives and have good relation with others			
+	Discipline	well behaved, polite and  disciplined			
+		Aware of rules and regulation and tries to abide			
+	Accountability and reliability	Stays focused on tasks in spite of distractions and interruptions			
+		not make excuses for errors or problems; acknowledges and corrects mistake			
+		Accepts personal responsibility for quality and timeliness of work			
+	Self management 	Planning and execution of work			
+		Priority Setting of task			
+		Ability and willingness to accept new/more complex duties/responsibilities 			
+		New technology learnt for the month	No new technology learnt		
+		Able to understand cases, DB design from peers and proceed			
+	Communication	Listening:Gives the speaker undivided attention			
+		Reading:Confirms understanding by paraphrasing or summarizing what others have said			
+		Email writing : Uses correct vocabulary, spelling, grammar, and punctuation			
+		Speaking : Ability to convey thoughts &feelings with clarity		2	Should speak with clarity
+	Stress Tolerence	Handles high workloads and stay calms,			
+		 Stays calm and maintains focus in emergency situations  and continues to perform effectively			
+		Handles task of peers during their absence			
+	Interviewing others	Identifying and preparing key questions			
+		Evaluvating the capability of the candidate 			
+		documenting the interview feedback			
+		Recommending the right candidate 			
+	Attendance & professional attire	Puntuality			
+		Leave without approvals/absence leading to overload of collegues and delay delivery			
+		Dress code			
+	Problem solving skills	Frames problems before trying to solve them. Breaks down problems and identifies all of their facets, including hidden or tricky aspects.			
+		 Shows insight into the root-causes of problems. Generates a range of solutions and courses of action with benefits			
+		 thinks ‘outside the box’ to find options			
+		Seeks advice from those who’ve solved similar problems.			
+)
+
+
+.NET developer : (
+
+S.No	Activity	Responsibilities	Project Name	Rating	Remarks
+PART A	Requirement gathering & Documentation	Ability to understand user requirement from PM and build technical workflow from it	POS		YES
+		Analysis of requirement/problem and proving technical solution			YES
+		Preparing undersatanding document, SRS and SDD and flow chart			NO
+		Build ER, class diagrams and mock up screen based on user requirement	POS		YES
+	Database	Create/Edit Table in SQL	POS		YES
+		Create/Edit Stored Procedure in SQL with committ and roll back			YES
+		Create/Edit Function in SQL			YES
+		Backup the DB in SQL			YES
+		Restore the DB in SQL			YES
+	WBS	Preparation of WBS	POS		YES
+		Adherence to Work Schedule/WBS			NO
+	Development & Coding	Create Server solution in Visual Studio	POS,CEV		YES
+		Create Client solution in Visual Studio			YES
+		Understand the framework of Server side solution with MVC,3 tire architecture			YES
+		Understand the framework of Client side solution with MVC,Variable declaration,using function avoid duplicate coding			YES
+		Create API method in Server solution- controllers,model,DAL,BAL,naming of variables			YES
+		Made the unit testing for API method (like: Post man)			YES
+		Prepare the schedule for the Development activities			YES
+		Integrate API method in Client solution			YES
+		CSS: Working with CSS ie. Apply the style and made Screen Responsive			YES
+		Javascript/jQuery: Working with jQuery/JavaScript for Client side validation and Call the Ajax method			YES
+		Add comment line for understanding the code at each page			YES
+		Exception identification: Use the Try Catch block at all the functions			YES
+		Exception handling : Write the error on Log file (Textfile/Table in DB)			YES
+		Naming the class, variable, function and object as the framework			YES
+		Send the email content/notification by coding			YES
+	Unit Testing	Testing application throughly before handover to QA	POS		YES
+		Number of critical defects (functional and validation)identifed by QA 			
+		Reoccurence of issues during successive test iterations			
+	Deployment	Add new URL on IIS application	CEV		YES
+		Publish the latest changes in Visual Studio			YES
+		Deploy the latest code on Athena server			YES
+		Knowledge about Deployment checklist			NO
+		Deployment on UAT server			YES
+	Production Support	Number of issues/modification/change request from client during production support	CEV		2
+		Undesatnding the issue,Diagnosis approach			YES
+		Ability to estimate the time requirement for each activity			YES(1 day)
+		Identification of root cause and correlating the occurance with root cause			sequence duplicate
+		Able to reprodcue the issue with root cause			repoduced by Gowtham
+		Idenitfication of countermeasure for the root cause			
+		Impact analysis			yes
+		Applying the solution, testing, deploying and monitoring			
+		Cofirmation from client on issue closure			not checked with client
+		Reopen of  closed  issue in production support			No
+		Updation of SRS,SDD and database based on change request and modification			Not required
+	Git Changes	Initial commit the code to Git lab	POS,CEV	5	at time project kick off
+		Clone the code from Git lab	POS	5	YES
+		Get/Fetch the latest code from Git lab		5	YES
+		Commit the code to Git lab		5	YES
+	Jira Tickets	Create task in Jira application		5	YES
+		Update the comments in Jira application		5	YES
+	Reporting	Usage of EPMS with detailed task description		3	Missing to add task
+		Reply to mails with in 15 mins to client/management		5	No reply to customer directly
+		Reporting to supervisor		5	YES
+	Rework	Reason for failure to meet the specification		0	
+		Number of rework	No	0	
+	Customer focus and complaints	number of customer complaints received for the month		5	zero complaints
+		responds timely to customer needs		3	
+		Delivers products and services on time		4	
+		Keepg management and client informed in advance when unable to deliver a requested product or service, 		4	
+		Provides to customers status reports and progress updates		0	
+		Seeks customer feedback  after delivery		0	
+		Handling adverse customer reactions		0	
+PART B	Team work	 Helps teammates who need or ask for support or assistance		5	
+		sharing information or expertise, working together to solve problems		5	
+		Delegation of work within team		5	
+		cooperatives and have good relation with others		5	
+	Discipline	well behaved, polite and  disciplined		5	
+		Aware of rules and regulation and tries to abide		5	
+	Accountability and reliability	Stays focused on tasks in spite of distractions and interruptions		5	
+		not make excuses for errors or problems; acknowledges and corrects mistake		5	
+		Accepts personal responsibility for quality and timeliness of work		5	
+	Self management 	Planning and execution of work		5	
+		Priority Setting of task		4	
+		Ability and willingness to accept new/more complex duties/responsibilities 		5	
+		New technology learnt for the month		5	
+		Able to understand coding, DB design from peers and proceed		5	
+	Communication	Listening:Gives the speaker undivided attention		5	
+		Reading:Confirms understanding by paraphrasing or summarizing what others have said		5	
+		Email writing : Uses correct vocabulary, spelling, grammar, and punctuation		5	
+		Speaking : Ability to convey thoughts &feelings with clarity		5	
+	Stress Tolerence	Handles high workloads and stay calms,		5	
+		 Stays calm and maintains focus in emergency situations  and continues to perform effectively		5	
+		Handles task of peers during their absence		5	
+	Interviewing others	Identifying and preparing key questions		5	
+		Evaluvating the capability of the candidate 		5	
+		documenting the interview feedback		5	
+		Recommending the right candidate 		5	
+	Attendance & professional attire	Puntuality		3	Should avoid late coming
+		Leave without approvals/absence leading to overload of collegues and delay delivery		5	No leave without approval
+		Dress code		5	
+	Problem solving skills	Frames problems before trying to solve them. Breaks down problems and identifies all of their facets, including hidden or tricky aspects.		5	
+		 Shows insight into the root-causes of problems. Generates a range of solutions and courses of action with benefits		5	
+		 thinks ‘outside the box’ to find options		4	
+		Seeks advice from those who’ve solved similar problems.		5	
+)
+
+IT system admin :(
+   "also add Remarks column"
+    S.NO	Team	Responsibilities	Sep
+1	IT Support	Health check activity-Ram usage	2
+2		Firewall monitoring	0
+3		 EB Unit Report	2
+4		New User creation and configure in AD & AD user password reset	3
+5		New Mail ID create and configure and password reset in Office 365 Portal	3
+6		Microsoft Office application install and config for users	3
+7		Outlook mails configure & backup and restore	3
+8		New VPN user creation and configure to users.	3
+9		Old VPN user disable	3
+10		Maintain the Asset database report.	3
+11		windows update & drivers update for user laptop	3
+12		Sytem slowness issue fix	3
+13		Laptop for New joining :
+Install and configure the required softwares and AD user configuration when new resource Joining - 	3
+14		Backup of exixting code in the external hard disk	3
+15		OS install & reinstall for user laptop	3
+16		Remote Support : Remote support for WFH employees	3
+17		online support for fix the Outlook error,teams error,Deployment support	3
+18	Database 	Backup and restore the Database	3
+19		create the new database and reset the password to existing database.	3
+20	Internet 	ISP Maintaining with Ragav Communications	3
+21	Hardware 	Network Printer driver update & support	3
+22		Keyboard,display,battery,cable replacement	3
+23	MES	Problem report validation	NA
+24		Incident report validation : Filter & Segregate the report per individualy	NA
+25		 Application list &knowledge validation Validate the application knowledge for team members-	NA
+26		MES attendance report validation: Filter & Segregate the report per individualy	NA
+27		Best Performer report preparation	NA
+28		Get the access for  4M and UDC servers & others from MES	NA
+29		Schedule the Weekly Meeting with MES and RNAIPL	NA
+30		Schedule the Monthly Meeting with MES and RNAIPL	NA
+31		Participated Monthly Meeting with MES and Hitachi	NA
+32		Participated the Monthly pre Meeting with MES and Hitachi	NA
+33		Trainig schedule	NA
+34		Intervirew process for MES resource	3
+35		General - Discussion based on the requirement (Like leave request, Report preparation,.etc)	NA
+36	NOC	shift Hand over report  Validate	NA
+37		 application knowledge : Validate the application knowledge for team members-	NA
+38		 problem report : Validation with Balaji	NA
+39		 attendance report validate : Filter & Segregate the report per individualy	NA
+40		Best Performer report consolidate	NA
+41		Schedule the Weekly Meeting with NOC and RNAIPL	NA
+42		Schedule the Monthly Meeting with NOC and RNAIPL	NA
+43		Intervirew process for NOC resource	NA
+44		Training report	NA
+45		General - Discussion based on the requirement (Like leave request, Report preparation,.etc)	NA
+46	TIBCO	TIBCO teams daily snap shot report consolidate	3
+47		TIBCO teams weekly Time sheet consolidates	3
+48		TIBCO Weekly report Validate	3
+49	Others	Tshirt order and stock maintain	3
+50		Courier and ID card print	3
+51		Bank work	3
+52		Account opening support	3
+53		UPS	3
+54		AC maintenance & service reminder	2
+55		Fire extinguisher refilling -expiary date	3
+	Jira	Tickets received and attended	2
+	Rework	Reason for failure to meet the specification	
+		Number of rework	
+	Team work	 Helps teammates who need or ask for support or assistance	3
+		sharing information or expertise, working together to solve problems	3
+		Delegation of work within team	3
+		cooperatives and have good relation with others	3
+	Discipline	well behaved, polite and  disciplined	2
+		Aware of rules and regulation and tries to abide	2
+	Accountability and reliability	Stays focused on tasks in spite of distractions and interruptions	2
+		not make excuses for errors or problems; acknowledges and corrects mistake	2
+		Accepts personal responsibility for quality and timeliness of work	2
+	Self management 	Planning and execution of work	3
+		Priority Setting of task	3
+		Ability and willingness to accept new/more complex duties/responsibilities 	3
+		New technology learnt for the month	0
+		Able to understand coding, DB design from peers and proceed	0
+	Communication	Listening:Gives the speaker undivided attention	2
+		Reading:Confirms understanding by paraphrasing or summarizing what others have said	3
+		Email writing : Uses correct vocabulary, spelling, grammar, and punctuation	3
+		Speaking : Ability to convey thoughts &feelings with clarity	2
+	Stress Tolerence	Handles high workloads and stay calms,	2
+		 Stays calm and maintains focus in emergency situations  and continues to perform effectively	2
+		Handles task of peers during their absence	3
+	Interviewing others	Identifying and preparing key questions	3
+		Evaluvating the capability of the candidate 	3
+		documenting the interview feedback	3
+		Recommending the right candidate 	3
+	Attendance & professional attire	Puntuality	3
+		Leave without approvals/absence leading to overload of collegues and delay delivery	3
+		Dress code	2
+	Problem solving skills	Frames problems before trying to solve them. Breaks down problems and identifies all of their facets, including hidden or tricky aspects.	NA
+		 Shows insight into the root-causes of problems. Generates a range of solutions and courses of action with benefits	NA
+		 thinks ‘outside the box’ to find options	NA
+		Seeks advice from those who’ve solved similar problems.	NA
+			2.5)
+
+
+ business analysis : (
+    S.No	Activity	Responsibilities	February
+	Requirement gathering & Documentation	Ability to understand user requirement from client and build technical workflow from it	
+		Analysis of requirement from SRS and capability to reproduce	
+		Preparing undersatanding document, SRS  and flow chart using Lucid	
+		Gathering critical information from meetings with various stakeholders and producing useful reports such as MOM	
+		develop  flow charts, activity diagrams, decision trees and decision tables to support the business requirements	
+	Monitoring team	Manage projects, develop project plans, and monitor performance	
+		Act as the point of contact and communicate project status to all participants	
+		 Assign tasks to internal teams and assist with schedule management. 	
+		Monitor project progress and handle any issues that arise	
+		Work on: Methodologies: SCRUM, Agile, Waterfall, Microsoft Office Suite (MS Project, MS Visio, MS Word, MS Excel, MS PowerPoint, MS Access) and JIRA	
+		Monitoring deliverables and ensuring timely completion of projects	
+		 Monitoring deliverables and ensuring timely completion of projects.	
+	Delivery	Should actively function on developing user-testing scenarios via testing approaches.	
+		Assure quality products are released into production.	
+		Perform all Quality Assurance tasks to assure requirements associated with each project and release are identified, classified and communicated.	
+	Reporting	Usage of EPMS with detailed task description	
+		Reply to mails with in 15 mins to client/management	
+		Reporting to supervisor	
+	Customer focus and complaints	number of customer complaints received for the month	
+		responds timely to customer needs	
+		Delivers products and services on time	
+		Keepg management and client informed in advance when unable to deliver a requested product or service, 	
+		Provides to customers status reports and progress updates	
+		Seeks customer feedback  after delivery	
+		Handling adverse customer reactions	
+	Jira Tickets	Create task in Jira application	
+		Update the comments in Jira application	
+		Training new joinees on Jira	
+		Addressing customer tickedt in JIRA	
+	Communication	Listening:Gives the speaker undivided attention	
+		Reading:Confirms understanding by paraphrasing or summarizing what others have said	
+		Email writing : Uses correct vocabulary, spelling, grammar, and punctuation	
+		Speaking : Ability to convey thoughts &feelings with clarity	
+		Planning and execution of work	
+	Self Management	Priority Setting of task	
+		Ability and willingness to accept new/more complex duties/responsibilities 	
+		New technology learnt for the month	
+		Able to understand coding, DB design from peers and proceed	
+	Customer focus and complaints	number of customer complaints received for the month	
+		responds timely to customer needs	
+		Delivers products and services on time	
+		Keepg management and client informed in advance when unable to deliver a requested product or service, 	
+		Provides to customers status reports and progress updates	
+		Seeks customer feedback  after delivery	
+		Handling adverse customer reactions	
+ )  
+
+HR : (
+    S.No	Activity	Responsibilities	Rating	Remarks	April
+1	Sourcing	Collecting Manpower requirement			
+2		Upload the requirement in JIRA			
+3		Sourcing profiles from Job portal			
+4		Screening profiles and shortlisting		System admin	
+5		Profile conversion to Elintsys /Intgro format			
+6		Schedule Interview		ramesh,prabhu ,guruvayoorappan 	
+7		Send Letter of Indent to selected candidates			
+8		Collecting & Verifying documents from Candidate			
+9		Salary negotiation			
+10		Closing Positios on time			
+11		Release offer letter			
+12	OnBoarding	Fill employee joining check list		abinaya,aathi,gowthaman,babu manender( babu has to filled in Jan,but he failed	
+13		NDA,NCA,EEF		Not for this month	
+14		Issue Letter Of Appointment			
+15	Induction	Welcome Mail to employee			
+16		Conduct Induction			
+17		Collect Induction feedback form		Abinaya  (collected)aathi - pending	
+18		Initiate BVG		Abinaya (reply pending),aathi ( reply pending),manendre,gowtham(reply pending)Babu(positive)	
+19	Attendance & Leave 	Attendance Maintenance		updated	
+20		Leave and Permission management		updated	
+21	Payroll	Payroll process			
+22		Issue of payslip			
+23	Statutory Compliance	ESI upload			
+24		PF upload			
+25		Labour welfare Fund			
+26		Payslips			
+27		Form 16			
+28		Insurance			
+29		Payroll process			
+30		Statutory Audit		Muster roll for NOC and MES rework not captured in EPMS	
+31	Employee Relation	Handling employee complaints,grievences & counseling			
+32		 investigating & resolving critical issues			
+33		Verbal warning documentation,Written warning letter and discipilinary actions record on misconduct,gross misconduct and poor performance			
+34		Termination of employees			
+35	Performance Management	Share APA document to employee for self rating			
+36		Collect feedback from managers/Supervisor			
+37		Evaluvation process 			
+38		discuss with Employee about goals and area of improvements			
+39		Handover of APA letter			
+40	Off Boarding	Accptance of Resignation			
+41		Send resignation acceptance email			
+42		Inform Dos and Donts during notice period			
+43		Notify key stake holder			
+44		Collect Transition plan from supervisor			
+45		Collect NOC from supervisor			
+46		Collect NOC from system admin			
+47		Conduct exit interview			
+48		Collect company Asset			
+49		Issue exit documents- Pay slip,Relieving Letter & Service letter			
+50		Fill exit check list		Kishore	
+51	Other- Tracker	Payment tracker maintenance- Internet/bridge i2p /Office rent &maintenance/subscription			
+52		MPR tracker sheet			
+53		Employee DB			
+54		screening report			
+55		Employee hand book			
+56		Man days loss data		updated	
+57		Leave tracker report			
+58		Attendance report			
+59		Dress code report		updated	
+60		Current Employee file			
+61		Original certificate			
+62		Ex employee files			
+63		MES- Training Report			
+64		Petty Cash tracker			
+65		NOC -training report			
+66		JD & Responsibilities			
+67		Resource requirement Tracker			
+68		MES- Quaterly performance report			
+69		Employee task report			
+70	Application Training	EPMS - training		EPMS not used properly, task description not in detail,Rework of muster roll for NOC and Mes not captured, audit captured	
+71		Online test Training		Jira update on 25th 2.22023	
+72	Team work	 Helps teammates who need or ask for support or assistance			
+73		sharing information or expertise, working together to solve problems			
+74		Delegation of work within team			
+75		cooperatives and have good relation with others			
+76	Discipline	well behaved, polite and  disciplined			
+77		Aware of rules and regulation and tries to abide			
+78	Accountability and reliability	Stays focused on tasks in spite of distractions and interruptions			
+79		not make excuses for errors or problems; acknowledges and corrects mistake			
+80		Accepts personal responsibility for quality and timeliness of work			
+81	Self management 	Planning and execution of work			
+82		Priority Setting of task			
+83		Ability and willingness to accept new/more complex duties/responsibilities 			
+84		New technology learnt for the month			
+85		Able to understand coding, DB design from peers and proceed			
+86	Communication	Listening:Gives the speaker undivided attention			
+87		Reading:Confirms understanding by paraphrasing or summarizing what others have said			
+88		Email writing : Uses correct vocabulary, spelling, grammar, and punctuation			
+89		Speaking : Ability to convey thoughts &feelings with clarity			
+90	Stress Tolerence	Handles high workloads and stay calms,			
+91		 Stays calm and maintains focus in emergency situations  and continues to perform effectively			
+92		Handles task of peers during their absence			
+93	Interviewing others	Identifying and preparing key questions			
+94		Evaluvating the capability of the candidate 			
+95		documenting the interview feedback			
+96		Recommending the right candidate 			
+97	Attendance & professional attire	Puntuality			
+98		Leave without approvals/absence leading to overload of collegues and delay delivery			
+99		Dress code			
+100	Problem solving skills	Frames problems before trying to solve them. Breaks down problems and identifies all of their facets, including hidden or tricky aspects.			
+101		 Shows insight into the root-causes of problems. Generates a range of solutions and courses of action with benefits			
+102		 thinks ‘outside the box’ to find options			
+103		Seeks advice from those who’ve solved similar problems.			
+)
+
+
+web designer : (
+
+S.NO	Activity 	Responsibilities	Project Name	Rating 	Remarks
+PART A	Requirement undersatnding	Understanding Requirement Specification Document 	NMPR		no srs shared. Screened by thilagavathi
+	Mock up and wireframes	Create mock-ups for proposed project pages and update them as needed using adobe HD	NMPR		
+		Create wireframes and share to project coordinator using adobe	NMPR		
+		get approval from project coordinator to convert to html file using adobe web export plugin	POS,NMPR		approved thilagavathi and Sugumar
+	Designing	Designing using - HTML, CSS, Javascript, jQuery, Dreamweaver,photoshops Bootstrap	POS		
+		  presenting initial design  to developer as HTMLfile	POS,		shared to Santhosh - 7 screens
+		coordinating with developer by sharing plugins 	POS		
+	UAT and Golive	Fixing UI defects assigned by QA	NA		Not for this month
+		Fixing UI defects assigned by QA in UAT	NA		Not for this month
+		Fixing UI defects assigned by QA in GO live support	NA		Not for this month
+	Others		search engine optimisation (SEO)	NA		
+		   researching current design trends	NA		
+		Learning new technology	NA		
+		Maintain and update all JQuery plugins	POS		
+	WBS	Preparation of WBS			Not maintained
+		Adherence to Work Schedule/WBS	POS, NMPR		Not maintained
+	Reporting	Usage of EPMS with detailed task description			Description In detail required
+		Reply to mails with in 15 mins to client/management			
+		Reporting to supervisor			
+	Rework	Reason for failure to meet the specification	NMPR		
+		Number of rework	NMPR		2 -login page
+	GIT changes	Clone the code from Git lab			Not for this month
+		Get the latest code from Git lab			Not for this month
+		Commit the code to Git lab			Not for this month
+	Jira Tickets	Create task in Jira application	POS		NMPR project not assigned to Vinotha in JIRA, hence task recoded oly in EPMS
+		Update the comments in Jira application			
+PART B	Team work	 Helps teammates who need or ask for support or assistance			
+		sharing information or expertise, working together to solve problems			
+		Delegation of work within team			
+		cooperatives and have good relation with others			
+	Discipline	well behaved, polite and  disciplined			
+		Aware of rules and regulation and tries to abide			
+	Accountability and reliability	Stays focused on tasks in spite of distractions and interruptions			
+		not make excuses for errors or problems; acknowledges and corrects mistake			
+		Accepts personal responsibility for quality and timeliness of work			
+	Self management 	Planning and execution of work			
+		Priority Setting of task			
+		Ability and willingness to accept new/more complex duties/responsibilities 			
+		New technology learnt for the month			
+		Able to understand coding, DB design from peers and proceed			
+	Communication	Listening:Gives the speaker undivided attention			
+		Reading:Confirms understanding by paraphrasing or summarizing what others have said			
+		Email writing : Uses correct vocabulary, spelling, grammar, and punctuation			
+		Speaking : Ability to convey thoughts &feelings with clarity			
+	Stress Tolerence	Handles high workloads and stay calms,			
+		 Stays calm and maintains focus in emergency situations  and continues to perform effectively			
+		Handles task of peers during their absence			
+	Interviewing others	Identifying and preparing key questions			
+		Evaluvating the capability of the candidate 			
+		documenting the interview feedback			
+		Recommending the right candidate 			
+	Attendance & professional attire	Puntuality			
+		Leave without approvals/absence leading to overload of collegues and delay delivery			
+		Dress code			
+	Problem solving skills	Frames problems before trying to solve them. Breaks down problems and identifies all of their facets, including hidden or tricky aspects.			
+		 Shows insight into the root-causes of problems. Generates a range of solutions and courses of action with benefits			
+		 thinks ‘outside the box’ to find options			
+		Seeks advice from those who’ve solved similar problems.			
+
+)
+

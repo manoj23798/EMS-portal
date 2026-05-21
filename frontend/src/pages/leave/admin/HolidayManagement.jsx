@@ -202,7 +202,7 @@ const HolidayManagement = () => {
                     font-size: 11px;
                     font-weight: 900;
                     text-transform: uppercase;
-                    color: #94a3b8;
+                    color: #64748b;
                     letter-spacing: 2px;
                     border-bottom: 2px solid #f8fafc;
                 }
@@ -282,7 +282,7 @@ const HolidayManagement = () => {
                 .label-premium {
                     font-size: 11px;
                     font-weight: 900;
-                    color: #94a3b8;
+                    color: #64748b;
                     text-transform: uppercase;
                     letter-spacing: 1.5px;
                     margin-bottom: 10px;
@@ -358,7 +358,7 @@ const HolidayManagement = () => {
                 <div style={{ marginBottom: '35px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <h3 style={{ fontSize: '16px', fontWeight: 900, color: '#475569', margin: 0 }}>Upcoming Holidays ({filteredHolidays.length})</h3>
                     <div style={{ position: 'relative' }}>
-                        <Search size={18} style={{ position: 'absolute', left: '18px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                        <Search size={18} style={{ position: 'absolute', left: '18px', top: '50%', transform: 'translateY(-50%)', color: '#64748b' }} />
                         <input className="input-premium" style={{ width: '300px', padding: '14px 20px 14px 50px', borderRadius: '16px', fontSize: '13px' }} placeholder="Search holiday..." />
                     </div>
                 </div>
@@ -366,7 +366,7 @@ const HolidayManagement = () => {
                 {loading ? (
                     <div style={{ padding: '120px 0', textAlign: 'center' }}>
                         <div style={{ width: '50px', height: '50px', border: '6px solid #f1f5f9', borderTopColor: '#ea580c', borderRadius: '50%', animation: 'spin 1s linear infinite', margin: '0 auto 20px' }}></div>
-                        <div style={{ fontSize: '12px', fontWeight: 900, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '2px' }}>Loading holidays...</div>
+                        <div style={{ fontSize: '12px', fontWeight: 900, color: '#64748b', textTransform: 'uppercase', letterSpacing: '2px' }}>Loading holidays...</div>
                     </div>
                 ) : (
                     <table className="registry-table">
@@ -410,7 +410,7 @@ const HolidayManagement = () => {
                                 <tr>
                                     <td colSpan="4" style={{ padding: '150px 0', textAlign: 'center' }}>
                                         <div style={{ color: '#e2e8f0', marginBottom: '20px' }}> <Globe size={80} /> </div>
-                                        <div style={{ fontSize: '12px', fontWeight: 900, color: '#cbd5e1', textTransform: 'uppercase', letterSpacing: '4px' }}>No holidays found</div>
+                                        <div style={{ fontSize: '12px', fontWeight: 900, color: '#64748b', textTransform: 'uppercase', letterSpacing: '4px' }}>No holidays found</div>
                                     </td>
                                 </tr>
                             )}
@@ -425,7 +425,7 @@ const HolidayManagement = () => {
                         <div style={{ padding: '40px', background: '#fcfcfc', borderBottom: '1.5px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <div>
                                 <h2 style={{ margin: 0, fontSize: '22px', fontWeight: 900, letterSpacing: '-0.5px' }}>ADD NEW HOLIDAY</h2>
-                                <p style={{ margin: '4px 0 0 0', fontSize: '11px', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '2px' }}>Add a new holiday to the calendar</p>
+                                <p style={{ margin: '4px 0 0 0', fontSize: '11px', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '2px' }}>Add a new holiday to the calendar</p>
                             </div>
                             <button onClick={() => setShowModal(false)} style={{ width: '44px', height: '44px', borderRadius: '14px', background: 'white', border: '1.5px solid #e2e8f0', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b' }}> <X size={22} /> </button>
                         </div>
@@ -446,7 +446,7 @@ const HolidayManagement = () => {
                                 </select>
                             </div>
                             <div style={{ display: 'flex', gap: '15px' }}>
-                                <button type="button" onClick={() => setShowModal(false)} style={{ flex: 1, padding: '20px', borderRadius: '20px', background: 'white', border: '2px solid #f1f5f9', color: '#94a3b8', fontWeight: 900, fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px', cursor: 'pointer' }}>Cancel</button>
+                                <button type="button" onClick={() => setShowModal(false)} style={{ flex: 1, padding: '20px', borderRadius: '20px', background: 'white', border: '2px solid #f1f5f9', color: '#64748b', fontWeight: 900, fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px', cursor: 'pointer' }}>Cancel</button>
                                 <button type="submit" style={{ flex: 2, padding: '20px', borderRadius: '20px', background: '#ea580c', border: 'none', color: 'white', fontWeight: 900, fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1.5px', cursor: 'pointer', boxShadow: '0 10px 25px rgba(234, 88, 12, 0.2)' }}>Save Holiday</button>
                             </div>
                         </form>

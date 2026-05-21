@@ -1,12 +1,11 @@
 package com.ems.controller;
 
 import com.ems.dto.response.DepartmentResponse;
-import com.ems.entity.Department;
-import com.ems.repository.DepartmentRepository;
+import com.ems.entity.Employee.Department;
+import com.ems.repository.Employee.DepartmentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
