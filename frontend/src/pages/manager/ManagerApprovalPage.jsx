@@ -1527,7 +1527,32 @@ const ManagerApprovalPage = () => {
                 }
             `}</style>
 
-            {/* Portal switch removed - defaulting to Leave Approvals with yearly breakdown */}
+            <div className="ma-portal-switch">
+                <button
+                    type="button"
+                    className={`ma-portal-switch-btn ${location.pathname === '/manager/leave-requests' ? 'active' : ''}`}
+                    onClick={() => navigate('/manager/leave-requests')}
+                >
+                    <Calendar size={14} /> Leave Approvals
+                </button>
+                <button
+                    type="button"
+                    className={`ma-portal-switch-btn ${location.pathname === '/manager/permission-requests' ? 'active' : ''}`}
+                    onClick={() => navigate('/manager/permission-requests')}
+                >
+                    <Clock size={14} /> Permission Approvals
+                </button>
+                <div style={{ width: '1px', background: '#cbd5e1', margin: '4px 2px' }} />
+                <button
+                    type="button"
+                    className={`ma-portal-switch-btn ${!showAnalysis ? 'active' : ''}`}
+                    onClick={() => setShowAnalysis(!showAnalysis)}
+                    style={{ color: showAnalysis ? '#0ea5e9' : '#64748b' }}
+                >
+                    {showAnalysis ? <Eye size={14} /> : <EyeOff size={14} />} 
+                    {showAnalysis ? 'Hide' : 'Show'} Analysis
+                </button>
+            </div>
 
             {showAnalysis && (
                 <div className="ma-layout-grid">
@@ -1596,11 +1621,7 @@ const ManagerApprovalPage = () => {
                                 ))
                             )}
                         </div>
-                        <div className="ma-period-selector">
-                            <button type="button" className={`ma-period-btn ${breakdownPeriod === 'week' ? 'active' : ''}`} onClick={() => setBreakdownPeriod('week')}>Week</button>
-                            <button type="button" className={`ma-period-btn ${breakdownPeriod === 'month' ? 'active' : ''}`} onClick={() => setBreakdownPeriod('month')}>Month</button>
-                            <button type="button" className={`ma-period-btn ${breakdownPeriod === 'year' ? 'active' : ''}`} onClick={() => setBreakdownPeriod('year')}>Year</button>
-                        </div>
+                        {/* Period selector removed — defaulting to yearly breakdown */}
                         <div className="ma-breakdown-mini">
                             <div className="ma-breakdown-mini-item">
                                 <div className="ma-breakdown-mini-label">Total Leave</div>
