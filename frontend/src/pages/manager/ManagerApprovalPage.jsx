@@ -1621,11 +1621,7 @@ const ManagerApprovalPage = () => {
                                 ))
                             )}
                         </div>
-                        <div className="ma-period-selector">
-                            <button type="button" className={`ma-period-btn ${breakdownPeriod === 'week' ? 'active' : ''}`} onClick={() => setBreakdownPeriod('week')}>Week</button>
-                            <button type="button" className={`ma-period-btn ${breakdownPeriod === 'month' ? 'active' : ''}`} onClick={() => setBreakdownPeriod('month')}>Month</button>
-                            <button type="button" className={`ma-period-btn ${breakdownPeriod === 'year' ? 'active' : ''}`} onClick={() => setBreakdownPeriod('year')}>Year</button>
-                        </div>
+                        {/* Period selector removed — default breakdownPeriod remains 'year' */}
                         <div className="ma-breakdown-mini">
                             <div className="ma-breakdown-mini-item">
                                 <div className="ma-breakdown-mini-label">Total Leave</div>
