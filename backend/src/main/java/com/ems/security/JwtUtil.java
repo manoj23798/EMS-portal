@@ -19,7 +19,7 @@ import java.util.function.Function;
 public class JwtUtil {
 
     // Application-wide secret key
-    @Value("${jwt.secret:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}")
+    @Value("${jwt.secret:XGjqsYml7zjpIYEQUwI7UeAZc6Wt5GKb86onW6AjfeM=}")
     private String secretString;
 
     private SecretKey getSecretKey() {
