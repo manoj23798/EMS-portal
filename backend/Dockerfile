@@ -2,7 +2,7 @@ FROM eclipse-temurin:17-jre-focal
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-    libreoffice-core libreoffice-writer libreoffice-common libreoffice-formatpack-en \
+    libreoffice-core libreoffice-writer libreoffice-common \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
