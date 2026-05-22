@@ -20,7 +20,8 @@ import {
     PieChart,
     Pie,
     Cell,
-    ResponsiveContainer
+    ResponsiveContainer,
+    Tooltip as RechartsTooltip
 } from 'recharts';
 import { LeaveStatsAPI, ManagerAPI } from '../../services/api';
 
@@ -289,8 +290,6 @@ const ManagerApprovalPage = () => {
     const [showFilters, setShowFilters] = useState(false);
     const [breakdownYear, setBreakdownYear] = useState(new Date().getFullYear());
     const [breakdownPeriod, setBreakdownPeriod] = useState('year');
-    const [categoryPopup, setCategoryPopup] = useState(null);
-    const popupCloseTimerRef = useRef(null);
     const [filters, setFilters] = useState({
         employeeId: '',
         status: 'ALL',
@@ -300,6 +299,11 @@ const ManagerApprovalPage = () => {
     });
     const [showAnalysis, setShowAnalysis] = useState(true);
     const [activeCategorySlice, setActiveCategorySlice] = useState(null);
+    const [categoryPopupIndex, setCategoryPopupIndex] = useState(null);
+    const [categoryPopupLocked, setCategoryPopupLocked] = useState(false);
+    const [categoryPopupPosition, setCategoryPopupPosition] = useState(null);
+    const categoryChartRef = useRef(null);
+    const categoryPopupRef = useRef(null);
 
     useEffect(() => {
         const fetchAllData = async () => {
@@ -319,6 +323,25 @@ const ManagerApprovalPage = () => {
 
         fetchAllData();
     }, []);
+
+    useEffect(() => {
+        const handleDocumentMouseDown = (event) => {
+            const chartNode = categoryChartRef.current;
+            const popupNode = categoryPopupRef.current;
+
+            if (!categoryPopupLocked) return;
+            if (chartNode?.contains(event.target)) return;
+            if (popupNode?.contains(event.target)) return;
+
+            setCategoryPopupLocked(false);
+            setCategoryPopupIndex(null);
+            setCategoryPopupPosition(null);
+            setActiveCategorySlice(null);
+        };
+
+        document.addEventListener('mousedown', handleDocumentMouseDown);
+        return () => document.removeEventListener('mousedown', handleDocumentMouseDown);
+    }, [categoryPopupLocked]);
 
     const employeeOptions = useMemo(() => {
         const uniqueEmployees = new Map();
@@ -343,6 +366,10 @@ const ManagerApprovalPage = () => {
         { value: 'Urgent Leave', label: 'Unplanned Leave' },
         { value: 'Casual Leave', label: 'Casual Leave' }
     ]), []);
+
+    const currentCategorySlice = categoryPopupIndex !== null
+        ? categoryStats.entries[categoryPopupIndex]
+        : (activeCategorySlice !== null ? categoryStats.entries[activeCategorySlice] : null);
 
     const showLopCountColumn = filters.status === 'LOP';
 
@@ -481,63 +508,47 @@ const ManagerApprovalPage = () => {
         };
     }, [employeeDateFilteredRequests]);
 
-    useEffect(() => () => {
-        if (popupCloseTimerRef.current) {
-            clearTimeout(popupCloseTimerRef.current);
-        }
-    }, []);
+    const CategoryTooltip = ({ slice, coordinate }) => {
+        if (!slice) return null;
 
-    const CategoryTooltip = () => {
-        if (!categoryPopup) return null;
-
-        const { entry } = categoryPopup;
-        const requestItems = entry?.requests || [];
+        const requestItems = slice.requests || [];
         const hideEmployeeName = Boolean(filters.employeeId);
-        const left = Math.max(12, categoryPopup.x - 16);
-        const top = categoryPopup.y + 16;
+        const tooltipStyle = coordinate
+            ? {
+                position: 'fixed',
+                left: `${coordinate.x - 16}px`,
+                top: `${coordinate.y + 16}px`
+            }
+            : {};
 
         return (
-            <div
-                style={{
-                    background: 'white',
-                    border: '1px solid #dbe4ef',
-                    borderRadius: '14px',
-                    boxShadow: '0 18px 40px rgba(15, 23, 42, 0.12)',
-                    padding: '12px 14px',
-                    minWidth: '260px',
-                    maxWidth: '360px',
-                    zIndex: 25,
-                    pointerEvents: 'auto',
-                    position: 'absolute',
-                    left: `${left}px`,
-                    top: `${top}px`,
-                    transform: 'translateX(-100%)'
-                }}
-                onMouseEnter={() => {
-                    if (popupCloseTimerRef.current) {
-                        clearTimeout(popupCloseTimerRef.current);
-                        popupCloseTimerRef.current = null;
-                    }
-                }}
-                onMouseLeave={() => {
-                    setCategoryPopup(null);
-                    setActiveCategorySlice(null);
-                }}
-            >
+            <div ref={categoryPopupRef} style={{
+                background: 'white',
+                border: '1px solid #dbe4ef',
+                borderRadius: '14px',
+                boxShadow: '0 18px 40px rgba(15, 23, 42, 0.12)',
+                padding: '12px 14px',
+                minWidth: '260px',
+                maxWidth: '360px',
+                zIndex: 25,
+                pointerEvents: 'auto',
+                transform: coordinate ? 'translateX(-100%)' : 'none',
+                ...tooltipStyle
+            }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', marginBottom: '10px' }}>
                     <div style={{ fontSize: '11px', fontWeight: 950, color: '#1e293b', textTransform: 'uppercase', letterSpacing: '1px' }}>
-                        {entry?.name || 'Leave Category'}
+                        {slice?.name || 'Leave Category'}
                     </div>
                     <div style={{ textAlign: 'right', lineHeight: 1 }}>
                         <div style={{ fontSize: '9px', fontWeight: 950, color: '#ef4444', textTransform: 'uppercase', letterSpacing: '0.8px' }}>
                             Total Leaves
                         </div>
                         <div style={{ fontSize: '18px', fontWeight: 950, color: '#ef4444', marginTop: '4px' }}>
-                            {entry?.v || 0}
+                            {slice?.v || 0}
                         </div>
                     </div>
                 </div>
-                <div style={{ display: 'grid', gap: '10px', maxHeight: '260px', overflowY: 'auto', paddingRight: '4px' }}>
+                <div style={{ display: 'grid', gap: '10px', maxHeight: '260px', overflowY: 'auto' }}>
                     {requestItems.map((request, index) => (
                         <div key={`${request.employeeName}-${index}`} style={{ borderBottom: index === requestItems.length - 1 ? 'none' : '1px solid #eef2f7', paddingBottom: index === requestItems.length - 1 ? 0 : '10px' }}>
                             {!hideEmployeeName && (
@@ -1677,29 +1688,7 @@ const ManagerApprovalPage = () => {
 
                     <div className="ma-card-ui">
                         <div className="ma-card-title-ui">By Category</div>
-                        <div
-                            style={{ height: '175px', position: 'relative', minWidth: 0 }}
-                            onMouseMove={(event) => {
-                                if (!categoryPopup) return;
-
-                                const bounds = event.currentTarget.getBoundingClientRect();
-                                setCategoryPopup((previous) => previous ? ({
-                                    ...previous,
-                                    x: event.clientX - bounds.left,
-                                    y: event.clientY - bounds.top
-                                }) : previous);
-                            }}
-                            onMouseLeave={() => {
-                                if (popupCloseTimerRef.current) {
-                                    clearTimeout(popupCloseTimerRef.current);
-                                }
-
-                                popupCloseTimerRef.current = setTimeout(() => {
-                                    setCategoryPopup(null);
-                                    setActiveCategorySlice(null);
-                                }, 120);
-                            }}
-                        >
+                        <div ref={categoryChartRef} style={{ height: '175px', position: 'relative', minWidth: 0 }}>
                             <ResponsiveContainer width="100%" height="100%">
                                 <PieChart>
                                     <Pie
@@ -1709,28 +1698,41 @@ const ManagerApprovalPage = () => {
                                         dataKey="v"
                                         stroke="none"
                                         onMouseEnter={(_, index, event) => {
-                                            const entry = categoryStats.entries[index];
-                                            if (!entry) return;
-
-                                            if (popupCloseTimerRef.current) {
-                                                clearTimeout(popupCloseTimerRef.current);
-                                                popupCloseTimerRef.current = null;
-                                            }
-
-                                            const bounds = event?.currentTarget?.getBoundingClientRect?.();
-                                            const x = bounds ? (event.clientX - bounds.left) : 0;
-                                            const y = bounds ? (event.clientY - bounds.top) : 0;
-
+                                            if (categoryPopupLocked) return;
                                             setActiveCategorySlice(index);
-                                            setCategoryPopup({ entry, x, y });
+                                            if (event?.clientX != null && event?.clientY != null) {
+                                                setCategoryPopupPosition({ x: event.clientX, y: event.clientY });
+                                            }
                                         }}
-                                        onMouseLeave={() => setActiveCategorySlice(null)}
+                                        onMouseMove={(_, index, event) => {
+                                            if (categoryPopupLocked) return;
+                                            if (index !== undefined && index !== null) setActiveCategorySlice(index);
+                                            if (event?.clientX != null && event?.clientY != null) {
+                                                setCategoryPopupPosition({ x: event.clientX, y: event.clientY });
+                                            }
+                                        }}
+                                        onMouseLeave={() => {
+                                            if (categoryPopupLocked) return;
+                                            setActiveCategorySlice(null);
+                                            setCategoryPopupPosition(null);
+                                        }}
+                                        onClick={(_, index, event) => {
+                                            if (index === undefined || index === null) return;
+                                            setCategoryPopupLocked(true);
+                                            setCategoryPopupIndex(index);
+                                            setActiveCategorySlice(index);
+                                            if (event?.clientX != null && event?.clientY != null) {
+                                                setCategoryPopupPosition({ x: event.clientX, y: event.clientY });
+                                            }
+                                        }}
                                     >
                                         {categoryStats.entries.map((entry, index) => <Cell key={entry.name} fill={COLORS[index % COLORS.length]} />)}
                                     </Pie>
                                 </PieChart>
                             </ResponsiveContainer>
-                            <CategoryTooltip />
+                            {currentCategorySlice && categoryPopupPosition && (
+                                <CategoryTooltip slice={currentCategorySlice} coordinate={categoryPopupPosition} />
+                            )}
                             <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none', opacity: activeCategorySlice === null ? 1 : 0 }}>
                                 <span style={{ fontSize: '36px', fontWeight: 950, color: '#0f172a', lineHeight: 1 }}>{categoryStats.total}</span>
                                 <span style={{ fontSize: '10px', fontWeight: 950, color: '#64748b', textTransform: 'uppercase' }}>Requests</span>
