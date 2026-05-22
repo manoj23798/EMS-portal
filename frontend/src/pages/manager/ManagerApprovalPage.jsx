@@ -480,12 +480,19 @@ const ManagerApprovalPage = () => {
         };
     }, [employeeDateFilteredRequests]);
 
-    const CategoryTooltip = ({ active, payload }) => {
+    const CategoryTooltip = ({ active, payload, coordinate }) => {
         if (!active || !payload || !payload.length) return null;
 
         const slice = payload[0]?.payload;
         const requestItems = slice?.requests || [];
         const hideEmployeeName = Boolean(filters.employeeId);
+        const tooltipStyle = coordinate
+            ? {
+                position: 'absolute',
+                left: `${coordinate.x + 16}px`,
+                top: `${coordinate.y + 16}px`
+            }
+            : {};
 
         return (
             <div style={{
@@ -495,10 +502,23 @@ const ManagerApprovalPage = () => {
                 boxShadow: '0 18px 40px rgba(15, 23, 42, 0.12)',
                 padding: '12px 14px',
                 minWidth: '260px',
-                maxWidth: '360px'
+                maxWidth: '360px',
+                zIndex: 25,
+                pointerEvents: 'none',
+                ...tooltipStyle
             }}>
-                <div style={{ fontSize: '11px', fontWeight: 950, color: '#1e293b', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '10px' }}>
-                    {slice?.name || 'Leave Category'} - {slice?.v || 0} requests
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', marginBottom: '10px' }}>
+                    <div style={{ fontSize: '11px', fontWeight: 950, color: '#1e293b', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                        {slice?.name || 'Leave Category'}
+                    </div>
+                    <div style={{ textAlign: 'right', lineHeight: 1 }}>
+                        <div style={{ fontSize: '9px', fontWeight: 950, color: '#ef4444', textTransform: 'uppercase', letterSpacing: '0.8px' }}>
+                            Total Leaves
+                        </div>
+                        <div style={{ fontSize: '18px', fontWeight: 950, color: '#ef4444', marginTop: '4px' }}>
+                            {slice?.v || 0}
+                        </div>
+                    </div>
                 </div>
                 <div style={{ display: 'grid', gap: '10px', maxHeight: '260px', overflowY: 'auto' }}>
                     {requestItems.map((request, index) => (
@@ -1656,8 +1676,7 @@ const ManagerApprovalPage = () => {
                                     </Pie>
                                     <RechartsTooltip
                                         content={<CategoryTooltip />}
-                                        cursor={false}
-                                        position={{ x: 14, y: 14 }}
+                                        cursor={{ fill: 'rgba(15, 23, 42, 0.04)' }}
                                         allowEscapeViewBox={{ x: true, y: true }}
                                     />
                                 </PieChart>
