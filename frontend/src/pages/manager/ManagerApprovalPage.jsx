@@ -369,10 +369,6 @@ const ManagerApprovalPage = () => {
         { value: 'Casual Leave', label: 'Casual Leave' }
     ]), []);
 
-    const currentCategorySlice = categoryPopupIndex !== null
-        ? categoryStats.entries[categoryPopupIndex]
-        : (activeCategorySlice !== null ? (categoryStats.entries[activeCategorySlice] || null) : null);
-
     const showLopCountColumn = filters.status === 'LOP';
 
     const filteredRequests = useMemo(() => {
@@ -509,6 +505,10 @@ const ManagerApprovalPage = () => {
             entries
         };
     }, [employeeDateFilteredRequests]);
+
+    const currentCategorySlice = categoryPopupIndex !== null
+        ? (categoryStats.entries[categoryPopupIndex] || null)
+        : (activeCategorySlice !== null ? (categoryStats.entries[activeCategorySlice] || null) : null);
 
     const CategoryTooltip = ({ slice, coordinate }) => {
         if (!slice) return null;
