@@ -302,6 +302,7 @@ const ManagerApprovalPage = () => {
     const [categoryPopupIndex, setCategoryPopupIndex] = useState(null);
     const [categoryPopupLocked, setCategoryPopupLocked] = useState(false);
     const [categoryPopupPosition, setCategoryPopupPosition] = useState(null);
+    const [categoryPopupHovered, setCategoryPopupHovered] = useState(false);
     const categoryChartRef = useRef(null);
     const categoryPopupRef = useRef(null);
 
@@ -336,6 +337,7 @@ const ManagerApprovalPage = () => {
             setCategoryPopupLocked(false);
             setCategoryPopupIndex(null);
             setCategoryPopupPosition(null);
+            setCategoryPopupHovered(false);
             setActiveCategorySlice(null);
         };
 
@@ -369,7 +371,7 @@ const ManagerApprovalPage = () => {
 
     const currentCategorySlice = categoryPopupIndex !== null
         ? categoryStats.entries[categoryPopupIndex]
-        : (activeCategorySlice !== null ? categoryStats.entries[activeCategorySlice] : null);
+        : (activeCategorySlice !== null ? (categoryStats.entries[activeCategorySlice] || null) : null);
 
     const showLopCountColumn = filters.status === 'LOP';
 
@@ -522,7 +524,17 @@ const ManagerApprovalPage = () => {
             : {};
 
         return (
-            <div ref={categoryPopupRef} style={{
+            <div
+                ref={categoryPopupRef}
+                onMouseEnter={() => setCategoryPopupHovered(true)}
+                onMouseLeave={() => {
+                    setCategoryPopupHovered(false);
+                    if (!categoryPopupLocked) {
+                        setActiveCategorySlice(null);
+                        setCategoryPopupPosition(null);
+                    }
+                }}
+                style={{
                 background: 'white',
                 border: '1px solid #dbe4ef',
                 borderRadius: '14px',
@@ -1712,7 +1724,7 @@ const ManagerApprovalPage = () => {
                                             }
                                         }}
                                         onMouseLeave={() => {
-                                            if (categoryPopupLocked) return;
+                                            if (categoryPopupLocked || categoryPopupHovered) return;
                                             setActiveCategorySlice(null);
                                             setCategoryPopupPosition(null);
                                         }}
