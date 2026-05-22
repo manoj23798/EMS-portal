@@ -518,7 +518,7 @@ const ManagerApprovalPage = () => {
         const tooltipStyle = coordinate
             ? {
                 position: 'fixed',
-                left: `${coordinate.x - 16}px`,
+                left: `${Math.max(16, coordinate.x - 360)}px`,
                 top: `${coordinate.y + 16}px`
             }
             : {};
@@ -544,7 +544,7 @@ const ManagerApprovalPage = () => {
                 maxWidth: '360px',
                 zIndex: 25,
                 pointerEvents: 'auto',
-                transform: coordinate ? 'translateX(-100%)' : 'none',
+                transform: 'none',
                 ...tooltipStyle
             }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', marginBottom: '10px' }}>
