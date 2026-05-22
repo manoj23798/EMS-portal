@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
     Calendar,
@@ -20,8 +20,7 @@ import {
     PieChart,
     Pie,
     Cell,
-    ResponsiveContainer,
-    Tooltip as RechartsTooltip
+    ResponsiveContainer
 } from 'recharts';
 import { LeaveStatsAPI, ManagerAPI } from '../../services/api';
 
@@ -299,6 +298,9 @@ const ManagerApprovalPage = () => {
     });
     const [showAnalysis, setShowAnalysis] = useState(true);
     const [activeCategorySlice, setActiveCategorySlice] = useState(null);
+    const [categoryPopup, setCategoryPopup] = useState({ open: false, locked: false, index: null, x: 0, y: 0 });
+    const categoryChartRef = useRef(null);
+    const categoryPopupRef = useRef(null);
 
     useEffect(() => {
         const fetchAllData = async () => {
@@ -480,66 +482,66 @@ const ManagerApprovalPage = () => {
         };
     }, [employeeDateFilteredRequests]);
 
-    const CategoryTooltip = ({ active, payload, coordinate }) => {
-        if (!active || !payload || !payload.length) return null;
+    useEffect(() => {
+        const handleOutsideClick = (event) => {
+            if (!categoryPopup.locked) return;
+            if (categoryPopupRef.current?.contains(event.target)) return;
 
-        const slice = payload[0]?.payload;
-        const requestItems = slice?.requests || [];
-        const hideEmployeeName = Boolean(filters.employeeId);
-        const tooltipStyle = coordinate
-            ? {
-                position: 'absolute',
-                left: `${coordinate.x - 16}px`,
-                top: `${coordinate.y + 16}px`
+            const chartSvg = categoryChartRef.current?.querySelector('svg');
+            if (chartSvg && chartSvg.contains(event.target)) return;
+
+            if (categoryChartRef.current && !categoryChartRef.current.contains(event.target)) {
+                setCategoryPopup({ open: false, locked: false, index: null, x: 0, y: 0 });
+                setActiveCategorySlice(null);
+                return;
             }
-            : {};
 
-        return (
-            <div style={{
-                background: 'white',
-                border: '1px solid #dbe4ef',
-                borderRadius: '14px',
-                boxShadow: '0 18px 40px rgba(15, 23, 42, 0.12)',
-                padding: '12px 14px',
-                minWidth: '260px',
-                maxWidth: '360px',
-                zIndex: 25,
-                pointerEvents: 'none',
-                transform: coordinate ? 'translateX(-100%)' : 'none',
-                ...tooltipStyle
-            }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', marginBottom: '10px' }}>
-                    <div style={{ fontSize: '11px', fontWeight: 950, color: '#1e293b', textTransform: 'uppercase', letterSpacing: '1px' }}>
-                        {slice?.name || 'Leave Category'}
-                    </div>
-                    <div style={{ textAlign: 'right', lineHeight: 1 }}>
-                        <div style={{ fontSize: '9px', fontWeight: 950, color: '#ef4444', textTransform: 'uppercase', letterSpacing: '0.8px' }}>
-                            Total Leaves
-                        </div>
-                        <div style={{ fontSize: '18px', fontWeight: 950, color: '#ef4444', marginTop: '4px' }}>
-                            {slice?.v || 0}
-                        </div>
-                    </div>
-                </div>
-                <div style={{ display: 'grid', gap: '10px', maxHeight: '260px', overflowY: 'auto' }}>
-                    {requestItems.map((request, index) => (
-                        <div key={`${request.employeeName}-${index}`} style={{ borderBottom: index === requestItems.length - 1 ? 'none' : '1px solid #eef2f7', paddingBottom: index === requestItems.length - 1 ? 0 : '10px' }}>
-                            {!hideEmployeeName && (
-                                <div style={{ fontSize: '11px', fontWeight: 950, color: '#0f172a', marginBottom: '4px' }}>{request.employeeName}</div>
-                            )}
-                            <div style={{ fontSize: '10px', fontWeight: 800, color: '#0f172a', lineHeight: 1.4 }}>
-                                <div><span style={{ color: '#64748b', textTransform: 'uppercase' }}>Reason:</span> {request.reason}</div>
-                                <div><span style={{ color: '#64748b', textTransform: 'uppercase' }}>Days:</span> {request.totalDays}</div>
-                                <div><span style={{ color: '#64748b', textTransform: 'uppercase' }}>Date:</span> {request.dateRange}</div>
-                            </div>
-                        </div>
-                    ))}
-                    {!requestItems.length && (
-                        <div style={{ fontSize: '11px', color: '#64748b', fontWeight: 800 }}>No leave records.</div>
-                    )}
-                </div>
-            </div>
-        );
+            setCategoryPopup({ open: false, locked: false, index: null, x: 0, y: 0 });
+            setActiveCategorySlice(null);
+        };
+
+        document.addEventListener('mousedown', handleOutsideClick);
+        return () => document.removeEventListener('mousedown', handleOutsideClick);
+    }, [categoryPopup.locked]);
+
+    const openCategoryPopup = (index) => {
+        if (index == null || !categoryStats.entries[index]) return;
+        setActiveCategorySlice(index);
+        setCategoryPopup((prev) => ({
+            ...prev,
+            open: true,
+            index,
+            locked: prev.locked
+        }));
+    };
+
+    const updateCategoryPopupPosition = (event) => {
+        if (!categoryPopup.open && !categoryPopup.locked) return;
+        if (!categoryChartRef.current) return;
+
+        const rect = categoryChartRef.current.getBoundingClientRect();
+        setCategoryPopup((prev) => ({
+            ...prev,
+            x: event.clientX - rect.left,
+            y: event.clientY - rect.top
+        }));
+    };
+
+    const hideCategoryPopup = () => {
+        if (categoryPopup.locked) return;
+        setCategoryPopup({ open: false, locked: false, index: null, x: 0, y: 0 });
+        setActiveCategorySlice(null);
+    };
+
+    const lockCategoryPopup = (index) => {
+        if (index == null || !categoryStats.entries[index]) return;
+        setActiveCategorySlice(index);
+        setCategoryPopup((prev) => ({
+            ...prev,
+            open: true,
+            locked: true,
+            index
+        }));
     };
 
     const breakdownYears = useMemo(() => {
@@ -1661,7 +1663,12 @@ const ManagerApprovalPage = () => {
 
                     <div className="ma-card-ui">
                         <div className="ma-card-title-ui">By Category</div>
-                        <div style={{ height: '175px', position: 'relative', minWidth: 0 }}>
+                        <div
+                            ref={categoryChartRef}
+                            style={{ height: '175px', position: 'relative', minWidth: 0 }}
+                            onMouseMove={updateCategoryPopupPosition}
+                            onMouseLeave={hideCategoryPopup}
+                        >
                             <ResponsiveContainer width="100%" height="100%">
                                 <PieChart>
                                     <Pie
@@ -1670,18 +1677,72 @@ const ManagerApprovalPage = () => {
                                         outerRadius={72}
                                         dataKey="v"
                                         stroke="none"
-                                        onMouseEnter={(_, index) => setActiveCategorySlice(index)}
-                                        onMouseLeave={() => setActiveCategorySlice(null)}
+                                        onMouseEnter={(_, index) => openCategoryPopup(index)}
+                                        onMouseLeave={hideCategoryPopup}
+                                        onClick={(_, index) => lockCategoryPopup(index)}
                                     >
                                         {categoryStats.entries.map((entry, index) => <Cell key={entry.name} fill={COLORS[index % COLORS.length]} />)}
                                     </Pie>
-                                    <RechartsTooltip
-                                        content={<CategoryTooltip />}
-                                        cursor={{ fill: 'rgba(15, 23, 42, 0.04)' }}
-                                        allowEscapeViewBox={{ x: true, y: true }}
-                                    />
                                 </PieChart>
                             </ResponsiveContainer>
+                            {categoryPopup.open && categoryStats.entries[categoryPopup.index] && (
+                                <div ref={categoryPopupRef} style={{
+                                    position: 'absolute',
+                                    left: `${categoryPopup.x}px`,
+                                    top: `${categoryPopup.y}px`,
+                                    transform: 'translate(calc(-100% - 12px), -100%)',
+                                    background: 'white',
+                                    border: '1px solid #dbe4ef',
+                                    borderRadius: '14px',
+                                    boxShadow: '0 18px 40px rgba(15, 23, 42, 0.12)',
+                                    padding: '12px 14px',
+                                    minWidth: '260px',
+                                    maxWidth: '360px',
+                                    zIndex: 25,
+                                    pointerEvents: 'auto'
+                                }}>
+                                    {(() => {
+                                        const slice = categoryStats.entries[categoryPopup.index];
+                                        const requestItems = slice?.requests || [];
+                                        const hideEmployeeName = Boolean(filters.employeeId);
+
+                                        return (
+                                            <>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', marginBottom: '10px' }}>
+                                                    <div style={{ fontSize: '11px', fontWeight: 950, color: '#1e293b', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                                                        {slice?.name || 'Leave Category'}
+                                                    </div>
+                                                    <div style={{ textAlign: 'right', lineHeight: 1 }}>
+                                                        <div style={{ fontSize: '9px', fontWeight: 950, color: '#ef4444', textTransform: 'uppercase', letterSpacing: '0.8px' }}>
+                                                            Total Leaves
+                                                        </div>
+                                                        <div style={{ fontSize: '18px', fontWeight: 950, color: '#ef4444', marginTop: '4px' }}>
+                                                            {slice?.v || 0}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div style={{ display: 'grid', gap: '10px', maxHeight: '260px', overflowY: 'auto' }}>
+                                                    {requestItems.map((request, index) => (
+                                                        <div key={`${request.employeeName}-${index}`} style={{ borderBottom: index === requestItems.length - 1 ? 'none' : '1px solid #eef2f7', paddingBottom: index === requestItems.length - 1 ? 0 : '10px' }}>
+                                                            {!hideEmployeeName && (
+                                                                <div style={{ fontSize: '11px', fontWeight: 950, color: '#0f172a', marginBottom: '4px' }}>{request.employeeName}</div>
+                                                            )}
+                                                            <div style={{ fontSize: '10px', fontWeight: 800, color: '#0f172a', lineHeight: 1.4 }}>
+                                                                <div><span style={{ color: '#64748b', textTransform: 'uppercase' }}>Reason:</span> {request.reason}</div>
+                                                                <div><span style={{ color: '#64748b', textTransform: 'uppercase' }}>Days:</span> {request.totalDays}</div>
+                                                                <div><span style={{ color: '#64748b', textTransform: 'uppercase' }}>Date:</span> {request.dateRange}</div>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                    {!requestItems.length && (
+                                                        <div style={{ fontSize: '11px', color: '#64748b', fontWeight: 800 }}>No leave records.</div>
+                                                    )}
+                                                </div>
+                                            </>
+                                        );
+                                    })()}
+                                </div>
+                            )}
                             <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none', opacity: activeCategorySlice === null ? 1 : 0 }}>
                                 <span style={{ fontSize: '36px', fontWeight: 950, color: '#0f172a', lineHeight: 1 }}>{categoryStats.total}</span>
                                 <span style={{ fontSize: '10px', fontWeight: 950, color: '#64748b', textTransform: 'uppercase' }}>Requests</span>
