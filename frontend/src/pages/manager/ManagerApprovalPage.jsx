@@ -480,22 +480,18 @@ const ManagerApprovalPage = () => {
         };
     }, [employeeDateFilteredRequests]);
 
-    const CategoryTooltip = ({ active, payload, coordinate }) => {
+    const CategoryTooltip = ({ active, payload }) => {
         if (!active || !payload || !payload.length) return null;
 
         const slice = payload[0]?.payload;
         const requestItems = slice?.requests || [];
         const hideEmployeeName = Boolean(filters.employeeId);
-        const tooltipStyle = coordinate
-            ? {
-                position: 'absolute',
-                left: `${coordinate.x + 16}px`,
-                top: `${coordinate.y + 16}px`
-            }
-            : {};
 
         return (
             <div style={{
+                position: 'absolute',
+                left: '12px',
+                bottom: '12px',
                 background: 'white',
                 border: '1px solid #dbe4ef',
                 borderRadius: '14px',
@@ -505,7 +501,6 @@ const ManagerApprovalPage = () => {
                 maxWidth: '360px',
                 zIndex: 25,
                 pointerEvents: 'none',
-                ...tooltipStyle
             }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', marginBottom: '10px' }}>
                     <div style={{ fontSize: '11px', fontWeight: 950, color: '#1e293b', textTransform: 'uppercase', letterSpacing: '1px' }}>
