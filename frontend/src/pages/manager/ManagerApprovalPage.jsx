@@ -99,6 +99,15 @@ const formatActionDate = (timestamp) => {
     return `${day}-${month}-${year}`;
 };
 
+const getStatusActionTimestamp = (request) => {
+    if (!request || !request.status) return 0;
+    let actionValue = null;
+    if (request.status === 'Approved') actionValue = request?.approvedAt;
+    else if (request.status === 'Rejected') actionValue = request?.rejectedAt;
+    const time = actionValue ? new Date(actionValue).getTime() : 0;
+    return Number.isFinite(time) ? time : 0;
+};
+
 const getLeavePaidDays = (request) => Math.max(0, (Number(request.totalDays) || 0) - (Number(request.lopCount) || 0));
 
 const getLeaveTotalDays = (request) => Number(request?.totalDays) || 0;
@@ -1926,7 +1935,7 @@ const ManagerApprovalPage = () => {
                                         <div style={{ textAlign: 'center' }}>
                                             <span className="ma-status-label" style={{ background: '#ecfdf5', color: '#059669' }}>Approved</span>
                                             <div style={{ fontSize: '9px', fontWeight: 900, color: '#94a3b8', marginTop: '4px', textTransform: 'uppercase', lineHeight: 1.2 }}>
-                                                Date: {formatActionDate(getActionTimestamp(lr)) || '--'}
+                                                Date: {formatActionDate(getStatusActionTimestamp(lr)) || '--'}
                                             </div>
                                         </div>
                                     ) : lr.status === 'Canceled' ? (
@@ -1935,7 +1944,7 @@ const ManagerApprovalPage = () => {
                                         <div style={{ textAlign: 'center' }}>
                                             <span className="ma-status-label" style={{ background: '#fef2f2', color: '#dc2626' }}>Rejected</span>
                                             <div style={{ fontSize: '9px', fontWeight: 900, color: '#94a3b8', marginTop: '4px', textTransform: 'uppercase', lineHeight: 1.2 }}>
-                                                Date: {formatActionDate(getActionTimestamp(lr)) || '--'}
+                                                Date: {formatActionDate(getStatusActionTimestamp(lr)) || '--'}
                                             </div>
                                         </div>
                                     ) : (
