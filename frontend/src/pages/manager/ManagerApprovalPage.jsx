@@ -85,7 +85,7 @@ const getSubmittedTimestamp = (request) => {
 };
 
 const getActionTimestamp = (request) => {
-    const actionValue = request?.approvedAt || request?.rejectedAt || request?.updatedAt;
+    const actionValue = request?.approvedAt || request?.rejectedAt || request?.updatedAt || request?.createdAt || request?.submissionDate || request?.appliedDate || request?.startDate;
     const time = actionValue ? new Date(actionValue).getTime() : 0;
     return Number.isFinite(time) ? time : 0;
 };
@@ -1925,14 +1925,18 @@ const ManagerApprovalPage = () => {
                                     {lr.status === 'Approved' ? (
                                         <div style={{ textAlign: 'center' }}>
                                             <span className="ma-status-label" style={{ background: '#ecfdf5', color: '#059669' }}>Approved</span>
-                                            {getActionTimestamp(lr) > 0 && <div style={{ fontSize: '9px', fontWeight: 900, color: '#94a3b8', marginTop: '4px', textTransform: 'uppercase' }}>{formatActionDate(getActionTimestamp(lr))}</div>}
+                                            <div style={{ fontSize: '9px', fontWeight: 900, color: '#94a3b8', marginTop: '4px', textTransform: 'uppercase', lineHeight: 1.2 }}>
+                                                Date: {formatActionDate(getActionTimestamp(lr)) || '--'}
+                                            </div>
                                         </div>
                                     ) : lr.status === 'Canceled' ? (
                                         <span className="ma-status-label" style={{ background: '#f1f5f9', color: '#475569' }}>Canceled</span>
                                     ) : lr.status === 'Rejected' ? (
                                         <div style={{ textAlign: 'center' }}>
                                             <span className="ma-status-label" style={{ background: '#fef2f2', color: '#dc2626' }}>Rejected</span>
-                                            {getActionTimestamp(lr) > 0 && <div style={{ fontSize: '9px', fontWeight: 900, color: '#94a3b8', marginTop: '4px', textTransform: 'uppercase' }}>{formatActionDate(getActionTimestamp(lr))}</div>}
+                                            <div style={{ fontSize: '9px', fontWeight: 900, color: '#94a3b8', marginTop: '4px', textTransform: 'uppercase', lineHeight: 1.2 }}>
+                                                Date: {formatActionDate(getActionTimestamp(lr)) || '--'}
+                                            </div>
                                         </div>
                                     ) : (
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
