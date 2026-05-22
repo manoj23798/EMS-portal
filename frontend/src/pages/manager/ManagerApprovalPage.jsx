@@ -90,6 +90,15 @@ const getActionTimestamp = (request) => {
     return Number.isFinite(time) ? time : 0;
 };
 
+const formatActionDate = (timestamp) => {
+    if (!timestamp) return '';
+    const date = new Date(timestamp);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
+};
+
 const getLeavePaidDays = (request) => Math.max(0, (Number(request.totalDays) || 0) - (Number(request.lopCount) || 0));
 
 const getLeaveTotalDays = (request) => Number(request?.totalDays) || 0;
@@ -1916,14 +1925,14 @@ const ManagerApprovalPage = () => {
                                     {lr.status === 'Approved' ? (
                                         <div style={{ textAlign: 'center' }}>
                                             <span className="ma-status-label" style={{ background: '#ecfdf5', color: '#059669' }}>Approved</span>
-                                            {getActionTimestamp(lr) > 0 && <div style={{ fontSize: '9px', fontWeight: 900, color: '#94a3b8', marginTop: '4px', textTransform: 'uppercase' }}>Date: {new Date(getActionTimestamp(lr)).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</div>}
+                                            {getActionTimestamp(lr) > 0 && <div style={{ fontSize: '9px', fontWeight: 900, color: '#94a3b8', marginTop: '4px', textTransform: 'uppercase' }}>{formatActionDate(getActionTimestamp(lr))}</div>}
                                         </div>
                                     ) : lr.status === 'Canceled' ? (
                                         <span className="ma-status-label" style={{ background: '#f1f5f9', color: '#475569' }}>Canceled</span>
                                     ) : lr.status === 'Rejected' ? (
                                         <div style={{ textAlign: 'center' }}>
                                             <span className="ma-status-label" style={{ background: '#fef2f2', color: '#dc2626' }}>Rejected</span>
-                                            {getActionTimestamp(lr) > 0 && <div style={{ fontSize: '9px', fontWeight: 900, color: '#94a3b8', marginTop: '4px', textTransform: 'uppercase' }}>Date: {new Date(getActionTimestamp(lr)).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</div>}
+                                            {getActionTimestamp(lr) > 0 && <div style={{ fontSize: '9px', fontWeight: 900, color: '#94a3b8', marginTop: '4px', textTransform: 'uppercase' }}>{formatActionDate(getActionTimestamp(lr))}</div>}
                                         </div>
                                     ) : (
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
