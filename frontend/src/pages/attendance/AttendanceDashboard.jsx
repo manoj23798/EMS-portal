@@ -312,11 +312,9 @@ export default function AttendanceDashboard() {
         const value = Math.max(0, Number(totalSeconds) || 0);
         const hrs = Math.floor(value / 3600);
         const mins = Math.floor((value % 3600) / 60);
-        const secs = value % 60;
 
-        if (hrs > 0) return `${hrs}h ${String(mins).padStart(2, '0')}m ${String(secs).padStart(2, '0')}s`;
-        if (mins > 0) return `${mins}m ${String(secs).padStart(2, '0')}s`;
-        return `${secs}s`;
+        if (hrs > 0) return `${hrs}h ${String(mins).padStart(2, '0')}m`;
+        return `${mins}m`;
     };
 
     const normalizeStatus = (status, inTime) => {
@@ -499,11 +497,11 @@ export default function AttendanceDashboard() {
                     background: linear-gradient(180deg, #fafcff 0%, #f4f7fb 100%);
                     padding: 0;
                     display: grid;
-                    grid-template-columns: 108px minmax(0, 1fr);
+                    grid-template-columns: 132px minmax(0, 1fr);
                     align-items: center;
                     gap: 0;
                     overflow: hidden;
-                    min-height: 96px;
+                    min-height: 116px;
                 }
 
                 .ap-clock-meta {
@@ -511,7 +509,7 @@ export default function AttendanceDashboard() {
                     flex-direction: column;
                     align-items: flex-start;
                     text-align: left;
-                    padding: 8px 12px 8px 8px;
+                    padding: 10px 14px 10px 8px;
                     z-index: 1;
                 }
 
@@ -529,7 +527,7 @@ export default function AttendanceDashboard() {
 
                 .ap-clock-time {
                     font-family: 'Outfit', sans-serif;
-                    font-size: clamp(24px, 1.9vw, 32px);
+                    font-size: clamp(26px, 2.1vw, 36px);
                     line-height: 1;
                     font-weight: 950;
                     letter-spacing: 1px;
@@ -547,8 +545,8 @@ export default function AttendanceDashboard() {
                 }
 
                 .ap-analog-shell {
-                    width: 96px;
-                    height: 96px;
+                    width: 116px;
+                    height: 116px;
                     margin: 0 auto;
                     border-radius: 50%;
                     background: transparent;
@@ -1094,7 +1092,7 @@ export default function AttendanceDashboard() {
                 <section className="ap-punch-card">
                     <div className="ap-clock-box">
                         <div className="ap-analog-shell">
-                            <svg width="78" height="78" viewBox="0 0 200 200" role="img" aria-label="Attendance analog clock">
+                            <svg width="96" height="96" viewBox="0 0 200 200" role="img" aria-label="Attendance analog clock">
                                 <circle cx="100" cy="100" r="88" fill="white" stroke="#3f4349" strokeWidth="8" />
 
                                 {[1, 2, 4, 5, 7, 8, 10, 11].map((hour) => {
