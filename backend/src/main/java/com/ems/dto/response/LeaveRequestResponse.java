@@ -31,4 +31,6 @@ public class LeaveRequestResponse {
     private Double leaveBalance;
     private String profilePhotoUrl;
     private LocalDateTime createdAt;
+    private LocalDateTime approvedAt;
+    private LocalDateTime rejectedAt;
 }

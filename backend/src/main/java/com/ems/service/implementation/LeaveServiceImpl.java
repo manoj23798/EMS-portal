@@ -19,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.List;
@@ -137,6 +138,7 @@ public class LeaveServiceImpl implements LeaveService {
         leaveRequest.setStatus("Approved");
         leaveRequest.setApprovedBy(manager);
         leaveRequest.setRemarks(remarks);
+        leaveRequest.setApprovedAt(LocalDateTime.now());
 
         // Recompute paid/LOP split at approval time to keep calculations accurate.
         LeaveAllocationSnapshot allocation = calculateLeaveAllocation(
@@ -203,6 +205,7 @@ public class LeaveServiceImpl implements LeaveService {
         leaveRequest.setStatus("Rejected");
         leaveRequest.setApprovedBy(manager);
         leaveRequest.setRemarks(remarks);
+        leaveRequest.setRejectedAt(LocalDateTime.now());
         leaveRequest.setCancelReason(null);
 
         return mapToResponse(leaveRequestRepository.save(leaveRequest));
@@ -503,6 +506,8 @@ public class LeaveServiceImpl implements LeaveService {
                 .leaveBalance(snapshot.availableLeaves)
                 .profilePhotoUrl(lr.getEmployee().getProfilePhotoUrl())
                 .createdAt(lr.getCreatedAt())
+                .approvedAt(lr.getApprovedAt())
+                .rejectedAt(lr.getRejectedAt())
                 .build();
     }
 
