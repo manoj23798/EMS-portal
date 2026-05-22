@@ -262,7 +262,7 @@ export default function EmployeeProfile() {
     return (
         <div style={{ padding: '24px', fontFamily: 'Outfit, sans-serif' }}>
             {/* COMPACT Header Card */}
-            <div style={{ background: THEME.white, borderRadius: 24, border: `1px solid ${THEME.border}`, overflow: 'hidden', marginBottom: 24, boxShadow: '0 10px 30px rgba(148, 163, 184, 0.18)' }}>
+            <div style={{ background: THEME.white, borderRadius: 24, border: `1px solid ${THEME.border}`, overflow: 'hidden', marginBottom: 24, boxShadow: '0 18px 32px rgba(148, 163, 184, 0.22), 0 3px 0 rgba(255, 255, 255, 0.85) inset, 0 1px 2px rgba(15, 23, 42, 0.05)' }}>
                 <div style={{ height: 56, background: '#f1f5f9', position: 'relative' }}>
                     <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)`, opacity: 0.6 }} />
                 </div>
@@ -450,23 +450,21 @@ export default function EmployeeProfile() {
             )}
 
             {/* OPTIMIZED PILL TABS */}
-            <div style={{ background: THEME.greyLight, border: `1px solid ${THEME.border}`, boxShadow: '0 8px 24px rgba(148, 163, 184, 0.14)', borderRadius: 20, marginBottom: 24, padding: 6, overflowX: 'auto', scrollbarWidth: 'none' }}>
-                <div style={{ display: 'flex', gap: 8, minWidth: 'fit-content' }}>
-                    {tabs.map(tab => (
-                        <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{
-                            padding: '8px 18px', border: activeTab === tab.id ? 'none' : `1px solid ${THEME.border}`,
-                            borderRadius: 99, display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer',
-                            fontSize: 13, fontWeight: 800, transition: 'all 0.2s',
-                            background: activeTab === tab.id ? THEME.primary : '#f3f4f6',
-                            color: activeTab === tab.id ? THEME.white : THEME.greyDark,
-                            boxShadow: activeTab === tab.id ? '0 6px 16px rgba(249, 115, 22, 0.35)' : '0 2px 8px rgba(148, 163, 184, 0.12)',
-                            flexShrink: 0,
-                        }}>
-                            {React.cloneElement(tab.icon, { size: 16, color: activeTab === tab.id ? THEME.white : THEME.greyDark })}
-                            {tab.label}
-                        </button>
-                    ))}
-                </div>
+            <div style={{ display: 'flex', gap: 8, marginBottom: 24, overflowX: 'auto', padding: '8px', scrollbarWidth: 'none', background: '#f8fafc', border: `1px solid ${THEME.border}`, borderRadius: 20, boxShadow: '0 14px 28px rgba(148, 163, 184, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.9)' }}>
+                {tabs.map(tab => (
+                    <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{
+                        padding: '8px 18px', border: activeTab === tab.id ? 'none' : `1px solid ${THEME.border}`,
+                        borderRadius: 99, display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer',
+                        fontSize: 13, fontWeight: 800, transition: 'all 0.2s',
+                        background: activeTab === tab.id ? THEME.primary : THEME.white,
+                        color: activeTab === tab.id ? THEME.white : THEME.greyDark,
+                        boxShadow: activeTab === tab.id ? '0 8px 18px rgba(249, 115, 22, 0.32)' : '0 8px 16px rgba(148, 163, 184, 0.16), inset 0 1px 0 rgba(255,255,255,0.75)',
+                        flexShrink: 0,
+                    }}>
+                        {React.cloneElement(tab.icon, { size: 16, color: activeTab === tab.id ? THEME.white : THEME.greyDark })}
+                        {tab.label}
+                    </button>
+                ))}
             </div>
 
             {/* CONDENSED Content Area with Sidebar Preview */}
