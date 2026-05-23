@@ -21,7 +21,7 @@ import {
 import { tokenManager } from '../../utils/tokenManager';
 
 const SHIFT_START_HOUR = 9;
-const SHIFT_START_MINUTE = 0;
+const SHIFT_START_MINUTE = 30;
 const SHIFT_END_HOUR = 18;
 const SHIFT_END_MINUTE = 0;
 const SHIFT_TOTAL_MINUTES = (SHIFT_END_HOUR * 60 + SHIFT_END_MINUTE) - (SHIFT_START_HOUR * 60 + SHIFT_START_MINUTE);
@@ -497,7 +497,7 @@ export default function AttendanceDashboard() {
                     background: linear-gradient(180deg, #fafcff 0%, #f4f7fb 100%);
                     padding: 0;
                     display: grid;
-                    grid-template-columns: 132px minmax(0, 1fr);
+                    grid-template-columns: 132px minmax(0, 1fr) auto;
                     align-items: center;
                     gap: 0;
                     overflow: hidden;
@@ -1142,6 +1142,9 @@ export default function AttendanceDashboard() {
                                 {currentTime.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
                             </div>
                         </div>
+                        <div style={{ paddingRight: '24px' }}>
+                            <div className="ap-shift-chip" style={{ background: '#ffffff' }}>Status: {attendance?.status || '---'}</div>
+                        </div>
                     </div>
 
                     <div className="ap-action-row">
@@ -1204,7 +1207,6 @@ export default function AttendanceDashboard() {
                 <section className="ap-summary-card">
                     <div className="ap-summary-head">
                         <div className="ap-mini-title" style={{ gap: 0 }}>Today's Summary</div>
-                        <div className="ap-shift-chip">Status: {attendance?.status || '---'}</div>
                     </div>
 
                     <div className="ap-summary-grid">
@@ -1221,6 +1223,15 @@ export default function AttendanceDashboard() {
                                     <div className="ap-summary-value">{formatTime(attendance?.outTime)}</div>
                                 </div>
                             </div>
+                        </article>
+
+                        <article className="ap-summary-box ap-box-orange">
+                            <div className="ap-summary-icon"><Laptop size={16} /></div>
+                            <div>
+                                <div className="ap-summary-label">Work Hours</div>
+                                <div className="ap-summary-value">{formatLiveDuration(workSeconds)}</div>
+                            </div>
+                            <div className="ap-summary-side-chip">Remaining: {formatLiveDuration(remainingWorkSeconds)}</div>
                         </article>
 
                         <article className="ap-summary-box ap-box-blue ap-break-box">
@@ -1243,15 +1254,6 @@ export default function AttendanceDashboard() {
                                     </div>
                                 </div>
                             </div>
-                        </article>
-
-                        <article className="ap-summary-box ap-box-orange">
-                            <div className="ap-summary-icon"><Laptop size={16} /></div>
-                            <div>
-                                <div className="ap-summary-label">Work Hours</div>
-                                <div className="ap-summary-value">{formatLiveDuration(workSeconds)}</div>
-                            </div>
-                            <div className="ap-summary-side-chip">Remaining: {formatLiveDuration(remainingWorkSeconds)}</div>
                         </article>
 
                         <article className="ap-summary-box ap-box-orange" style={{ gridTemplateColumns: '34px 1fr' }}>
@@ -1485,8 +1487,8 @@ export default function AttendanceDashboard() {
                                                 height: '24px',
                                                 borderRadius: '50%',
                                                 border: '1.5px solid',
-                                                borderColor: currentPage === p ? '#f97316' : '#dbe4ef',
-                                                background: currentPage === p ? '#f97316' : 'white',
+                                                borderColor: currentPage === p ? '#334155' : '#dbe4ef',
+                                                background: currentPage === p ? '#334155' : 'white',
                                                 color: currentPage === p ? 'white' : '#334155',
                                                 fontSize: '10px',
                                                 fontWeight: 900,
@@ -1494,7 +1496,7 @@ export default function AttendanceDashboard() {
                                                 display: 'flex',
                                                 alignItems: 'center',
                                                 justifyContent: 'center',
-                                                boxShadow: currentPage === p ? '0 4px 10px rgba(249,115,22,0.2)' : 'none'
+                                                boxShadow: currentPage === p ? '0 4px 10px rgba(51, 65, 85, 0.2)' : 'none'
                                             }}
                                         >
                                             {p}
