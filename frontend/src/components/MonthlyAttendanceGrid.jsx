@@ -272,16 +272,17 @@ export default function MonthlyAttendanceGrid() {
                             </colgroup>
                             <thead>
                                 <tr>
-                                    <th style={{ position: 'sticky', left: 0, background: '#1f2937', color: 'white', padding: '8px 10px', zIndex: 2, borderRight: '1px solid #334155' }}>Day</th>
+                                    <th style={{ position: 'sticky', left: 0, background: '#f1f5f9', color: '#64748b', padding: '8px 10px', zIndex: 2, borderRight: '1px solid #e2e8f0', borderBottom: '1px solid #e2e8f0' }}>Day</th>
                                     {days.map((d) => (
                                         <th
                                             key={`day-${d.date}`}
                                             style={{
-                                                background: '#1f2937',
-                                                color: 'white',
-                                                fontWeight: 500,
+                                                background: '#f1f5f9',
+                                                color: '#64748b',
+                                                fontWeight: 600,
                                                 textAlign: 'center',
-                                                borderRight: '1px solid #334155',
+                                                borderRight: '1px solid #e2e8f0',
+                                                borderBottom: '1px solid #e2e8f0',
                                                 padding: '8px 4px',
                                                 fontSize: '0.68rem',
                                                 whiteSpace: 'nowrap',
@@ -293,17 +294,19 @@ export default function MonthlyAttendanceGrid() {
                                     ))}
                                 </tr>
                                 <tr>
-                                    <th style={{ position: 'sticky', left: 0, background: 'var(--primary)', color: 'white', padding: '8px 10px', zIndex: 2, borderRight: '1px solid #ea580c' }}>Employee</th>
+                                    <th style={{ position: 'sticky', left: 0, background: '#ffffff', color: '#f97316', padding: '8px 10px', zIndex: 2, borderRight: '1px solid #e2e8f0', borderBottom: '1px solid #e2e8f0' }}>Employee</th>
                                     {days.map((d) => (
                                         <th
                                             key={`date-${d.date}`}
                                             style={{
-                                                background: 'var(--primary)',
-                                                color: 'white',
+                                                background: '#ffffff',
+                                                color: '#f97316',
                                                 textAlign: 'center',
-                                                borderRight: '1px solid #ea580c',
+                                                borderRight: '1px solid #e2e8f0',
+                                                borderBottom: '1px solid #e2e8f0',
                                                 padding: '8px 4px',
-                                                fontSize: '0.68rem',
+                                                fontSize: '0.75rem',
+                                                fontWeight: 800,
                                                 minWidth: '44px'
                                             }}
                                         >
@@ -326,15 +329,16 @@ export default function MonthlyAttendanceGrid() {
                                             style={{
                                                 position: 'sticky',
                                                 left: 0,
-                                                background: 'var(--surface)',
+                                                background: '#ffffff',
                                                 fontWeight: 600,
                                                 color: '#0f172a',
                                                 padding: '8px 12px',
                                                 width: '240px',
                                                 minWidth: '240px',
-                                                borderRight: '1px solid var(--border)',
+                                                borderRight: '1px solid #e2e8f0',
+                                                borderBottom: '1px solid #e2e8f0',
                                                 zIndex: 1,
-                                                boxShadow: '2px 0 4px rgba(0,0,0,0.04)',
+                                                boxShadow: '2px 0 4px rgba(0,0,0,0.02)',
                                                 whiteSpace: 'nowrap',
                                                 overflow: 'hidden',
                                                 textOverflow: 'ellipsis'
@@ -349,33 +353,32 @@ export default function MonthlyAttendanceGrid() {
                                             let content = null;
                                             let bgStyle = {};
                                             let tooltip = '';
-                                            let indicatorSize = 36; // Square size
 
                                             if (record) {
                                                 if (status === 'Leave') {
-                                                    bgStyle = { background: '#f3e8ff', color: '#6b21a8' };
-                                                    content = <div style={{ fontWeight: 700, fontSize: '1rem' }}>L</div>;
+                                                    bgStyle = { background: '#a855f7', color: '#ffffff' };
+                                                    content = <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>L</div>;
                                                     tooltip = record.leaveType ? `Leave: ${record.leaveType}` : 'Leave';
                                                 } else if (status === 'Holiday') {
-                                                    bgStyle = { background: '#ffd7a8', color: '#92400e' };
-                                                    content = <div style={{ fontWeight: 700, fontSize: '1rem' }}>H</div>;
+                                                    bgStyle = { background: '#f97316', color: '#ffffff' };
+                                                    content = <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>H</div>;
                                                     tooltip = record.holidayName ? `Holiday: ${record.holidayName}` : 'Holiday';
                                                 } else if (status === 'Absent') {
-                                                    bgStyle = { background: '#fecaca', color: '#7f1d1d' };
-                                                    content = <div style={{ fontWeight: 700, fontSize: '1rem' }}>A</div>;
+                                                    bgStyle = { background: '#ef4444', color: '#ffffff' };
+                                                    content = <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>A</div>;
                                                     tooltip = 'Absent';
                                                 } else if (status === 'Late') {
-                                                    bgStyle = { background: '#2b9053', color: '#ffffff' };
-                                                    content = <div style={{ fontWeight: 700, fontSize: '1rem' }}>L</div>;
+                                                    bgStyle = { background: '#f59e0b', color: '#ffffff' };
+                                                    content = <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>L</div>;
                                                     tooltip = `Late - In: ${formatTime(record.inTime)} Out: ${formatTime(record.outTime)}`;
                                                 } else if (status === 'Present') {
-                                                    bgStyle = { background: '#bbf7d0', color: '#15803d' };
-                                                    content = <div style={{ fontWeight: 700, fontSize: '1rem' }}>P</div>;
+                                                    bgStyle = { background: '#22c55e', color: '#ffffff' };
+                                                    content = <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>P</div>;
                                                     tooltip = `In: ${formatTime(record.inTime)} Out: ${formatTime(record.outTime)}`;
                                                 }
                                             } else if (d.isWeekend) {
-                                                bgStyle = { background: '#e2e8f0', color: '#334155' };
-                                                content = <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>WO</div>;
+                                                bgStyle = { background: '#475569', color: '#ffffff' };
+                                                content = <div style={{ fontWeight: 700, fontSize: '0.8rem' }}>WO</div>;
                                                 tooltip = 'Sunday/Saturday - Week Off';
                                             } else {
                                                 bgStyle = { background: '#f8fafc' };
@@ -385,16 +388,16 @@ export default function MonthlyAttendanceGrid() {
                                                 <td
                                                     key={`${employeeKey}-${d.date}`}
                                                     style={{
-                                                        borderRight: '1px solid var(--border)',
-                                                        borderBottom: '1px solid var(--border)',
+                                                        borderRight: '1px solid #f1f5f9',
+                                                        borderBottom: '1px solid #f1f5f9',
                                                         textAlign: 'center',
                                                         padding: 0,
-                                                        height: 56,
+                                                        height: 52,
                                                         minWidth: '44px',
                                                         overflow: 'hidden',
                                                         cursor: tooltip ? 'help' : 'default',
                                                         position: 'relative',
-                                                        background: '#f8fafc'
+                                                        background: '#ffffff'
                                                     }}
                                                 >
                                                     <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -402,9 +405,10 @@ export default function MonthlyAttendanceGrid() {
                                                             <Tooltip text={tooltip} position="top">
                                                                 <div
                                                                     style={{
-                                                                        width: 36,
-                                                                        height: 36,
-                                                                        borderRadius: '6px',
+                                                                        width: 'calc(100% - 4px)',
+                                                                        height: 'calc(100% - 4px)',
+                                                                        margin: '2px',
+                                                                        borderRadius: '4px',
                                                                         display: 'flex',
                                                                         alignItems: 'center',
                                                                         justifyContent: 'center',
@@ -415,7 +419,17 @@ export default function MonthlyAttendanceGrid() {
                                                                     {content}
                                                                 </div>
                                                             </Tooltip>
-                                                        ) : null}
+                                                        ) : (
+                                                            <div
+                                                                style={{
+                                                                    width: 'calc(100% - 4px)',
+                                                                    height: 'calc(100% - 4px)',
+                                                                    margin: '2px',
+                                                                    borderRadius: '4px',
+                                                                    ...bgStyle
+                                                                }}
+                                                            ></div>
+                                                        )}
                                                     </div>
                                                 </td>
                                             );
@@ -433,27 +447,27 @@ export default function MonthlyAttendanceGrid() {
                 <p style={{ color: 'var(--text-main)', fontWeight: 600, marginBottom: 8, fontSize: '0.9rem' }}>Legend</p>
                 <div style={{ display: 'flex', gap: 16, fontSize: '0.82rem', color: 'var(--text-main)', flexWrap: 'wrap' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <div style={{ width: 14, height: 14, background: '#bbf7d0', borderRadius: 4 }}></div>
+                        <div style={{ width: 14, height: 14, background: '#22c55e', borderRadius: 4 }}></div>
                         Present (P)
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <div style={{ width: 14, height: 14, background: '#14532d', borderRadius: 4 }}></div>
+                        <div style={{ width: 14, height: 14, background: '#f59e0b', borderRadius: 4 }}></div>
                         Late (L)
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <div style={{ width: 14, height: 14, background: '#fecaca', borderRadius: 4 }}></div>
+                        <div style={{ width: 14, height: 14, background: '#ef4444', borderRadius: 4 }}></div>
                         Absent (A)
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <div style={{ width: 14, height: 14, background: '#f3e8ff', borderRadius: 4 }}></div>
+                        <div style={{ width: 14, height: 14, background: '#a855f7', borderRadius: 4 }}></div>
                         Leave (L)
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <div style={{ width: 14, height: 14, background: '#ffd7a8', borderRadius: 4 }}></div>
+                        <div style={{ width: 14, height: 14, background: '#f97316', borderRadius: 4 }}></div>
                         Holiday (H)
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <div style={{ width: 14, height: 14, background: '#e2e8f0', borderRadius: 4 }}></div>
+                        <div style={{ width: 14, height: 14, background: '#475569', borderRadius: 4 }}></div>
                         Week Off (WO)
                     </div>
                 </div>

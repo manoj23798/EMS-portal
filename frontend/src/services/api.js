@@ -26,6 +26,7 @@ api.interceptors.response.use(
 
 export const EmployeeAPI = {
     getAll: () => api.get('/employees'),
+    search: (query) => api.get('/employees/search', { params: { query } }),
     getById: (id) => api.get(`/employees/${id}`),
     create: (data) => api.post('/employees', data),
     update: (id, data) => api.put(`/employees/${id}`, data),
@@ -154,7 +155,7 @@ export const ManagerAPI = {
     rejectLeave: (id, managerId, remarks) => api.put(`/manager/leaves/${id}/reject`, null, { params: { managerId, remarks } }),
     getPendingPermissions: () => api.get(`/manager/permissions`),
     approvePermission: (id, managerId) => api.put(`/manager/permissions/${id}/approve`, null, { params: { managerId } }),
-    rejectPermission: (id, managerId) => api.put(`/manager/permissions/${id}/reject`, null, { params: { managerId } }),
+    rejectPermission: (id, managerId, remarks) => api.put(`/manager/permissions/${id}/reject`, null, { params: { managerId, remarks } }),
 };
 
 export const LeaveStatsAPI = {

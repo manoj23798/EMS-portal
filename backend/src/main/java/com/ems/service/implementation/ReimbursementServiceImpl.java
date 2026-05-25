@@ -194,7 +194,7 @@ public class ReimbursementServiceImpl implements ReimbursementService {
 
     @Override
     @Transactional
-    public ReimbursementResponse managerApproveOrReject(Long id, boolean approve) {
+    public ReimbursementResponse managerApproveOrReject(Long id, boolean approve, String remarks) {
         ReimbursementMaster rm = masterRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Reimbursement record not found"));
         
@@ -205,6 +205,9 @@ public class ReimbursementServiceImpl implements ReimbursementService {
         rm.setStatus(approve ? "APPROVED" : "REJECTED");
         rm.setManagerApprovalDate(LocalDate.now());
         rm.setManagerApprovalBy(getLoggedInUsername());
+        if (!approve && remarks != null) {
+            rm.setManagerRemarks(remarks);
+        }
         
         return mapToResponse(masterRepository.save(rm));
     }
@@ -261,6 +264,7 @@ public class ReimbursementServiceImpl implements ReimbursementService {
         res.setAmountToReturn(rm.getAmountToReturn());
         res.setManagerApprovalDate(rm.getManagerApprovalDate());
         res.setManagerApprovalBy(rm.getManagerApprovalBy());
+        res.setManagerRemarks(rm.getManagerRemarks());
         res.setAccountsApprovedAmount(rm.getAccountsApprovedAmount());
         res.setAccountsReason(rm.getAccountsReason());
         res.setAccountsApprovalDate(rm.getAccountsApprovalDate());

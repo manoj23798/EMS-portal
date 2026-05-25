@@ -33,33 +33,131 @@ export default function EmployeeListPage() {
     );
 
     return (
-        <div style={{ padding: '24px' }}>
-            <div className="card">
-            <div className="card-header">
-                <h2 className="card-title">Employees Directory</h2>
-                <div style={{ display: 'flex', gap: '12px' }}>
-                    <div style={{ position: 'relative' }}>
-                        <Search size={18} style={{ position: 'absolute', left: 10, top: 12, color: 'var(--text-muted)' }} />
-                        <input
-                            type="text"
-                            placeholder="Search employee..."
-                            className="form-input"
-                            style={{ paddingLeft: 36 }}
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                    </div>
-                    <button className="btn btn-primary" onClick={() => setShowCreateModal(true)}>
-                        <Plus size={18} /> Add Employee
-                    </button>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, padding: '24px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                    <h1 style={{ fontSize: 24, fontWeight: 800, color: '#1e293b', margin: 0 }}>Employees Directory</h1>
                 </div>
             </div>
-            <div className="card-body">
+
+            {/* Top Bar with 3D Shadow */}
+            <div style={{ 
+                background: '#fff', 
+                borderRadius: 12, 
+                padding: '12px 16px', 
+                boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08), 0 1px 4px rgba(0, 0, 0, 0.04)',
+                display: 'flex', 
+                gap: 12, 
+                alignItems: 'center'
+            }}>
+                <div style={{ position: 'relative', flex: 1 }}>
+                    <Search size={18} style={{ position: 'absolute', left: 12, top: 10, color: '#94a3b8' }} />
+                    <input
+                        type="text"
+                        placeholder="Search employee..."
+                        style={{ width: '100%', height: 38, padding: '0 12px 0 36px', borderRadius: 8, border: '1px solid #cbd5e1', fontSize: 14 }}
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                </div>
+                <button 
+                    onClick={() => setShowCreateModal(true)}
+                    style={{ height: 38, padding: '0 16px', background: '#f97316', color: '#fff', border: 'none', borderRadius: 8, display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700, cursor: 'pointer', boxShadow: '0 4px 12px rgba(249,115,22,0.3)' }}
+                >
+                    <Plus size={18} /> Add Employee
+                </button>
+                <div style={{ padding: '0 16px', height: 38, background: '#f1f5f9', borderRadius: 8, display: 'flex', alignItems: 'center', fontWeight: 800, fontSize: 13, color: '#334155', whiteSpace: 'nowrap' }}>
+                    Total Records: {filteredEmployees.length}
+                </div>
+            </div>
+
+            <style>{`
+                .perfect-table-container {
+                    background: #ffffff;
+                    border-radius: 22px;
+                    border: 1.5px solid #f1f5f9;
+                    overflow: hidden;
+                    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+                    padding: 0 !important;
+                }
+                .perfect-table-wrap {
+                    overflow-x: auto;
+                    width: 100%;
+                }
+                .perfect-table {
+                    width: 100%;
+                    border-collapse: collapse !important;
+                    margin: 0 !important;
+                }
+                .perfect-table th {
+                    padding: 12px 18px !important;
+                    background: #edf2f7 !important;
+                    border-bottom: 2px solid #f1f5f9 !important;
+                    font-size: 9.5px !important;
+                    font-weight: 950 !important;
+                    text-transform: uppercase !important;
+                    color: #1e293b !important;
+                    letter-spacing: 1.5px !important;
+                    text-align: left;
+                }
+                .perfect-table td {
+                    padding: 14px 18px !important;
+                    border-bottom: 1.5px solid #f8fafc !important;
+                    font-size: 13px !important;
+                    font-weight: 800 !important;
+                    color: #1e293b !important;
+                    vertical-align: middle !important;
+                }
+                .perfect-table tbody tr {
+                    transition: background 0.16s ease;
+                }
+                .perfect-table tbody tr:hover {
+                    background: #f9fbfd !important;
+                }
+                .perfect-table-status-active {
+                    background: #ecfdf5 !important;
+                    color: #059669 !important;
+                    padding: 6px 12px;
+                    border-radius: 10px;
+                    font-size: 11px;
+                    font-weight: 950;
+                    text-transform: uppercase;
+                    display: inline-block;
+                }
+                .perfect-table-status-inactive {
+                    background: #fef2f2 !important;
+                    color: #dc2626 !important;
+                    padding: 6px 12px;
+                    border-radius: 10px;
+                    font-size: 11px;
+                    font-weight: 950;
+                    text-transform: uppercase;
+                    display: inline-block;
+                }
+                .perfect-table-action-btn {
+                    background: none;
+                    border: none;
+                    cursor: pointer;
+                    color: #64748b;
+                    transition: all 0.2s;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 6px;
+                    border-radius: 8px;
+                }
+                .perfect-table-action-btn:hover {
+                    color: #f97316;
+                    background: #fff7ed;
+                }
+            `}</style>
+
+            <div className="perfect-table-container">
                 {loading ? (
                     <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>Loading directory...</div>
                 ) : (
-                    <div className="table-container">
-                        <table>
+                    <div className="perfect-table-wrap">
+                        <table className="perfect-table">
                             <thead>
                                 <tr>
                                     <th>Employee ID</th>
@@ -73,29 +171,29 @@ export default function EmployeeListPage() {
                             <tbody>
                                 {filteredEmployees.map(emp => (
                                     <tr key={emp.id}>
-                                        <td style={{ fontWeight: 500 }}>{emp.employeeId}</td>
+                                        <td>{emp.employeeId}</td>
                                         <td>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                                                 <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(67, 97, 238, 0.1)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 'bold' }}>
                                                     {emp.firstName.charAt(0)}{emp.lastName.charAt(0)}
                                                 </div>
                                                 <div>
-                                                    <div style={{ fontWeight: 500, color: 'var(--text-main)' }}>{emp.firstName} {emp.lastName}</div>
-                                                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{emp.email}</div>
+                                                    <div style={{ fontWeight: 800, color: '#1e293b' }}>{emp.firstName} {emp.lastName}</div>
+                                                    <div style={{ fontSize: '11px', color: '#64748b', fontWeight: 500 }}>{emp.email}</div>
                                                 </div>
                                             </div>
                                         </td>
                                         <td>{emp.departmentName || 'Not Assigned'}</td>
                                         <td>{emp.designationTitle || 'N/A'}</td>
                                         <td>
-                                            <span className={`status-badge ${emp.status === 'ACTIVE' ? 'status-active' : 'status-inactive'}`}>
+                                            <span className={emp.status === 'ACTIVE' ? 'perfect-table-status-active' : 'perfect-table-status-inactive'}>
                                                 {emp.status}
                                             </span>
                                         </td>
                                         <td>
-                                            <div style={{ display: 'flex', gap: '12px', color: 'var(--text-muted)' }}>
-                                                <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', transition: 'color 0.2s' }} onClick={() => navigate(`/employees/${emp.id}`)} title="View Profile">
-                                                    <Eye size={18} className="hover:text-primary" />
+                                            <div style={{ display: 'flex', gap: '12px' }}>
+                                                <button className="perfect-table-action-btn" onClick={() => navigate(`/employees/${emp.id}`)} title="View Profile">
+                                                    <Eye size={18} />
                                                 </button>
                                             </div>
                                         </td>
@@ -103,7 +201,7 @@ export default function EmployeeListPage() {
                                 ))}
                                 {filteredEmployees.length === 0 && (
                                     <tr>
-                                        <td colSpan="6" style={{ textAlign: 'center', padding: '48px', color: 'var(--text-muted)' }}>
+                                        <td colSpan="6" style={{ textAlign: 'center', padding: '48px', color: '#64748b' }}>
                                             No employees match your criteria. Add a new employee to get started.
                                         </td>
                                     </tr>
@@ -124,7 +222,6 @@ export default function EmployeeListPage() {
                     }}
                 />
             )}
-            </div>
         </div>
     );
 }

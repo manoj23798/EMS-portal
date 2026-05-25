@@ -43,6 +43,9 @@ public class PermissionRequest {
     @Column(columnDefinition = "TEXT")
     private String reason;
 
+    @Column(columnDefinition = "TEXT")
+    private String remarks;
+
     @Column(nullable = false, length = 20)
     @Builder.Default
     private String status = "Pending"; // Pending, Approved, Rejected

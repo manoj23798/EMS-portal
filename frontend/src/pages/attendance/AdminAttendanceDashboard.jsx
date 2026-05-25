@@ -269,9 +269,9 @@ export default function AdminAttendanceDashboard() {
                     flex-direction: column;
                     min-width: 76px;
                     padding: 5px 10px;
-                    border: 1px solid #dbe4ef;
+                    border: 1px solid #e2e8f0;
                     border-radius: 10px;
-                    background: #f1f5f9;
+                    background: #f8fafc;
                 }
                 .ap-header-metric-label { font-size: 10px; font-weight: 950; color: #8ca0bc; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 0; }
                 .ap-header-metric-value { font-size: 18px; font-weight: 950; color: #0b1b3b; line-height: 1; }
@@ -660,7 +660,7 @@ export default function AdminAttendanceDashboard() {
                                                     )}
                                                 </span>
                                             </td>
-                                            <td style={{ color: '#0ea5e9' }}>{formatMinutes(record.totalHours)}</td>
+                                            <td style={{ color: '#94a3b8' }}>{formatMinutes(record.totalHours)}</td>
                                             <td>
                                                 <span className={`ap-status-pill ${statusClass}`}>
                                                     {getLateLabel(record)}

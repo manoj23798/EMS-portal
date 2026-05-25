@@ -31,7 +31,7 @@ export default function Sidebar() {
             </div>
             <nav className="sidebar-nav">
                 {/* Profile */}
-                <NavLink to={`/employees/${tokenManager.getUserData()?.id}`}
+                <NavLink to={`/employees/${tokenManager.getUserData()?.employeeId || tokenManager.getUserData()?.id}`}
                     className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
                     <User size={20} />
                     <span>My Profile</span>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../services/api';
 import { Eye, Check, X, AlertTriangle, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
+import RejectModal from '../../components/RejectModal';
 
 export default function ManagerReimbursementDashboard() {
     const [pendingClaims, setPendingClaims] = useState([]);
@@ -31,13 +32,20 @@ export default function ManagerReimbursementDashboard() {
         }
     };
 
-    const handleAction = async (claimId, approve) => {
-        if (!window.confirm(`Are you sure you want to ${approve ? 'APPROVE' : 'REJECT'} this reimbursement claim?`)) return;
+    const [rejectModal, setRejectModal] = useState({ isOpen: false, requestId: null });
+
+    const handleAction = async (claimId, approve, remarks = '') => {
+        if (approve && !window.confirm(`Are you sure you want to APPROVE this reimbursement claim?`)) return;
+        if (!approve && !remarks) {
+            setRejectModal({ isOpen: true, requestId: claimId });
+            return;
+        }
         
         try {
             setProcessing(true);
-            await api.put(`/manager/reimbursement/${claimId}/approve`, { approve });
+            await api.put(`/manager/reimbursement/${claimId}/approve`, { approve, remarks });
             setSelectedClaim(null);
+            if (!approve) setRejectModal({ isOpen: false, requestId: null });
             fetchPending(); // Refresh list
         } catch (err) {
             alert(err.response?.data?.message || `Failed to ${approve ? 'approve' : 'reject'} claim`);
@@ -113,19 +121,19 @@ export default function ManagerReimbursementDashboard() {
 
                 {/* Pagination Controls */}
                 {pendingClaims.length > 0 && (
-                    <div style={{ padding: '4px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1.5px solid #fed7aa', background: 'white' }}>
+                    <div style={{ padding: '4px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1.5px solid #cbd5e1', background: 'white' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                             <button 
                                 disabled={currentPage === 1} 
                                 onClick={() => setCurrentPage(1)} 
-                                style={{ width: '24px', height: '24px', borderRadius: '50%', border: '1.5px solid #fed7aa', background: 'white', color: '#431407', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', opacity: currentPage === 1 ? 0.3 : 1 }}
+                                style={{ width: '24px', height: '24px', borderRadius: '50%', border: '1.5px solid #cbd5e1', background: 'white', color: '#431407', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', opacity: currentPage === 1 ? 0.3 : 1 }}
                             >
                                 <ChevronsLeft size={14} />
                             </button>
                             <button 
                                 disabled={currentPage === 1} 
                                 onClick={() => setCurrentPage(p => p - 1)} 
-                                style={{ width: '24px', height: '24px', borderRadius: '50%', border: '1.5px solid #fed7aa', background: 'white', color: '#431407', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', opacity: currentPage === 1 ? 0.3 : 1 }}
+                                style={{ width: '24px', height: '24px', borderRadius: '50%', border: '1.5px solid #cbd5e1', background: 'white', color: '#431407', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', opacity: currentPage === 1 ? 0.3 : 1 }}
                             >
                                 <ChevronLeft size={14} />
                             </button>
@@ -134,17 +142,17 @@ export default function ManagerReimbursementDashboard() {
                                 .filter(p => p === 1 || p === Math.ceil(pendingClaims.length / rowsPerPage) || (p >= currentPage - 1 && p <= currentPage + 1))
                                 .map((p, i, arr) => (
                                     <React.Fragment key={p}>
-                                        {i > 0 && arr[i-1] !== p - 1 && <span style={{ color: '#fed7aa', fontSize: '10px' }}>...</span>}
+                                        {i > 0 && arr[i-1] !== p - 1 && <span style={{ color: '#cbd5e1', fontSize: '10px' }}>...</span>}
                                         <button 
                                             onClick={() => setCurrentPage(p)}
                                             style={{
                                                 width: '24px', height: '24px', borderRadius: '50%', border: '1.5px solid',
-                                                borderColor: currentPage === p ? '#f97316' : '#fed7aa',
-                                                background: currentPage === p ? '#f97316' : 'white',
+                                                borderColor: currentPage === p ? '#334155' : '#cbd5e1',
+                                                background: currentPage === p ? '#334155' : 'white',
                                                 color: currentPage === p ? 'white' : '#431407',
                                                 fontSize: '10px', fontWeight: 900, cursor: 'pointer', transition: '0.2s',
                                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                boxShadow: currentPage === p ? '0 4px 10px rgba(249,115,22,0.2)' : 'none'
+                                                boxShadow: currentPage === p ? '0 4px 10px rgba(51, 65, 85, 0.2)' : 'none'
                                             }}
                                         >
                                             {p}
@@ -155,14 +163,14 @@ export default function ManagerReimbursementDashboard() {
                             <button 
                                 disabled={currentPage === Math.ceil(pendingClaims.length / rowsPerPage)} 
                                 onClick={() => setCurrentPage(p => p + 1)} 
-                                style={{ width: '24px', height: '24px', borderRadius: '50%', border: '1.5px solid #fed7aa', background: 'white', color: '#431407', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', opacity: currentPage === Math.ceil(pendingClaims.length / rowsPerPage) ? 0.3 : 1 }}
+                                style={{ width: '24px', height: '24px', borderRadius: '50%', border: '1.5px solid #cbd5e1', background: 'white', color: '#431407', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', opacity: currentPage === Math.ceil(pendingClaims.length / rowsPerPage) ? 0.3 : 1 }}
                             >
                                 <ChevronRight size={14} />
                             </button>
                             <button 
                                 disabled={currentPage === Math.ceil(pendingClaims.length / rowsPerPage)} 
                                 onClick={() => setCurrentPage(Math.ceil(pendingClaims.length / rowsPerPage))} 
-                                style={{ width: '24px', height: '24px', borderRadius: '50%', border: '1.5px solid #fed7aa', background: 'white', color: '#431407', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', opacity: currentPage === Math.ceil(pendingClaims.length / rowsPerPage) ? 0.3 : 1 }}
+                                style={{ width: '24px', height: '24px', borderRadius: '50%', border: '1.5px solid #cbd5e1', background: 'white', color: '#431407', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', opacity: currentPage === Math.ceil(pendingClaims.length / rowsPerPage) ? 0.3 : 1 }}
                             >
                                 <ChevronsRight size={14} />
                             </button>
@@ -262,6 +270,13 @@ export default function ManagerReimbursementDashboard() {
                     </div>
                 </div>
             )}
+
+            <RejectModal 
+                isOpen={rejectModal.isOpen} 
+                onClose={() => setRejectModal({ isOpen: false, requestId: null })} 
+                onReject={(remarks) => handleAction(rejectModal.requestId, false, remarks)} 
+                title="Reject Reimbursement Claim"
+            />
         </div>
     );
 }

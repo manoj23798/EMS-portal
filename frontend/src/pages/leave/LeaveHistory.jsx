@@ -108,8 +108,8 @@ export default function LeaveHistory({ embedded = false } = {}) {
                 .action-btn:hover { border-color: #f97316; color: #f97316; background: #fff7ed; }
                 .filter-input { padding: 6px 12px; border-radius: 8px; border: 1.5px solid #cbd5e1; background: #f8fafc; font-size: 11px; fontWeight: 800; outline: none; }
                 .btn-pagination { width: 32px; height: 32px; border-radius: 10px; border: 1.5px solid #cbd5e1; background: white; display: flex; alignItems: center; justifyContent: center; cursor: pointer; color: #1e293b; transition: 0.2s; }
-                .btn-pagination:hover:not(:disabled) { border-color: #f97316; color: #f97316; }
-                .btn-pagination.active { background: #f97316; color: white; border-color: #f97316; }
+                .btn-pagination:hover:not(:disabled) { border-color: #334155; color: #334155; }
+                .btn-pagination.active { background: #334155; color: white; border-color: #334155; }
             `}</style>
 
             {/* ActionBar */}

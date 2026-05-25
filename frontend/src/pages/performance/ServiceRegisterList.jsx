@@ -109,83 +109,161 @@ export default function ServiceRegisterList() {
                 )}
             </div>
 
-            {/* Filters */}
-            <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 12, padding: 16 }}>
-                <div style={{ display: 'flex', gap: 12, marginBottom: 20 }}>
-                    <div style={{ position: 'relative', flex: 1, maxWidth: 300 }}>
-                        <Search size={18} style={{ position: 'absolute', left: 12, top: 10, color: '#94a3b8' }} />
+            {/* Top Bar with 3D Shadow */}
+            <div style={{ 
+                background: '#fff', 
+                borderRadius: 12, 
+                padding: '12px 16px', 
+                boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08), 0 1px 4px rgba(0, 0, 0, 0.04)',
+                display: 'flex', 
+                gap: 12, 
+                alignItems: 'center'
+            }}>
+                <div style={{ position: 'relative', flex: 1 }}>
+                    <Search size={18} style={{ position: 'absolute', left: 12, top: 10, color: '#94a3b8' }} />
+                    <input 
+                        value={search} onChange={e => setSearch(e.target.value)} 
+                        placeholder="Search by Employee Name..." 
+                        style={{ width: '100%', height: 38, padding: '0 12px 0 36px', borderRadius: 8, border: '1px solid #cbd5e1', fontSize: 14 }} 
+                    />
+                </div>
+                <button 
+                    onClick={() => setShowFilters(!showFilters)}
+                    style={{ padding: '0 16px', height: 38, background: showFilters ? '#fff7ed' : '#f8fafc', border: `1px solid ${showFilters ? '#f97316' : '#cbd5e1'}`, borderRadius: 8, display: 'flex', alignItems: 'center', gap: 8, fontWeight: 600, color: showFilters ? '#f97316' : '#475569', cursor: 'pointer' }}
+                >
+                    <Filter size={16} /> {showFilters ? 'Hide Filters' : 'Filters'}
+                </button>
+                {(filters.category || filters.startDate || filters.endDate || filters.reportedBy) && (
+                    <button 
+                        onClick={() => setFilters({ category: '', startDate: '', endDate: '', reportedBy: '' })}
+                        style={{ padding: '0 12px', height: 38, background: '#fff', border: '1px solid #fee2e2', color: '#ef4444', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}
+                    >Clear</button>
+                )}
+                <div style={{ padding: '0 16px', height: 38, background: '#f1f5f9', borderRadius: 8, display: 'flex', alignItems: 'center', fontWeight: 800, fontSize: 13, color: '#334155', whiteSpace: 'nowrap' }}>
+                    Total Records: {filteredEntries.length}
+                </div>
+            </div>
+
+            <style>{`
+                .perfect-table-container {
+                    background: #ffffff;
+                    border-radius: 22px;
+                    border: 1.5px solid #f1f5f9;
+                    overflow: hidden;
+                    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+                    padding: 0 !important;
+                }
+                .perfect-table-wrap {
+                    overflow-x: auto;
+                    width: 100%;
+                }
+                .perfect-table {
+                    width: 100%;
+                    border-collapse: collapse !important;
+                    margin: 0 !important;
+                }
+                .perfect-table th {
+                    padding: 12px 18px !important;
+                    background: #edf2f7 !important;
+                    border-bottom: 2px solid #f1f5f9 !important;
+                    font-size: 9.5px !important;
+                    font-weight: 950 !important;
+                    text-transform: uppercase !important;
+                    color: #1e293b !important;
+                    letter-spacing: 1.5px !important;
+                }
+                .perfect-table td {
+                    padding: 14px 18px !important;
+                    border-bottom: 1.5px solid #f8fafc !important;
+                    font-size: 13px !important;
+                    font-weight: 800 !important;
+                    color: #1e293b !important;
+                    vertical-align: middle !important;
+                }
+                .perfect-table tbody tr {
+                    transition: background 0.16s ease;
+                }
+                .perfect-table tbody tr:hover {
+                    background: #f9fbfd !important;
+                }
+                .perfect-table-category-good {
+                    padding: 6px 12px !important;
+                    border-radius: 10px !important;
+                    font-size: 11px !important;
+                    font-weight: 950 !important;
+                    text-transform: uppercase !important;
+                    background: #ecfdf5 !important;
+                    color: #059669 !important;
+                    display: inline-flex !important;
+                    align-items: center !important;
+                    gap: 6px !important;
+                }
+                .perfect-table-category-bad {
+                    padding: 6px 12px !important;
+                    border-radius: 10px !important;
+                    font-size: 11px !important;
+                    font-weight: 950 !important;
+                    text-transform: uppercase !important;
+                    background: #fef2f2 !important;
+                    color: #dc2626 !important;
+                    display: inline-flex !important;
+                    align-items: center !important;
+                    gap: 6px !important;
+                }
+            `}</style>
+
+            {showFilters && (
+                <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 12, padding: '16px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12, marginBottom: 12 }}>
+                    <div>
+                        <label style={{ display: 'block', fontSize: 11, fontWeight: 800, color: '#64748b', marginBottom: 6 }}>CATEGORY</label>
+                        <select 
+                            value={filters.category} onChange={e => setFilters({...filters, category: e.target.value})}
+                            style={{ width: '100%', height: 36, borderRadius: 6, border: '1px solid #cbd5e1', padding: '0 8px', fontSize: 13 }}
+                        >
+                            <option value="">All Categories</option>
+                            <option value="GOOD">Good (Appreciation)</option>
+                            <option value="BAD">Bad (Issue)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style={{ display: 'block', fontSize: 11, fontWeight: 800, color: '#64748b', marginBottom: 6 }}>START DATE</label>
                         <input 
-                            value={search} onChange={e => setSearch(e.target.value)} 
-                            placeholder="Search by Employee Name..." 
-                            style={{ width: '100%', height: 38, padding: '0 12px 0 36px', borderRadius: 8, border: '1px solid #cbd5e1', fontSize: 14 }} 
+                            type="date" value={filters.startDate} onChange={e => setFilters({...filters, startDate: e.target.value})}
+                            style={{ width: '100%', height: 36, borderRadius: 6, border: '1px solid #cbd5e1', padding: '0 8px', fontSize: 13 }}
                         />
                     </div>
-                    <button 
-                        onClick={() => setShowFilters(!showFilters)}
-                        style={{ padding: '0 16px', height: 38, background: showFilters ? '#fff7ed' : '#f8fafc', border: `1px solid ${showFilters ? '#f97316' : '#cbd5e1'}`, borderRadius: 8, display: 'flex', alignItems: 'center', gap: 8, fontWeight: 600, color: showFilters ? '#f97316' : '#475569', cursor: 'pointer' }}
-                    >
-                        <Filter size={16} /> {showFilters ? 'Hide Filters' : 'Filters'}
-                    </button>
-                    {(filters.category || filters.startDate || filters.endDate || filters.reportedBy) && (
-                        <button 
-                            onClick={() => setFilters({ category: '', startDate: '', endDate: '', reportedBy: '' })}
-                            style={{ padding: '0 12px', height: 38, background: '#fff', border: '1px solid #fee2e2', color: '#ef4444', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}
-                        >Clear</button>
-                    )}
-                </div>
-
-                {showFilters && (
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12, padding: '12px 0', borderTop: '1px solid #f1f5f9', marginBottom: 12 }}>
-                        <div>
-                            <label style={{ display: 'block', fontSize: 11, fontWeight: 800, color: '#64748b', marginBottom: 6 }}>CATEGORY</label>
-                            <select 
-                                value={filters.category} onChange={e => setFilters({...filters, category: e.target.value})}
-                                style={{ width: '100%', height: 36, borderRadius: 6, border: '1px solid #cbd5e1', padding: '0 8px', fontSize: 13 }}
-                            >
-                                <option value="">All Categories</option>
-                                <option value="GOOD">Good (Appreciation)</option>
-                                <option value="BAD">Bad (Issue)</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label style={{ display: 'block', fontSize: 11, fontWeight: 800, color: '#64748b', marginBottom: 6 }}>START DATE</label>
-                            <input 
-                                type="date" value={filters.startDate} onChange={e => setFilters({...filters, startDate: e.target.value})}
-                                style={{ width: '100%', height: 36, borderRadius: 6, border: '1px solid #cbd5e1', padding: '0 8px', fontSize: 13 }}
-                            />
-                        </div>
-                        <div>
-                            <label style={{ display: 'block', fontSize: 11, fontWeight: 800, color: '#64748b', marginBottom: 6 }}>END DATE</label>
-                            <input 
-                                type="date" value={filters.endDate} onChange={e => setFilters({...filters, endDate: e.target.value})}
-                                style={{ width: '100%', height: 36, borderRadius: 6, border: '1px solid #cbd5e1', padding: '0 8px', fontSize: 13 }}
-                            />
-                        </div>
-                        <div>
-                            <label style={{ display: 'block', fontSize: 11, fontWeight: 800, color: '#64748b', marginBottom: 6 }}>REPORTED BY</label>
-                            <input 
-                                value={filters.reportedBy} onChange={e => setFilters({...filters, reportedBy: e.target.value})}
-                                placeholder="Search reporter..."
-                                style={{ width: '100%', height: 36, borderRadius: 6, border: '1px solid #cbd5e1', padding: '0 8px', fontSize: 13 }}
-                            />
-                        </div>
+                    <div>
+                        <label style={{ display: 'block', fontSize: 11, fontWeight: 800, color: '#64748b', marginBottom: 6 }}>END DATE</label>
+                        <input 
+                            type="date" value={filters.endDate} onChange={e => setFilters({...filters, endDate: e.target.value})}
+                            style={{ width: '100%', height: 36, borderRadius: 6, border: '1px solid #cbd5e1', padding: '0 8px', fontSize: 13 }}
+                        />
                     </div>
-                )}
+                    <div>
+                        <label style={{ display: 'block', fontSize: 11, fontWeight: 800, color: '#64748b', marginBottom: 6 }}>REPORTED BY</label>
+                        <input 
+                            value={filters.reportedBy} onChange={e => setFilters({...filters, reportedBy: e.target.value})}
+                            placeholder="Search reporter..."
+                            style={{ width: '100%', height: 36, borderRadius: 6, border: '1px solid #cbd5e1', padding: '0 8px', fontSize: 13 }}
+                        />
+                    </div>
+                </div>
+            )}
 
-                {/* Table */}
-                <div style={{ overflowX: 'auto' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 1000 }}>
+            <div className="perfect-table-container">
+                <div className="perfect-table-wrap">
+                    <table className="perfect-table" style={{ minWidth: 1000 }}>
                         <thead>
-                            <tr style={{ background: '#f8fafc', borderBottom: '2px solid #e2e8f0', color: '#475569', fontSize: 12, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-                                <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 800, width: 50 }}>#</th>
-                                <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 800 }}>Employee</th>
-                                <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 800 }}>Date</th>
-                                <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 800 }}>Nature</th>
-                                <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 800, width: 250 }}>Description</th>
-                                <th style={{ padding: '12px 16px', textAlign: 'center', fontWeight: 800 }}>Category</th>
-                                <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 800 }}>Reported By</th>
-                                <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 800 }}>Created At</th>
-                                <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 800 }}>Remarks</th>
+                            <tr>
+                                <th style={{ textAlign: 'left', width: 50 }}>#</th>
+                                <th style={{ textAlign: 'left' }}>Employee</th>
+                                <th style={{ textAlign: 'left' }}>Date</th>
+                                <th style={{ textAlign: 'left' }}>Nature</th>
+                                <th style={{ textAlign: 'left', width: 250 }}>Description</th>
+                                <th style={{ textAlign: 'center' }}>Category</th>
+                                <th style={{ textAlign: 'left' }}>Reported By</th>
+                                <th style={{ textAlign: 'left' }}>Created At</th>
+                                <th style={{ textAlign: 'left' }}>Remarks</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -194,29 +272,24 @@ export default function ServiceRegisterList() {
                             ) : filteredEntries.length === 0 ? (
                                 <tr><td colSpan={9} style={{ textAlign: 'center', padding: 40, color: '#94a3b8' }}>No entries found.</td></tr>
                             ) : filteredEntries.map((entry, index) => (
-                                <tr key={entry.id} style={{ borderBottom: '1px solid #e2e8f0', fontSize: 13, transition: 'background 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = '#f8fafc'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                                    <td style={{ padding: '10px 16px', color: '#64748b' }}>{index + 1}</td>
-                                    <td style={{ padding: '10px 16px' }}>
-                                        <div style={{ fontWeight: 700, color: '#0f172a' }}>{getEmployeeName(entry.employeeId)}</div>
-                                        <div style={{ fontSize: 11, color: '#64748b' }}>ID: {entry.employeeId}</div>
+                                <tr key={entry.id}>
+                                    <td style={{ color: '#64748b' }}>{index + 1}</td>
+                                    <td>
+                                        <div style={{ fontWeight: 800, color: '#0f172a' }}>{getEmployeeName(entry.employeeId)}</div>
+                                        <div style={{ fontSize: 11, color: '#64748b', fontWeight: 500 }}>ID: {entry.employeeId}</div>
                                     </td>
-                                    <td style={{ padding: '10px 16px', color: '#475569' }}>{entry.date}</td>
-                                    <td style={{ padding: '10px 16px', fontStyle: 'italic', color: '#1e293b' }}>{entry.natureOfAction}</td>
-                                    <td style={{ padding: '10px 16px', color: '#475569' }}>{entry.description}</td>
-                                    <td style={{ padding: '10px 16px', textAlign: 'center' }}>
-                                        <span style={{ 
-                                            padding: '4px 10px', borderRadius: 100, fontSize: 11, fontWeight: 800,
-                                            background: entry.category === 'GOOD' ? '#dcfce7' : '#fee2e2',
-                                            color: entry.category === 'GOOD' ? '#166534' : '#991b1b',
-                                            display: 'inline-flex', alignItems: 'center', gap: 4
-                                        }}>
+                                    <td style={{ color: '#475569' }}>{entry.date}</td>
+                                    <td style={{ fontStyle: 'italic', color: '#1e293b' }}>{entry.natureOfAction}</td>
+                                    <td style={{ color: '#475569' }}>{entry.description}</td>
+                                    <td style={{ textAlign: 'center' }}>
+                                        <span className={entry.category === 'GOOD' ? 'perfect-table-category-good' : 'perfect-table-category-bad'}>
                                             {entry.category === 'GOOD' ? <CheckCircle2 size={12} /> : <AlertCircle size={12} />}
                                             {entry.category}
                                         </span>
                                     </td>
-                                    <td style={{ padding: '10px 16px', color: '#475569', fontWeight: 500 }}>{entry.reportedBy}</td>
-                                    <td style={{ padding: '10px 16px', color: '#64748b', fontSize: 12 }}>{entry.createdAt ? new Date(entry.createdAt).toLocaleDateString() : '-'}</td>
-                                    <td style={{ padding: '10px 16px', color: '#64748b' }}>{entry.remarks}</td>
+                                    <td style={{ color: '#475569', fontWeight: 500 }}>{entry.reportedBy}</td>
+                                    <td style={{ color: '#64748b', fontSize: 12 }}>{entry.createdAt ? new Date(entry.createdAt).toLocaleDateString() : '-'}</td>
+                                    <td style={{ color: '#64748b' }}>{entry.remarks}</td>
                                 </tr>
                             ))}
                         </tbody>

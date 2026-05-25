@@ -18,6 +18,7 @@ public class PermissionRequestResponse {
     private LocalTime endTime;
     private Long totalHours;
     private String reason;
+    private String remarks;
     private String status;
     private String approvedByName;
     private LocalDateTime createdAt;

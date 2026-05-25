@@ -3,9 +3,11 @@ import { Plus, Save, Search, Filter, ChevronDown, Trash2, Info } from 'lucide-re
 import { assetService } from '../../../services/assetService';
 import LogHistoryTable, { addTableLog } from '../components/LogHistoryTable';
 import Pagination from '../components/Pagination';
+import AssetDetailView from '../components/AssetDetailView';
 
-export default function ServerTab({ canEdit, data }) {
+export default function ServerTab({ canEdit, data, onViewHistory }) {
     const [servers, setServers] = useState([]);
+    const [viewingAsset, setViewingAsset] = useState(null);
 
     useEffect(() => {
         if (data && data.length > 0) {
@@ -103,37 +105,22 @@ export default function ServerTab({ canEdit, data }) {
         }
     };
 
-    const startEdit = (row, index) => {
-        setEditingId(row.id || index);
-        setEditFormData(row);
-    };
-
-    const cancelEdit = () => {
-        setEditingId(null);
-        setEditFormData({});
-    };
-
-    const saveEdit = async (index) => {
-        const oldRow = servers.find((r, i) => (r.id && r.id === editingId) || i === index);
+    const handleSaveView = async (updatedAsset) => {
+        const oldRow = servers.find(r => r.id === updatedAsset.id);
         if (!oldRow) return;
 
-        const updatedRow = { ...editFormData, assetClass: 'Server' };
+        const payload = { ...updatedAsset, assetClass: 'Server' };
         
         try {
-            let result;
-            if (oldRow.id) {
-                result = await assetService.updateCategoryAsset(oldRow.id, updatedRow);
-            } else {
-                result = await assetService.createCategoryAsset(updatedRow);
-            }
+            const result = await assetService.updateCategoryAsset(oldRow.id, payload);
 
             const changes = [];
             const ignoreFields = ['id', 'tempId', 'createdAt', 'updatedAt'];
 
-            Object.keys(updatedRow).forEach(key => {
+            Object.keys(payload).forEach(key => {
                 if (ignoreFields.includes(key)) return;
                 const oldVal = (oldRow[key] || '').toString();
-                const newVal = (updatedRow[key] || '').toString();
+                const newVal = (payload[key] || '').toString();
                 if (oldVal !== newVal) {
                     const label = key.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').toUpperCase().trim();
                     changes.push({ field: label, old: oldVal, new: newVal });
@@ -141,13 +128,13 @@ export default function ServerTab({ canEdit, data }) {
             });
 
             if (changes.length > 0) {
-                addTableLog('Server', 'MODIFIED', updatedRow.computerName || 'Unknown', `Updated ${changes.length} fields.`, oldRow.id || result.id, changes);
+                addTableLog('Server', 'MODIFIED', payload.computerName || 'Unknown', `Updated ${changes.length} fields.`, oldRow.id, changes);
             }
 
-            setServers(prev => prev.map((r) => ((r.id && r.id === oldRow.id) || r === oldRow) ? result : r));
-            setEditingId(null);
+            setServers(prev => prev.map((r) => r.id === oldRow.id ? result : r));
         } catch (error) {
             console.error('Failed to update server', error);
+            throw error;
         }
     };
 
@@ -166,6 +153,14 @@ export default function ServerTab({ canEdit, data }) {
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {viewingAsset ? (
+                <AssetDetailView 
+                    asset={viewingAsset} 
+                    onBack={() => setViewingAsset(null)}
+                    onSave={canEdit ? handleSaveView : undefined}
+                />
+            ) : (
+                <>
             {/* Filters Section */}
             <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 16, padding: 16, boxShadow: '0 8px 30px rgba(156,163,175,0.4)' }}>
                 <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
@@ -226,23 +221,12 @@ export default function ServerTab({ canEdit, data }) {
             {/* Table Section */}
             <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 16, overflow: 'hidden', boxShadow: '0 8px 30px rgba(156,163,175,0.4)' }}>
                 <div style={{ overflowX: 'auto' }}>
-                    <table className="asset-dashboard-table" style={{ width: '100%', borderCollapse: 'collapse', minWidth: 1500 }}>
+                    <table className="asset-dashboard-table" style={{ width: '100%', borderCollapse: 'collapse', minWidth: 800 }}>
                         <thead style={{ position: 'sticky', top: 0, zIndex: 2 }}>
                             <tr style={{ background: '#f8fafc' }}>
-                                <th style={{ textAlign: 'left', padding: '14px 12px', fontSize: 12, textTransform: 'uppercase', letterSpacing: 0.6, fontWeight: 900, color: '#334155', borderBottom: '1px solid #dbe3ea' }}>SL No</th>
-                                <th style={{ textAlign: 'left', padding: '14px 12px', fontSize: 12, textTransform: 'uppercase', letterSpacing: 0.6, fontWeight: 900, color: '#334155', borderBottom: '1px solid #dbe3ea' }}>Created At</th>
-                                <th style={{ textAlign: 'left', padding: '14px 12px', fontSize: 12, textTransform: 'uppercase', letterSpacing: 0.6, fontWeight: 900, color: '#334155', borderBottom: '1px solid #dbe3ea' }}>PC NAME</th>
-                                <th style={{ textAlign: 'left', padding: '14px 12px', fontSize: 12, textTransform: 'uppercase', letterSpacing: 0.6, fontWeight: 900, color: '#334155', borderBottom: '1px solid #dbe3ea' }}>User Name</th>
-                                <th style={{ textAlign: 'left', padding: '14px 12px', fontSize: 12, textTransform: 'uppercase', letterSpacing: 0.6, fontWeight: 900, color: '#334155', borderBottom: '1px solid #dbe3ea' }}>Department</th>
-                                <th style={{ textAlign: 'left', padding: '14px 12px', fontSize: 12, textTransform: 'uppercase', letterSpacing: 0.6, fontWeight: 900, color: '#334155', borderBottom: '1px solid #dbe3ea' }}>IP ADDRESS</th>
-                                <th style={{ textAlign: 'left', padding: '14px 12px', fontSize: 12, textTransform: 'uppercase', letterSpacing: 0.6, fontWeight: 900, color: '#334155', borderBottom: '1px solid #dbe3ea' }}>MAKE</th>
-                                <th style={{ textAlign: 'left', padding: '14px 12px', fontSize: 12, textTransform: 'uppercase', letterSpacing: 0.6, fontWeight: 900, color: '#334155', borderBottom: '1px solid #dbe3ea' }}>MODEL</th>
-                                <th style={{ textAlign: 'left', padding: '14px 12px', fontSize: 12, textTransform: 'uppercase', letterSpacing: 0.6, fontWeight: 900, color: '#334155', borderBottom: '1px solid #dbe3ea' }}>CPU</th>
-                                <th style={{ textAlign: 'left', padding: '14px 12px', fontSize: 12, textTransform: 'uppercase', letterSpacing: 0.6, fontWeight: 900, color: '#334155', borderBottom: '1px solid #dbe3ea' }}>RAM</th>
-                                <th style={{ textAlign: 'left', padding: '14px 12px', fontSize: 12, textTransform: 'uppercase', letterSpacing: 0.6, fontWeight: 900, color: '#334155', borderBottom: '1px solid #dbe3ea' }}>HDD and Type</th>
-                                <th style={{ textAlign: 'left', padding: '14px 12px', fontSize: 12, textTransform: 'uppercase', letterSpacing: 0.6, fontWeight: 900, color: '#334155', borderBottom: '1px solid #dbe3ea' }}>OS</th>
-                                <th style={{ textAlign: 'left', padding: '14px 12px', fontSize: 12, textTransform: 'uppercase', letterSpacing: 0.6, fontWeight: 900, color: '#334155', borderBottom: '1px solid #dbe3ea' }}>Remarks</th>
-                                <th style={{ textAlign: 'left', padding: '14px 12px', fontSize: 12, textTransform: 'uppercase', letterSpacing: 0.6, fontWeight: 900, color: '#334155', borderBottom: '1px solid #dbe3ea' }}>Actions</th>
+                                {['SL No', 'Created At', 'PC NAME', 'User Name', 'Department', 'IP ADDRESS', 'Actions'].map(head => (
+                                    <th key={head} style={{ textAlign: 'left', padding: '14px 12px', fontSize: 12, textTransform: 'uppercase', letterSpacing: 0.6, fontWeight: 900, color: '#334155', borderBottom: '1px solid #dbe3ea' }}>{head}</th>
+                                ))}
                             </tr>
                         </thead>
                         <tbody>
@@ -255,13 +239,6 @@ export default function ServerTab({ canEdit, data }) {
                                     <td style={{ padding: '10px 12px' }}><input value={row.userName} onChange={(e) => setNewServerRows(prev => prev.map(r => r.tempId === row.tempId ? { ...r, userName: e.target.value } : r))} placeholder="User" style={{ width: 120, height: 32, borderRadius: 8, border: '1px solid #cbd5e1', padding: '0 8px' }} /></td>
                                     <td style={{ padding: '10px 12px' }}><input value={row.department} onChange={(e) => setNewServerRows(prev => prev.map(r => r.tempId === row.tempId ? { ...r, department: e.target.value } : r))} placeholder="Department" style={{ width: 140, height: 32, borderRadius: 8, border: '1px solid #cbd5e1', padding: '0 8px' }} /></td>
                                     <td style={{ padding: '10px 12px' }}><input value={row.ipAddress} onChange={(e) => setNewServerRows(prev => prev.map(r => r.tempId === row.tempId ? { ...r, ipAddress: e.target.value } : r))} placeholder="IP" style={{ width: 110, height: 32, borderRadius: 8, border: '1px solid #cbd5e1', padding: '0 8px' }} /></td>
-                                    <td style={{ padding: '10px 12px' }}><input value={row.make} onChange={(e) => setNewServerRows(prev => prev.map(r => r.tempId === row.tempId ? { ...r, make: e.target.value } : r))} placeholder="Make" style={{ width: 100, height: 32, borderRadius: 8, border: '1px solid #cbd5e1', padding: '0 8px' }} /></td>
-                                    <td style={{ padding: '10px 12px' }}><input value={row.model} onChange={(e) => setNewServerRows(prev => prev.map(r => r.tempId === row.tempId ? { ...r, model: e.target.value } : r))} placeholder="Model" style={{ width: 120, height: 32, borderRadius: 8, border: '1px solid #cbd5e1', padding: '0 8px' }} /></td>
-                                    <td style={{ padding: '10px 12px' }}><input value={row.cpu} onChange={(e) => setNewServerRows(prev => prev.map(r => r.tempId === row.tempId ? { ...r, cpu: e.target.value } : r))} placeholder="CPU" style={{ width: 150, height: 32, borderRadius: 8, border: '1px solid #cbd5e1', padding: '0 8px' }} /></td>
-                                    <td style={{ padding: '10px 12px' }}><input value={row.ram} onChange={(e) => setNewServerRows(prev => prev.map(r => r.tempId === row.tempId ? { ...r, ram: e.target.value } : r))} placeholder="RAM" style={{ width: 90, height: 32, borderRadius: 8, border: '1px solid #cbd5e1', padding: '0 8px' }} /></td>
-                                    <td style={{ padding: '10px 12px' }}><input value={row.hddType} onChange={(e) => setNewServerRows(prev => prev.map(r => r.tempId === row.tempId ? { ...r, hddType: e.target.value } : r))} placeholder="HDD" style={{ width: 130, height: 32, borderRadius: 8, border: '1px solid #cbd5e1', padding: '0 8px' }} /></td>
-                                    <td style={{ padding: '10px 12px' }}><input value={row.os} onChange={(e) => setNewServerRows(prev => prev.map(r => r.tempId === row.tempId ? { ...r, os: e.target.value } : r))} placeholder="OS" style={{ width: 120, height: 32, borderRadius: 8, border: '1px solid #cbd5e1', padding: '0 8px' }} /></td>
-                                    <td style={{ padding: '10px 12px' }}><input value={row.remarks} onChange={(e) => setNewServerRows(prev => prev.map(r => r.tempId === row.tempId ? { ...r, remarks: e.target.value } : r))} placeholder="Remarks" style={{ width: 160, height: 32, borderRadius: 8, border: '1px solid #cbd5e1', padding: '0 8px' }} /></td>
                                     <td style={{ padding: '10px 12px' }}>
                                         <button onClick={() => setNewServerRows(prev => prev.filter(r => r.tempId !== row.tempId))} style={{ height: 28, padding: '0 8px', borderRadius: 6, border: '1px solid #fecaca', background: '#fff', color: '#dc2626', fontWeight: 800, cursor: 'pointer' }}>Cancel</button>
                                     </td>
@@ -275,52 +252,18 @@ export default function ServerTab({ canEdit, data }) {
                                 <tr key={globalIndex} style={{ borderBottom: '1px solid #edf2f7' }}>
                                     <td style={{ padding: '12px' }}><div className="asset-data-cell">{canEdit ? newServerRows.length + globalIndex + 1 : globalIndex + 1}</div></td>
                                     <td style={{ padding: '12px' }}><div className="asset-data-cell" style={{ border: 'none', background: '#f8fafc', color: '#64748b' }}>{row.createdAt ? new Date(row.createdAt).toLocaleDateString() : '-'}</div></td>
-                                    {editingId === index ? (
-                                        <>
-                                            <td style={{ padding: '8px' }}><input value={editFormData.computerName} onChange={e => setEditFormData({ ...editFormData, computerName: e.target.value })} style={{ width: 120, height: 32, borderRadius: 8, border: '1px solid #3b82f6', padding: '0 8px' }} /></td>
-                                            <td style={{ padding: '8px' }}><input value={editFormData.userName} onChange={e => setEditFormData({ ...editFormData, userName: e.target.value })} style={{ width: 120, height: 32, borderRadius: 8, border: '1px solid #3b82f6', padding: '0 8px' }} /></td>
-                                            <td style={{ padding: '8px' }}><input value={editFormData.department} onChange={e => setEditFormData({ ...editFormData, department: e.target.value })} style={{ width: 140, height: 32, borderRadius: 8, border: '1px solid #3b82f6', padding: '0 8px' }} /></td>
-                                            <td style={{ padding: '8px' }}><input value={editFormData.ipAddress} onChange={e => setEditFormData({ ...editFormData, ipAddress: e.target.value })} style={{ width: 110, height: 32, borderRadius: 8, border: '1px solid #3b82f6', padding: '0 8px' }} /></td>
-                                            <td style={{ padding: '8px' }}><input value={editFormData.make} onChange={e => setEditFormData({ ...editFormData, make: e.target.value })} style={{ width: 100, height: 32, borderRadius: 8, border: '1px solid #3b82f6', padding: '0 8px' }} /></td>
-                                            <td style={{ padding: '8px' }}><input value={editFormData.model} onChange={e => setEditFormData({ ...editFormData, model: e.target.value })} style={{ width: 120, height: 32, borderRadius: 8, border: '1px solid #3b82f6', padding: '0 8px' }} /></td>
-                                            <td style={{ padding: '8px' }}><input value={editFormData.cpu} onChange={e => setEditFormData({ ...editFormData, cpu: e.target.value })} style={{ width: 150, height: 32, borderRadius: 8, border: '1px solid #3b82f6', padding: '0 8px' }} /></td>
-                                            <td style={{ padding: '8px' }}><input value={editFormData.ram} onChange={e => setEditFormData({ ...editFormData, ram: e.target.value })} style={{ width: 90, height: 32, borderRadius: 8, border: '1px solid #3b82f6', padding: '0 8px' }} /></td>
-                                            <td style={{ padding: '8px' }}><input value={editFormData.hddType} onChange={e => setEditFormData({ ...editFormData, hddType: e.target.value })} style={{ width: 130, height: 32, borderRadius: 8, border: '1px solid #3b82f6', padding: '0 8px' }} /></td>
-                                            <td style={{ padding: '8px' }}><input value={editFormData.os} onChange={e => setEditFormData({ ...editFormData, os: e.target.value })} style={{ width: 120, height: 32, borderRadius: 8, border: '1px solid #3b82f6', padding: '0 8px' }} /></td>
-                                            <td style={{ padding: '8px' }}><input value={editFormData.remarks} onChange={e => setEditFormData({ ...editFormData, remarks: e.target.value })} style={{ width: 160, height: 32, borderRadius: 8, border: '1px solid #3b82f6', padding: '0 8px' }} /></td>
-                                            <td style={{ padding: '12px' }}>
-                                                <div style={{ display: 'flex', gap: 6 }}>
-                                                    <button onClick={() => saveEdit(index)} style={{ padding: '6px 10px', borderRadius: 8, background: '#10b981', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 800 }}>Save</button>
-                                                    <button onClick={cancelEdit} style={{ padding: '6px 10px', borderRadius: 8, background: '#94a3b8', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 800 }}>X</button>
-                                                </div>
-                                            </td>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <td style={{ padding: '12px' }}><div className="asset-data-cell" style={{ fontWeight: 900 }}>{row.computerName || '-'}</div></td>
-                                            <td style={{ padding: '12px' }}><div className="asset-data-cell">{row.userName || '-'}</div></td>
-                                            <td style={{ padding: '12px' }}><div className="asset-data-cell">{row.department || '-'}</div></td>
-                                            <td style={{ padding: '12px' }}><div className="asset-data-cell">{row.ipAddress || '-'}</div></td>
-                                            <td style={{ padding: '12px' }}><div className="asset-data-cell">{row.make || '-'}</div></td>
-                                            <td style={{ padding: '12px' }}><div className="asset-data-cell">{row.model || '-'}</div></td>
-                                            <td style={{ padding: '12px' }}><div className="asset-data-cell">{row.cpu || '-'}</div></td>
-                                            <td style={{ padding: '12px' }}><div className="asset-data-cell">{row.ram || '-'}</div></td>
-                                            <td style={{ padding: '12px' }}><div className="asset-data-cell">{row.hddAndType || row.hddType || '-'}</div></td>
-                                            <td style={{ padding: '12px' }}><div className="asset-data-cell">{row.os || '-'}</div></td>
-                                            <td style={{ padding: '12px' }}><div className="asset-data-cell">{row.remarks || '-'}</div></td>
-                                            <td style={{ padding: '12px' }}>
-                                                <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                                                    <button onClick={() => onViewHistory && onViewHistory(row)} style={{ border: '1px solid #e2e8f0', background: '#fff', color: '#64748b', borderRadius: 8, padding: '5px 8px', display: 'inline-flex', alignItems: 'center', cursor: 'pointer' }} title="View row history"><Info size={14} /></button>
-                                                    {canEdit && (
-                                                        <div style={{ display: 'flex', gap: 6 }}>
-                                                            <button onClick={() => startEdit(row, index)} style={{ border: '1px solid #cbd5e1', background: '#fff', color: '#1e293b', borderRadius: 8, padding: '6px 10px', fontSize: 11, cursor: 'pointer', fontWeight: 800 }}>Edit</button>
-                                                            <button onClick={() => deleteAsset(row, globalIndex)} style={{ border: '1px solid #fecaca', background: '#fff', color: '#dc2626', borderRadius: 8, padding: '6px 10px', fontSize: 11, cursor: 'pointer', fontWeight: 800 }}>Delete</button>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </td>
-                                        </>
-                                    )}
+                                    <td style={{ padding: '12px' }}><div className="asset-data-cell" style={{ fontWeight: 900 }}>{row.computerName || '-'}</div></td>
+                                    <td style={{ padding: '12px' }}><div className="asset-data-cell">{row.userName || '-'}</div></td>
+                                    <td style={{ padding: '12px' }}><div className="asset-data-cell">{row.department || '-'}</div></td>
+                                    <td style={{ padding: '12px' }}><div className="asset-data-cell">{row.ipAddress || '-'}</div></td>
+                                    <td style={{ padding: '12px' }}>
+                                        <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                                            <button onClick={() => setViewingAsset(row)} style={{ border: '1px solid #cbd5e1', background: '#fff', color: '#1e293b', borderRadius: 8, padding: '6px 8px', fontSize: 10, cursor: 'pointer', fontWeight: 800 }}>View</button>
+                                            {canEdit && (
+                                                <button onClick={() => deleteAsset(row, globalIndex)} style={{ border: '1px solid #fecaca', background: '#fff', color: '#dc2626', borderRadius: 8, padding: '6px 10px', fontSize: 11, cursor: 'pointer', fontWeight: 800 }}>Delete</button>
+                                            )}
+                                        </div>
+                                    </td>
                                 </tr>
                                 )
                             })}
@@ -350,6 +293,8 @@ export default function ServerTab({ canEdit, data }) {
                     </div>
                 )}
             </div>
+            </>
+            )}
         </div>
     );
 }

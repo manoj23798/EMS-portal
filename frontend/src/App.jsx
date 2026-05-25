@@ -28,6 +28,7 @@ import CommunicationDetails from './pages/communications/CommunicationDetails';
 
 import HandbookPage from './pages/handbook/HandbookPage';
 import PolicyView from './pages/handbook/PolicyView';
+import PolicyEditor from './pages/handbook/PolicyEditor';
 
 import ReimbursementApply from './pages/reimbursement/ReimbursementApply';
 import ReimbursementHistory from './pages/reimbursement/ReimbursementHistory';
@@ -91,6 +92,8 @@ function App() {
             {/* Employee Handbook Modules */}
             <Route path="handbook" element={<RoleGuard allowedRoles={['ADMIN', 'HR', 'PROJECT_MANAGER', 'IT_MANAGER', 'EMPLOYEE']}><HandbookPage /></RoleGuard>}>
                 <Route path="policy/:id" element={<PolicyView />} />
+                <Route path="create" element={<RoleGuard allowedRoles={['ADMIN', 'HR']}><PolicyEditor /></RoleGuard>} />
+                <Route path="edit/:id" element={<RoleGuard allowedRoles={['ADMIN', 'HR']}><PolicyEditor /></RoleGuard>} />
             </Route>
 
             {/* Reimbursement Modules */}

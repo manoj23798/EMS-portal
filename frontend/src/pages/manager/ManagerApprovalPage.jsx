@@ -14,8 +14,10 @@ import {
     RotateCcw,
     Download,
     Eye,
-    EyeOff
+    EyeOff,
+    Info
 } from 'lucide-react';
+import RejectModal from '../../components/RejectModal';
 import {
     PieChart,
     Pie,
@@ -321,6 +323,7 @@ const ManagerApprovalPage = () => {
     const [categoryPopupLocked, setCategoryPopupLocked] = useState(false);
     const [categoryPopupPosition, setCategoryPopupPosition] = useState(null);
     const [categoryPopupHovered, setCategoryPopupHovered] = useState(false);
+    const [rejectModal, setRejectModal] = useState({ isOpen: false, requestId: null });
     const categoryChartRef = useRef(null);
     const categoryPopupRef = useRef(null);
 
@@ -824,9 +827,22 @@ const ManagerApprovalPage = () => {
 
     const handleAction = async (id, action) => {
         try {
-            if (action === 'approve') await ManagerAPI.approveLeave(id, 1, 'Approved');
-            else await ManagerAPI.rejectLeave(id, 1, 'Rejected');
+            if (action === 'approve') {
+                await ManagerAPI.approveLeave(id, 1, 'Approved');
+                const allRes = await ManagerAPI.getPendingLeaves();
+                setAllRequests(allRes.data || []);
+            } else if (action === 'reject') {
+                setRejectModal({ isOpen: true, requestId: id });
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    };
 
+    const handleConfirmReject = async (remarks) => {
+        try {
+            await ManagerAPI.rejectLeave(rejectModal.requestId, 1, remarks);
+            setRejectModal({ isOpen: false, requestId: null });
             const allRes = await ManagerAPI.getPendingLeaves();
             setAllRequests(allRes.data || []);
         } catch (err) {
@@ -1603,6 +1619,19 @@ const ManagerApprovalPage = () => {
                         justify-content: flex-start;
                     }
                 }
+
+                .ma-tooltip-container { position: relative; display: inline-flex; align-items: center; cursor: pointer; margin-left: 4px; }
+                .ma-tooltip-content {
+                    display: none; position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%);
+                    background: #1e293b; color: white; padding: 10px 12px; border-radius: 8px; font-size: 11px; font-weight: 600;
+                    white-space: normal; text-transform: none; text-align: left; margin-bottom: 8px; z-index: 100;
+                    box-shadow: 0 10px 25px rgba(0,0,0,0.2); min-width: 200px;
+                }
+                .ma-tooltip-container:hover .ma-tooltip-content { display: block; }
+                .ma-tooltip-content::after {
+                    content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+                    border-width: 5px; border-style: solid; border-color: #1e293b transparent transparent transparent;
+                }
             `}</style>
 
             <div className="ma-portal-switch">
@@ -1785,6 +1814,13 @@ const ManagerApprovalPage = () => {
                     </div>
                 </div>
             )}
+            
+            <RejectModal 
+                isOpen={rejectModal.isOpen} 
+                onClose={() => setRejectModal({ isOpen: false, requestId: null })} 
+                onReject={handleConfirmReject} 
+                title="Reject Leave Request"
+            />
 
             <section className="ma-table-container">
                 <div className="ma-filter-topbar">
@@ -1942,7 +1978,18 @@ const ManagerApprovalPage = () => {
                                         <span className="ma-status-label" style={{ background: '#f1f5f9', color: '#475569' }}>Canceled</span>
                                     ) : lr.status === 'Rejected' ? (
                                         <div style={{ textAlign: 'center' }}>
-                                            <span className="ma-status-label" style={{ background: '#fef2f2', color: '#dc2626' }}>Rejected</span>
+                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                                                <span className="ma-status-label" style={{ background: '#fef2f2', color: '#dc2626' }}>Rejected</span>
+                                                {lr.remarks && (
+                                                    <div className="ma-tooltip-container">
+                                                        <Info size={14} color="#ef4444" />
+                                                        <div className="ma-tooltip-content">
+                                                            <div style={{ fontWeight: 900, marginBottom: '4px', color: '#cbd5e1', borderBottom: '1px solid #334155', paddingBottom: '4px', textTransform: 'uppercase' }}>Rejection Remarks</div>
+                                                            <div style={{ color: '#f8fafc', lineHeight: 1.4 }}>{lr.remarks}</div>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
                                             <div style={{ fontSize: '9px', fontWeight: 900, color: '#94a3b8', marginTop: '4px', textTransform: 'uppercase', lineHeight: 1.2 }}>
                                                 {formatActionDate(getStatusActionTimestamp(lr)) || '--'}
                                             </div>

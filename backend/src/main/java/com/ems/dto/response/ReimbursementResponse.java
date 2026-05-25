@@ -36,6 +36,7 @@ public class ReimbursementResponse {
     // Approvals
     private LocalDate managerApprovalDate;
     private String managerApprovalBy;
+    private String managerRemarks;
     
     private Double accountsApprovedAmount;
     private String accountsReason;

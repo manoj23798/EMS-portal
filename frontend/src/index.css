@@ -78,16 +78,9 @@ body {
   overflow-y: auto;
 }
 
-/* Thinner scrollbar for sidebar */
+/* Hide scrollbar for sidebar */
 .sidebar::-webkit-scrollbar {
-  width: 5px;
-}
-.sidebar::-webkit-scrollbar-thumb {
-  background: rgba(249, 115, 22, 0.2);
-  border-radius: 10px;
-}
-.sidebar::-webkit-scrollbar-thumb:hover {
-  background: rgba(249, 115, 22, 0.4);
+  display: none;
 }
 
 .sidebar-header {
@@ -127,10 +120,9 @@ body {
 }
 
 .nav-item.active {
-  background-color: var(--primary-light);
-  color: var(--primary-hover);
-  border-left: 4px solid var(--primary);
-  font-weight: 600;
+  background-color: #e2e8f0;
+  color: #0f172a;
+  font-weight: 700;
 }
 
 .main-content {

@@ -177,14 +177,36 @@ export default function RowHistoryPopup({ isOpen, onClose, logs: initialLogs, as
                                                             </div>
                                                         ) : (
                                                             (() => {
-                                                                const diff = log.diff || [];
+                                                                let diffRaw = log.diff || [];
+                                                                if (typeof diffRaw === 'string') {
+                                                                    try { diffRaw = JSON.parse(diffRaw); } catch(e) { diffRaw = []; }
+                                                                }
+                                                                let diff = [];
+                                                                if (Array.isArray(diffRaw)) {
+                                                                    diff = diffRaw;
+                                                                } else if (typeof diffRaw === 'object' && diffRaw !== null) {
+                                                                    if (diffRaw.new !== undefined || diffRaw.old !== undefined || diffRaw.name !== undefined) {
+                                                                        diff = [diffRaw];
+                                                                    } else {
+                                                                        diff = Object.entries(diffRaw).map(([k, v]) => ({ field: k, old: '', new: v }));
+                                                                    }
+                                                                }
                                                                 const uniqueChanges = [];
                                                                 const seenFields = new Set();
                                                                 const seenValues = new Map();
 
                                                                 diff.forEach(change => {
-                                                                    const field = (change.field || '').toString().toUpperCase().trim();
-                                                                    const val = (change.new || '').toString().trim();
+                                                                    let fieldRaw = change.field || change.name || '';
+                                                                    let newVal = change.new;
+                                                                    let oldVal = change.old;
+
+                                                                    if (typeof newVal === 'object' && newVal !== null) newVal = JSON.stringify(newVal);
+                                                                    if (typeof oldVal === 'object' && oldVal !== null) oldVal = JSON.stringify(oldVal);
+
+                                                                    const field = fieldRaw.toString().toUpperCase().trim();
+                                                                    const val = (newVal !== undefined && newVal !== null ? newVal : '').toString().trim();
+                                                                    const oldStr = (oldVal !== undefined && oldVal !== null ? oldVal : '').toString().trim();
+
                                                                     if (!field || seenFields.has(field)) return;
 
                                                                     // Define alias groups to clean up redundant "twins"
@@ -203,7 +225,7 @@ export default function RowHistoryPopup({ isOpen, onClose, logs: initialLogs, as
                                                                     }
 
                                                                     if (!redundant) {
-                                                                        uniqueChanges.push(change);
+                                                                        uniqueChanges.push({ field, old: oldStr, new: val });
                                                                         seenFields.add(field);
                                                                         seenValues.set(val, field);
                                                                     }

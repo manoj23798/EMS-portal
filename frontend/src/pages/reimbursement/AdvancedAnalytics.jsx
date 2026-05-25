@@ -16,7 +16,7 @@ import { useNavigate } from 'react-router-dom';
 import * as XLSX from 'xlsx';
 import { ReimbursementAPI } from '../../services/api';
 
-const SearchableSelect = ({ label, options, value, onChange, placeholder, icon: Icon }) => {
+const SearchableSelect = ({ label, options, value, onChange, placeholder, icon: Icon, noSearch }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [search, setSearch] = useState("");
     const dropdownRef = React.useRef(null);
@@ -61,19 +61,21 @@ const SearchableSelect = ({ label, options, value, onChange, placeholder, icon: 
                     padding: '8px', maxHeight: '300px', overflowY: 'auto', border: '1.5px solid #fed7aa',
                     background: 'white', borderRadius: '12px', boxShadow: '0 10px 25px rgba(0,0,0,0.2)'
                 }}>
-                    <div style={{ position: 'relative', marginBottom: '8px' }}>
-                        <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
-                        <input 
-                            autoFocus
-                            placeholder="Type to search..."
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            style={{ 
-                                width: '100%', padding: '8px 8px 8px 32px', borderRadius: '8px', border: '1.5px solid #f1f5f9', 
-                                fontSize: '12px', fontWeight: 600, background: '#fff', outline: 'none'
-                            }}
-                        />
-                    </div>
+                    {!noSearch && (
+                        <div style={{ position: 'relative', marginBottom: '8px' }}>
+                            <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                            <input 
+                                autoFocus
+                                placeholder="Type to search..."
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                                style={{ 
+                                    width: '100%', padding: '8px 8px 8px 32px', borderRadius: '8px', border: '1.5px solid #f1f5f9', 
+                                    fontSize: '12px', fontWeight: 600, background: '#fff', outline: 'none'
+                                }}
+                            />
+                        </div>
+                    )}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
                         {filtered.length > 0 ? filtered.map(opt => (
                             <div 
@@ -127,7 +129,7 @@ const AdvancedAnalytics = () => {
     });
     const [authError, setAuthError] = useState(null);
     const [filterError, setFilterError] = useState(null);
-    const [showDashboard, setShowDashboard] = useState(false);
+    const [showDashboard, setShowDashboard] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
     const rowsPerPage = 10;
 
@@ -390,18 +392,6 @@ const AdvancedAnalytics = () => {
                 (c.reasonForTravel || "").toLowerCase().includes(s) ||
                 (c.status || "").toLowerCase().includes(s)
             );
-        })
-        .sort((a, b) => {
-            if (sortConfig.direction === 'none' || sortConfig.direction === 'ALL') return 0;
-            const dir = sortConfig.direction;
-            if (dir === 'asc') { // Pending first
-                if (a.status === 'PENDING' && b.status !== 'PENDING') return -1;
-                if (a.status !== 'PENDING' && b.status === 'PENDING') return 1;
-            } else {
-                if (a.status === dir && b.status !== dir) return -1;
-                if (a.status !== dir && b.status === dir) return 1;
-            }
-            return 0;
         });
 
     return (
@@ -411,7 +401,7 @@ const AdvancedAnalytics = () => {
                 select:focus, input:focus { border-color: #f97316 !important; box-shadow: 0 0 0 4px rgba(249,115,22,0.1); }
                 .glass-card { background: white; border-radius: 24px; transition: 0.3s; margin-bottom: 24px; width: 100%; border: none; box-shadow: 0 10px 40px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.04); }
                 .glass-card:hover { transform: translateY(-5px); box-shadow: 0 20px 50px rgba(0,0,0,0.12); }
-                .calendar-cell { height: 34px; width: 34px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; border-radius: 8px; transition: 0.1s; cursor: pointer; }
+                .calendar-cell { height: 34px; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; border-radius: 8px; transition: 0.1s; cursor: pointer; }
                 .glass-card { min-width: 0; }
                 .calendar-cell:hover { background: #f1f5f9; }
                 .dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; margin: 0 1px; }
@@ -511,11 +501,11 @@ const AdvancedAnalytics = () => {
             {showDashboard && (
                 <>
             {/* THE FOUR COLUMN COMMAND CENTER */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1.4fr 3.4fr 1.25fr', gap: '16px', marginBottom: '16px', alignItems: 'stretch', position: 'relative', zIndex: 100 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1.2fr 3.2fr 1.4fr', gap: '16px', marginBottom: '16px', alignItems: 'stretch', position: 'relative', zIndex: 100 }}>
                 <div className="glass-card" style={{ padding: '14px', height: '100%', marginBottom: 0, display: 'flex', flexDirection: 'column' }}>
                     <h4 style={{ margin: '0 0 8px 0', fontSize: '12.5px', fontWeight: 950, color: '#1e293b', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Expense Category Breakdown</h4>
-                            <div style={{ height: '220px', flex: 1, display: 'flex', alignItems: 'center', minHeight: 220, minWidth: 260 }}>
-                                <ResponsiveContainer width="100%" height="100%" minHeight={140}>
+                            <div style={{ height: '220px', flex: 1, minHeight: 220, minWidth: 200, position: 'relative' }}>
+                                <ResponsiveContainer width="100%" height="100%" minHeight={220}>
                             <PieChart>
                                 <Pie 
                                     data={Object.entries(analytics.categoryBreakdown || {}).map(([k, v]) => ({ name: k, value: v })).sort((a, b) => a.name.localeCompare(b.name))} 
@@ -546,8 +536,8 @@ const AdvancedAnalytics = () => {
 
                 <div className="glass-card" style={{ padding: '14px', height: '100%', marginBottom: 0, display: 'flex', flexDirection: 'column' }}>
                     <h4 style={{ margin: '0 0 12px 0', fontSize: '12.5px', fontWeight: 950, color: '#1e293b', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Audit Status Health</h4>
-                    <div style={{ height: '220px', flex: 1, display: 'flex', alignItems: 'center', minHeight: 220, minWidth: 260 }}>
-                        <ResponsiveContainer width="100%" height="100%" minHeight={140}>
+                    <div style={{ height: '220px', flex: 1, minHeight: 220, minWidth: 200, position: 'relative' }}>
+                        <ResponsiveContainer width="100%" height="100%" minHeight={220}>
                             <PieChart>
                                 <Pie data={(() => {
                                     const raw = analytics.statusDistribution || {};
@@ -626,7 +616,7 @@ const AdvancedAnalytics = () => {
                     </div>
                 </div>
 
-                <div className="glass-card" style={{ padding: '14px', height: '100%', marginBottom: 0, minWidth: '350px' }}>
+                <div className="glass-card" style={{ padding: '14px', height: '100%', marginBottom: 0, minWidth: 0 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
                         <h4 style={{ margin: 0, fontSize: '12.5px', fontWeight: 950, color: '#1e293b', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Expenditure Trend</h4>
                         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
@@ -731,8 +721,10 @@ const AdvancedAnalytics = () => {
                             {blanks.map((_, i) => <div key={`b-${i}`} className="calendar-cell" />)}
                             {calendarDays.map((date, i) => {
                                 const dateStr = date.toISOString().split('T')[0];
-                                const daySummary = analytics.calendarData?.[dateStr];
-                                const hasData = !!daySummary;
+                                const daySummaryRaw = analytics.calendarData?.[dateStr];
+                                const approvedDetails = daySummaryRaw?.details?.filter(d => ['APPROVED', 'MANAGER_APPROVED', 'ACCOUNTS_SETTLED'].includes(d.status)) || [];
+                                const hasData = approvedDetails.length > 0;
+                                const daySummary = hasData ? { ...daySummaryRaw, details: approvedDetails } : null;
                                 
                                 return (
                                     <div 
@@ -749,7 +741,7 @@ const AdvancedAnalytics = () => {
                                         <span style={{ fontSize: '13px', fontWeight: 950 }}>{i + 1}</span>
                                         <div style={{ display: 'flex', gap: '2px', height: '6px', marginTop: '3px' }}>
                                             {hasData && (
-                                                <span className="dot" style={{ background: daySummary.type === 'RED' ? '#ef4444' : (daySummary.type === 'GREEN' ? '#10b981' : '#64748b') }} />
+                                                <span className="dot" style={{ background: '#10b981' }} />
                                             )}
                                         </div>
 
@@ -815,75 +807,27 @@ const AdvancedAnalytics = () => {
             {/* Simplified Audit Pipeline Table */}
             <div className="glass-card" style={{ overflow: 'hidden', display: 'flex', flexDirection: 'column', border: '1.5px solid #cbd5e1', boxShadow: '0 10px 40px rgba(0,0,0,0.06)', position: 'relative', zIndex: 1 }}>
                  <div style={{ padding: '8px 20px', borderBottom: '1.5px solid #cbd5e1', display: 'flex', justifyContent: 'space-between', alignItems: 'center', minHeight: '60px', background: '#fcfdfe' }}>
-                      <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+                      <div style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
                           {[
-                              { label: 'TOTAL REQUESTS', val: analytics.totalRequests || 0, icon: FileText, color: '#3b82f6', bg: '#eff6ff' },
-                              { label: 'APPROVED', val: analytics.approvedCount || 0, icon: CheckCircle, color: '#10b981', bg: '#f0fdf4' },
-                              { label: 'REJECTED', val: analytics.rejectedCount || 0, icon: XCircle, color: '#ef4444', bg: '#fef2f2' },
-                              { label: 'PENDING REVIEW', val: analytics.pendingReviewCount || 0, icon: Clock, color: '#f59e0b', bg: '#fffbeb' },
-                          ].map((card, idx) => (
-                              <div key={idx} style={{ 
-                                  display: 'flex', alignItems: 'center', gap: '10px', padding: '6px 14px', 
-                                  background: 'white', borderRadius: '12px', border: '1px solid #e2e8f0',
-                                  boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
-                              }}>
-                                  <div style={{ 
-                                      width: '32px', height: '32px', borderRadius: '8px', background: card.bg, 
-                                      color: card.color, display: 'flex', alignItems: 'center', justifyContent: 'center' 
-                                  }}>
-                                      <card.icon size={16} strokeWidth={2.5} />
+                              { label: 'TOTAL', val: analytics.totalRequests || 0, color: '#3b82f6' },
+                              { label: 'PENDING', val: analytics.pendingReviewCount || 0, color: '#f59e0b' },
+                              { label: 'APPROVED', val: analytics.approvedCount || 0, color: '#10b981' },
+                              { label: 'REJECTED', val: analytics.rejectedCount || 0, color: '#ef4444' },
+                          ].map((card, idx, arr) => (
+                              <React.Fragment key={idx}>
+                                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                      <div style={{ fontSize: '10px', fontWeight: 950, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>{card.label}</div>
+                                      <div style={{ fontSize: '20px', fontWeight: 950, color: card.color, lineHeight: 1 }}>{card.val}</div>
                                   </div>
-                                  <div>
-                                      <div style={{ fontSize: '9px', fontWeight: 900, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{card.label}</div>
-                                      <div style={{ fontSize: '15px', fontWeight: 950, color: '#1e293b', lineHeight: 1 }}>{card.val}</div>
-                                  </div>
-                              </div>
+                                  {idx < arr.length - 1 && <div style={{ width: '1.5px', height: '28px', background: '#e2e8f0' }} />}
+                              </React.Fragment>
                           ))}
                       </div>
                       
                       <div style={{ display: 'flex', gap: '8px', position: 'relative', alignItems: 'center' }}>
-                          {showFiltersInline && (
-                              <div style={{ display: 'flex', gap: '8px', alignItems: 'center', animation: 'popup 0.2s ease-out' }}>
-                                  <div style={{ width: '180px' }}>
-                                      <SearchableSelect 
-                                          label="Employee" 
-                                          options={[{ label: "All Employees", value: "" }, ...filterData.employees.map(emp => ({ label: `${emp.firstName} ${emp.lastName}`, value: emp.id.toString() }))]} 
-                                          value={filters.employeeId} 
-                                          onChange={(v) => handleFilterChange('employeeId', v)} 
-                                          placeholder="All Employees"
-                                      />
-                                  </div>
-                                  <div style={{ width: '180px' }}>
-                                      <SearchableSelect 
-                                          label="Project" 
-                                          options={[{ label: "All Projects", value: "" }, ...filterData.projects.map(p => ({ label: p, value: p }))]} 
-                                          value={filters.project} 
-                                          onChange={(v) => handleFilterChange('project', v)} 
-                                          placeholder="All Projects"
-                                      />
-                                  </div>
-                                  <input type="date" value={filters.dateFrom} onChange={(e) => handleFilterChange('dateFrom', e.target.value)} className="inline-filter-input" placeholder="From" />
-                                  <input type="date" value={filters.dateTo} onChange={(e) => handleFilterChange('dateTo', e.target.value)} className="inline-filter-input" placeholder="To" />
-                              </div>
-                          )}
-
                           <button onClick={() => setShowFiltersInline(!showFiltersInline)} className="action-btn" style={{ background: showFiltersInline ? '#fff7ed' : 'white', borderColor: showFiltersInline ? '#fed7aa' : '#f1f5f9' }}>
                              <Filter size={16} color={showFiltersInline ? '#f97316' : '#94a3b8'} /> FILTERS
                           </button>
-
-                          <div style={{ position: 'relative' }}>
-                              <button onClick={() => setShowSort(!showSort)} className="action-btn">
-                                 <TrendingUp size={16} color="#3b82f6" /> SORT
-                              </button>
-                              {showSort && (
-                                  <div className="dropdown-menu">
-                                      <div className="dropdown-item" onClick={() => handleSort('asc')}>Pending First</div>
-                                      <div className="dropdown-item" onClick={() => handleSort('APPROVED')}>Approved First</div>
-                                      <div className="dropdown-item" onClick={() => handleSort('REJECTED')}>Rejected First</div>
-                                      <div className="dropdown-item" onClick={() => handleSort('ALL')}>Default Order</div>
-                                  </div>
-                              )}
-                          </div>
 
                           <div style={{ position: 'relative' }}>
                               <button onClick={() => setShowExport(!showExport)} className="action-btn">
@@ -899,12 +843,54 @@ const AdvancedAnalytics = () => {
                               )}
                           </div>
                       </div>
-                </div>
+                 </div>
+
+                 {showFiltersInline && (
+                     <div style={{ padding: '12px 20px', background: '#f8fafc', borderBottom: '1.5px solid #cbd5e1', display: 'flex', gap: '16px', alignItems: 'center', animation: 'popup 0.2s ease-out', flexWrap: 'wrap' }}>
+                         <div style={{ width: '180px' }}>
+                             <SearchableSelect 
+                                 label="Employee" 
+                                 options={[{ label: "All Employees", value: "" }, ...filterData.employees.map(emp => ({ label: `${emp.firstName} ${emp.lastName}`, value: emp.id.toString() }))]} 
+                                 value={filters.employeeId} 
+                                 onChange={(v) => handleFilterChange('employeeId', v)} 
+                                 placeholder="All Employees"
+                             />
+                         </div>
+                         <div style={{ width: '180px' }}>
+                             <SearchableSelect 
+                                 label="Project" 
+                                 options={[{ label: "All Projects", value: "" }, ...filterData.projects.map(p => ({ label: p, value: p }))]} 
+                                 value={filters.project} 
+                                 onChange={(v) => handleFilterChange('project', v)} 
+                                 placeholder="All Projects"
+                             />
+                         </div>
+                         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                             <input type="date" value={filters.dateFrom} onChange={(e) => handleFilterChange('dateFrom', e.target.value)} className="inline-filter-input" placeholder="From" />
+                             <span style={{ color: '#94a3b8', fontSize: '11px', fontWeight: 800 }}>TO</span>
+                             <input type="date" value={filters.dateTo} onChange={(e) => handleFilterChange('dateTo', e.target.value)} className="inline-filter-input" placeholder="To" />
+                         </div>
+                         <div style={{ width: '180px' }}>
+                             <SearchableSelect 
+                                 label="Status" 
+                                 options={[
+                                     { label: "All Statuses", value: "ALL" },
+                                     { label: "Pending", value: "PENDING" },
+                                     { label: "Approved", value: "APPROVED" },
+                                     { label: "Rejected", value: "REJECTED" }
+                                 ]} 
+                                 value={filters.status} 
+                                 onChange={(v) => handleFilterChange('status', v)} 
+                                 placeholder="Status Filter"
+                                 noSearch={true}
+                             />
+                         </div>
+                     </div>
+                 )}
                 <div style={{ overflowX: 'auto', flex: 1 }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                         <thead>
                             <tr style={{ background: '#f8fafc', borderBottom: '2px solid #cbd5e1' }}>
-                                <th style={{ padding: '12px 24px', fontSize: '12px', fontWeight: 950, color: '#475569', textTransform: 'uppercase' }}>REQ ID</th>
                                 <th style={{ padding: '12px 24px', fontSize: '12px', fontWeight: 950, color: '#475569', textTransform: 'uppercase' }}>EMPLOYEE</th>
                                 <th style={{ padding: '12px 24px', fontSize: '12px', fontWeight: 950, color: '#475569', textTransform: 'uppercase' }}>PROJECT/REASON</th>
                                 <th style={{ padding: '12px 24px', fontSize: '12px', fontWeight: 950, color: '#475569', textTransform: 'uppercase' }}>SUBMITTED DATE</th>
@@ -918,12 +904,15 @@ const AdvancedAnalytics = () => {
                         <tbody>
                             {filteredClaims.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage).map((c, i) => (
                                 <tr key={c.id} className="audit-row" style={{ borderBottom: '1px solid #f1f5f9' }}>
-                                    <td style={{ padding: '10px 24px', fontSize: '14px', fontWeight: 900, color: '#94a3b8' }}>#{String(c.id).padStart(5, '0')}</td>
                                     <td style={{ padding: '10px 24px' }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                            <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: '#fff7ed', border: '1.5px solid #fed7aa', color: '#f97316', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '900', fontSize: '12px' }}>
-                                                {c.employeeName?.charAt(0)}
-                                            </div>
+                                            {c.profilePhotoUrl ? (
+                                                <img src={c.profilePhotoUrl} alt="profile" style={{ width: '32px', height: '32px', borderRadius: '10px', objectFit: 'cover' }} />
+                                            ) : (
+                                                <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: '#f1f5f9', border: '1.5px solid #e2e8f0', color: '#64748b', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '900', fontSize: '12px' }}>
+                                                    {c.employeeName?.charAt(0) || '?'}
+                                                </div>
+                                            )}
                                             <div>
                                                 <p style={{ margin: 0, fontSize: '14px', fontWeight: 950, color: '#1e293b', whiteSpace: 'nowrap' }}>{c.employeeName}</p>
                                                 <p style={{ margin: '1px 0 0 0', fontSize: '10.5px', fontWeight: 800, color: '#94a3b8' }}>{c.employeeCode}</p>
@@ -966,21 +955,21 @@ const AdvancedAnalytics = () => {
                                             <button 
                                                 onClick={() => handleMarkAsViewed(c.id)} 
                                                 style={{ 
-                                                    background: 'white', color: '#f97316', border: '1.5px solid #f97316', 
-                                                    padding: '8px 14px', borderRadius: '8px', fontSize: '10px', 
-                                                    fontWeight: 950, textTransform: 'uppercase', cursor: 'pointer', 
+                                                    background: '#f8fafc', color: '#64748b', border: '1.5px solid #cbd5e1', 
+                                                    padding: '6px 12px', borderRadius: '8px', fontSize: '10px', 
+                                                    fontWeight: 900, textTransform: 'uppercase', cursor: 'pointer', 
                                                     display: 'flex', alignItems: 'center', gap: '6px', transition: '0.2s'
                                                 }}
-                                                onMouseOver={(e) => { e.currentTarget.style.background = '#fff7ed'; }}
-                                                onMouseOut={(e) => { e.currentTarget.style.background = 'white'; }}
+                                                onMouseOver={(e) => { e.currentTarget.style.background = '#e2e8f0'; }}
+                                                onMouseOut={(e) => { e.currentTarget.style.background = '#f8fafc'; }}
                                             >
                                                 VIEW <ChevronRight size={14}/>
                                             </button>
                                             {!viewedClaims.includes(c.id) && (
                                                 <div style={{ 
-                                                    position: 'absolute', top: '-5px', right: '-5px', 
+                                                    position: 'absolute', top: '-4px', right: '-4px', 
                                                     width: '10px', height: '10px', background: '#ef4444', 
-                                                    borderRadius: '50%', border: '2.5px solid white',
+                                                    borderRadius: '50%', border: '2px solid white',
                                                     boxShadow: '0 0 0 2px rgba(239,68,68,0.2)'
                                                 }} />
                                             )}
@@ -999,14 +988,14 @@ const AdvancedAnalytics = () => {
                             <button 
                                 disabled={currentPage === 1} 
                                 onClick={() => setCurrentPage(1)} 
-                                style={{ width: '24px', height: '24px', borderRadius: '50%', border: '1.5px solid #fed7aa', background: 'white', color: '#431407', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', opacity: currentPage === 1 ? 0.3 : 1 }}
+                                style={{ width: '24px', height: '24px', borderRadius: '50%', border: '1.5px solid #cbd5e1', background: 'white', color: '#431407', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', opacity: currentPage === 1 ? 0.3 : 1 }}
                             >
                                 <ChevronsLeft size={14} />
                             </button>
                             <button 
                                 disabled={currentPage === 1} 
                                 onClick={() => setCurrentPage(p => p - 1)} 
-                                style={{ width: '24px', height: '24px', borderRadius: '50%', border: '1.5px solid #fed7aa', background: 'white', color: '#431407', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', opacity: currentPage === 1 ? 0.3 : 1 }}
+                                style={{ width: '24px', height: '24px', borderRadius: '50%', border: '1.5px solid #cbd5e1', background: 'white', color: '#431407', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', opacity: currentPage === 1 ? 0.3 : 1 }}
                             >
                                 <ChevronLeft size={14} />
                             </button>
@@ -1014,17 +1003,17 @@ const AdvancedAnalytics = () => {
                                 .filter(p => p === 1 || p === Math.ceil(filteredClaims.length / rowsPerPage) || (p >= currentPage - 1 && p <= currentPage + 1))
                                 .map((p, i, arr) => (
                                     <React.Fragment key={p}>
-                                        {i > 0 && arr[i-1] !== p - 1 && <span style={{ color: '#fed7aa', fontSize: '10px' }}>...</span>}
+                                        {i > 0 && arr[i-1] !== p - 1 && <span style={{ color: '#cbd5e1', fontSize: '10px' }}>...</span>}
                                         <button 
                                             onClick={() => setCurrentPage(p)}
                                             style={{
                                                 width: '24px', height: '24px', borderRadius: '50%', border: '1.5px solid',
-                                                borderColor: currentPage === p ? '#f97316' : '#fed7aa',
-                                                background: currentPage === p ? '#f97316' : 'white',
+                                                borderColor: currentPage === p ? '#334155' : '#cbd5e1',
+                                                background: currentPage === p ? '#334155' : 'white',
                                                 color: currentPage === p ? 'white' : '#431407',
                                                 fontSize: '10px', fontWeight: 900, cursor: 'pointer', transition: '0.2s',
                                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                boxShadow: currentPage === p ? '0 4px 10px rgba(249,115,22,0.2)' : 'none'
+                                                boxShadow: currentPage === p ? '0 4px 10px rgba(51, 65, 85, 0.2)' : 'none'
                                             }}
                                         >
                                             {p}
@@ -1034,14 +1023,14 @@ const AdvancedAnalytics = () => {
                             <button 
                                 disabled={currentPage === Math.ceil(filteredClaims.length / rowsPerPage)} 
                                 onClick={() => setCurrentPage(p => p + 1)} 
-                                style={{ width: '24px', height: '24px', borderRadius: '50%', border: '1.5px solid #fed7aa', background: 'white', color: '#431407', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', opacity: currentPage === Math.ceil(filteredClaims.length / rowsPerPage) ? 0.3 : 1 }}
+                                style={{ width: '24px', height: '24px', borderRadius: '50%', border: '1.5px solid #cbd5e1', background: 'white', color: '#431407', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', opacity: currentPage === Math.ceil(filteredClaims.length / rowsPerPage) ? 0.3 : 1 }}
                             >
                                 <ChevronRight size={14} />
                             </button>
                             <button 
                                 disabled={currentPage === Math.ceil(filteredClaims.length / rowsPerPage)} 
                                 onClick={() => setCurrentPage(Math.ceil(filteredClaims.length / rowsPerPage))} 
-                                style={{ width: '24px', height: '24px', borderRadius: '50%', border: '1.5px solid #fed7aa', background: 'white', color: '#431407', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', opacity: currentPage === Math.ceil(filteredClaims.length / rowsPerPage) ? 0.3 : 1 }}
+                                style={{ width: '24px', height: '24px', borderRadius: '50%', border: '1.5px solid #cbd5e1', background: 'white', color: '#431407', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', opacity: currentPage === Math.ceil(filteredClaims.length / rowsPerPage) ? 0.3 : 1 }}
                             >
                                 <ChevronsRight size={14} />
                             </button>

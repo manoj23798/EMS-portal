@@ -3,9 +3,11 @@ import { Plus, Save, Search, Filter, ChevronDown, Trash2, Info } from 'lucide-re
 import { assetService } from '../../../services/assetService';
 import LogHistoryTable, { addTableLog } from '../components/LogHistoryTable';
 import Pagination from '../components/Pagination';
+import AssetDetailView from '../components/AssetDetailView';
 
 export default function FixturesTab({ canEdit, data, onViewHistory }) {
     const [fixtures, setFixtures] = useState([]);
+    const [viewingAsset, setViewingAsset] = useState(null);
 
     useEffect(() => {
         if (data && data.length > 0) {
@@ -106,37 +108,22 @@ export default function FixturesTab({ canEdit, data, onViewHistory }) {
         }
     };
 
-    const startEdit = (row, index) => {
-        setEditingId(row.id || index);
-        setEditFormData(row);
-    };
-
-    const cancelEdit = () => {
-        setEditingId(null);
-        setEditFormData({});
-    };
-
-    const saveEdit = async (index) => {
-        const oldRow = fixtures.find((r, i) => (r.id && r.id === editingId) || i === index);
+    const handleSaveView = async (updatedAsset) => {
+        const oldRow = fixtures.find(r => r.id === updatedAsset.id);
         if (!oldRow) return;
 
-        const updatedRow = { ...editFormData, assetClass: 'Fixtures' };
+        const payload = { ...updatedAsset, assetClass: 'Fixtures' };
         
         try {
-            let result;
-            if (oldRow.id) {
-                result = await assetService.updateCategoryAsset(oldRow.id, updatedRow);
-            } else {
-                result = await assetService.createCategoryAsset(updatedRow);
-            }
+            const result = await assetService.updateCategoryAsset(oldRow.id, payload);
 
             const changes = [];
             const ignoreFields = ['id', 'tempId', 'createdAt', 'updatedAt'];
 
-            Object.keys(updatedRow).forEach(key => {
+            Object.keys(payload).forEach(key => {
                 if (ignoreFields.includes(key)) return;
                 const oldVal = (oldRow[key] || '').toString();
-                const newVal = (updatedRow[key] || '').toString();
+                const newVal = (payload[key] || '').toString();
                 if (oldVal !== newVal) {
                     const label = key.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').toUpperCase().trim();
                     changes.push({ field: label, old: oldVal, new: newVal });
@@ -144,13 +131,13 @@ export default function FixturesTab({ canEdit, data, onViewHistory }) {
             });
 
             if (changes.length > 0) {
-                addTableLog('Fixtures', 'MODIFIED', updatedRow.assetCode || 'Record', `Updated ${changes.length} fields.`, oldRow.id || result.id, changes);
+                addTableLog('Fixtures', 'MODIFIED', payload.assetCode || 'Record', `Updated ${changes.length} fields.`, oldRow.id, changes);
             }
 
-            setFixtures(prev => prev.map((r) => ((r.id && r.id === oldRow.id) || r === oldRow) ? result : r));
-            setEditingId(null);
+            setFixtures(prev => prev.map((r) => r.id === oldRow.id ? result : r));
         } catch (error) {
             console.error('Failed to update fixture', error);
+            throw error;
         }
     };
 
@@ -169,6 +156,14 @@ export default function FixturesTab({ canEdit, data, onViewHistory }) {
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {viewingAsset ? (
+                <AssetDetailView 
+                    asset={viewingAsset} 
+                    onBack={() => setViewingAsset(null)}
+                    onSave={canEdit ? handleSaveView : undefined}
+                />
+            ) : (
+                <>
             <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 16, padding: 16, boxShadow: '0 8px 30px rgba(156,163,175,0.4)' }}>
                 <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
                     <div style={{ position: 'relative', flex: '1 1 200px' }}>
@@ -212,13 +207,12 @@ export default function FixturesTab({ canEdit, data, onViewHistory }) {
 
             <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 16, overflow: 'hidden', boxShadow: '0 8px 30px rgba(156,163,175,0.4)' }}>
                 <div style={{ overflowX: 'auto' }}>
-                    <table className="asset-dashboard-table" style={{ width: '100%', borderCollapse: 'collapse', minWidth: 1500 }}>
+                    <table className="asset-dashboard-table" style={{ width: '100%', borderCollapse: 'collapse', minWidth: 800 }}>
                         <thead style={{ position: 'sticky', top: 0, zIndex: 2 }}>
                             <tr style={{ background: '#f8fafc' }}>
-                                {['SL No', 'Created At', 'ASSET CLASS', 'PRODUCT NAME', 'ASSET CODE', 'USER', 'DEPARTMENT', 'RESPONSIBILITY', 'MAKE', 'MODEL', 'DESCRIPTION', 'STATUS', 'LAST MAINTENANCE', 'SUPPORT', 'Remarks'].map(head => (
+                                {['SL No', 'Created At', 'ASSET CLASS', 'ASSET CODE', 'USER', 'DEPARTMENT', 'STATUS', 'Actions'].map(head => (
                                     <th key={head} style={{ textAlign: 'left', padding: '14px 12px', fontSize: 12, textTransform: 'uppercase', letterSpacing: 0.6, fontWeight: 900, color: '#334155', borderBottom: '1px solid #dbe3ea' }}>{head}</th>
                                 ))}
-                                <th style={{ textAlign: 'left', padding: '14px 12px', fontSize: 12, textTransform: 'uppercase', letterSpacing: 0.6, fontWeight: 900, color: '#334155', borderBottom: '1px solid #dbe3ea' }}>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -227,14 +221,9 @@ export default function FixturesTab({ canEdit, data, onViewHistory }) {
                                     <td style={{ padding: '10px 12px', fontWeight: 800, color: '#f97316' }}>{draftIndex + 1}</td>
                                     <td style={{ padding: '10px 12px' }}><div className="asset-data-cell" style={{ background: '#fffaf5', color: '#ea580c', fontWeight: 700 }}>New Row</div></td>
                                     <td style={{ padding: '10px 12px' }}><input value={row.assetClass} onChange={(e) => setNewFixtureRows(prev => prev.map(r => r.tempId === row.tempId ? { ...r, assetClass: e.target.value } : r))} placeholder="Class" style={{ width: 120, height: 32, borderRadius: 8, border: '1px solid #cbd5e1', padding: '0 8px' }} /></td>
-                                    <td style={{ padding: '10px 12px' }}><input value={row.productName} onChange={(e) => setNewFixtureRows(prev => prev.map(r => r.tempId === row.tempId ? { ...r, productName: e.target.value } : r))} placeholder="Product" style={{ width: 120, height: 32, borderRadius: 8, border: '1px solid #cbd5e1', padding: '0 8px' }} /></td>
                                     <td style={{ padding: '10px 12px' }}><input value={row.assetCode} onChange={(e) => setNewFixtureRows(prev => prev.map(r => r.tempId === row.tempId ? { ...r, assetCode: e.target.value } : r))} placeholder="Asset code" style={{ width: 130, height: 32, borderRadius: 8, border: '1px solid #cbd5e1', padding: '0 8px' }} /></td>
                                     <td style={{ padding: '10px 12px' }}><input value={row.user} onChange={(e) => setNewFixtureRows(prev => prev.map(r => r.tempId === row.tempId ? { ...r, user: e.target.value } : r))} placeholder="User" style={{ width: 120, height: 32, borderRadius: 8, border: '1px solid #cbd5e1', padding: '0 8px' }} /></td>
                                     <td style={{ padding: '10px 12px' }}><input value={row.department} onChange={(e) => setNewFixtureRows(prev => prev.map(r => r.tempId === row.tempId ? { ...r, department: e.target.value } : r))} placeholder="Department" style={{ width: 120, height: 32, borderRadius: 8, border: '1px solid #cbd5e1', padding: '0 8px' }} /></td>
-                                    <td style={{ padding: '10px 12px' }}><input value={row.responsibility} onChange={(e) => setNewFixtureRows(prev => prev.map(r => r.tempId === row.tempId ? { ...r, responsibility: e.target.value } : r))} placeholder="Responsibility" style={{ width: 130, height: 32, borderRadius: 8, border: '1px solid #cbd5e1', padding: '0 8px' }} /></td>
-                                    <td style={{ padding: '10px 12px' }}><input value={row.make} onChange={(e) => setNewFixtureRows(prev => prev.map(r => r.tempId === row.tempId ? { ...r, make: e.target.value } : r))} placeholder="Make" style={{ width: 100, height: 32, borderRadius: 8, border: '1px solid #cbd5e1', padding: '0 8px' }} /></td>
-                                    <td style={{ padding: '10px 12px' }}><input value={row.model} onChange={(e) => setNewFixtureRows(prev => prev.map(r => r.tempId === row.tempId ? { ...r, model: e.target.value } : r))} placeholder="Model" style={{ width: 120, height: 32, borderRadius: 8, border: '1px solid #cbd5e1', padding: '0 8px' }} /></td>
-                                    <td style={{ padding: '10px 12px' }}><input value={row.description} onChange={(e) => setNewFixtureRows(prev => prev.map(r => r.tempId === row.tempId ? { ...r, description: e.target.value } : r))} placeholder="Description" style={{ width: 180, height: 32, borderRadius: 8, border: '1px solid #cbd5e1', padding: '0 8px' }} /></td>
                                     <td style={{ padding: '10px 12px' }}>
                                         <select value={row.status} onChange={(e) => setNewFixtureRows(prev => prev.map(r => r.tempId === row.tempId ? { ...r, status: e.target.value } : r))} style={{ width: 120, height: 32, borderRadius: 8, border: '1px solid #cbd5e1', padding: '0 8px' }}>
                                             <option value="Working">Working</option>
@@ -242,9 +231,6 @@ export default function FixturesTab({ canEdit, data, onViewHistory }) {
                                             <option value="Scrap">Scrap</option>
                                         </select>
                                     </td>
-                                    <td style={{ padding: '10px 12px' }}><input value={row.lastMaintenance} onChange={(e) => setNewFixtureRows(prev => prev.map(r => r.tempId === row.tempId ? { ...r, lastMaintenance: e.target.value } : r))} style={{ width: 130, height: 32, borderRadius: 8, border: '1px solid #cbd5e1', padding: '0 8px' }} /></td>
-                                    <td style={{ padding: '10px 12px' }}><input value={row.additionalSupport} onChange={(e) => setNewFixtureRows(prev => prev.map(r => r.tempId === row.tempId ? { ...r, additionalSupport: e.target.value } : r))} style={{ width: 120, height: 32, borderRadius: 8, border: '1px solid #cbd5e1', padding: '0 8px' }} /></td>
-                                    <td style={{ padding: '10px 12px' }}><input value={row.remarks} onChange={(e) => setNewFixtureRows(prev => prev.map(r => r.tempId === row.tempId ? { ...r, remarks: e.target.value } : r))} style={{ width: 140, height: 32, borderRadius: 8, border: '1px solid #cbd5e1', padding: '0 8px' }} /></td>
                                     <td style={{ padding: '10px 12px' }}>
                                         <button onClick={() => setNewFixtureRows(prev => prev.filter(r => r.tempId !== row.tempId))} style={{ height: 28, padding: '0 8px', borderRadius: 6, border: '1px solid #fecaca', background: '#fff', color: '#dc2626', fontWeight: 800, cursor: 'pointer' }}>Cancel</button>
                                     </td>
@@ -257,62 +243,19 @@ export default function FixturesTab({ canEdit, data, onViewHistory }) {
                                 <tr key={globalIndex} style={{ borderBottom: '1px solid #edf2f7' }}>
                                     <td style={{ padding: '12px' }}><div className="asset-data-cell">{canEdit ? newFixtureRows.length + globalIndex + 1 : globalIndex + 1}</div></td>
                                     <td style={{ padding: '12px' }}><div className="asset-data-cell" style={{ border: 'none', background: '#f8fafc', color: '#64748b' }}>{row.createdAt ? new Date(row.createdAt).toLocaleDateString() : '-'}</div></td>
-                                    {editingId === globalIndex ? (
-                                        <>
-                                            <td style={{ padding: '8px' }}><input value={editFormData.assetClass} onChange={e => setEditFormData({...editFormData, assetClass: e.target.value})} style={{ width: 90, height: 30, borderRadius: 6, border: '1px solid #3b82f6', padding: '0 6px' }} /></td>
-                                            <td style={{ padding: '8px' }}><input value={editFormData.productName} onChange={e => setEditFormData({...editFormData, productName: e.target.value})} style={{ width: 100, height: 30, borderRadius: 6, border: '1px solid #3b82f6', padding: '0 6px' }} /></td>
-                                            <td style={{ padding: '8px' }}><input value={editFormData.assetCode} onChange={e => setEditFormData({...editFormData, assetCode: e.target.value})} style={{ width: 100, height: 30, borderRadius: 6, border: '1px solid #3b82f6', padding: '0 6px' }} /></td>
-                                            <td style={{ padding: '8px' }}><input value={editFormData.user} onChange={e => setEditFormData({...editFormData, user: e.target.value})} style={{ width: 100, height: 30, borderRadius: 6, border: '1px solid #3b82f6', padding: '0 6px' }} /></td>
-                                            <td style={{ padding: '8px' }}><input value={editFormData.department} onChange={e => setEditFormData({...editFormData, department: e.target.value})} style={{ width: 100, height: 30, borderRadius: 6, border: '1px solid #3b82f6', padding: '0 6px' }} /></td>
-                                            <td style={{ padding: '8px' }}><input value={editFormData.responsibility} onChange={e => setEditFormData({...editFormData, responsibility: e.target.value})} style={{ width: 110, height: 30, borderRadius: 6, border: '1px solid #3b82f6', padding: '0 6px' }} /></td>
-                                            <td style={{ padding: '8px' }}><input value={editFormData.make} onChange={e => setEditFormData({...editFormData, make: e.target.value})} style={{ width: 90, height: 30, borderRadius: 6, border: '1px solid #3b82f6', padding: '0 6px' }} /></td>
-                                            <td style={{ padding: '8px' }}><input value={editFormData.model} onChange={e => setEditFormData({...editFormData, model: e.target.value})} style={{ width: 100, height: 30, borderRadius: 6, border: '1px solid #3b82f6', padding: '0 6px' }} /></td>
-                                            <td style={{ padding: '8px' }}><input value={editFormData.description} onChange={e => setEditFormData({...editFormData, description: e.target.value})} style={{ width: 130, height: 30, borderRadius: 6, border: '1px solid #3b82f6', padding: '0 6px' }} /></td>
-                                            <td style={{ padding: '8px' }}>
-                                                <select value={editFormData.status} onChange={e => setEditFormData({...editFormData, status: e.target.value})} style={{ width: 100, height: 30, borderRadius: 6, border: '1px solid #3b82f6' }}>
-                                                    <option value="Working">Working</option>
-                                                    <option value="Repair">Repair</option>
-                                                    <option value="Scrap">Scrap</option>
-                                                </select>
-                                            </td>
-                                            <td style={{ padding: '8px' }}><input value={editFormData.lastMaintenance} onChange={e => setEditFormData({...editFormData, lastMaintenance: e.target.value})} style={{ width: 100, height: 30, borderRadius: 6, border: '1px solid #3b82f6', padding: '0 6px' }} /></td>
-                                            <td style={{ padding: '8px' }}><input value={editFormData.additionalSupport} onChange={e => setEditFormData({...editFormData, additionalSupport: e.target.value})} style={{ width: 100, height: 30, borderRadius: 6, border: '1px solid #3b82f6', padding: '0 6px' }} /></td>
-                                            <td style={{ padding: '8px' }}><input value={editFormData.remarks} onChange={e => setEditFormData({...editFormData, remarks: e.target.value})} style={{ width: 110, height: 30, borderRadius: 6, border: '1px solid #3b82f6', padding: '0 6px' }} /></td>
-                                            <td style={{ padding: '12px' }}>
-                                                <div style={{ display: 'flex', gap: 6 }}>
-                                                    <button onClick={() => saveEdit(index)} style={{ padding: '4px 8px', borderRadius: 6, background: '#10b981', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 11, fontWeight: 800 }}>Save</button>
-                                                    <button onClick={cancelEdit} style={{ padding: '4px 8px', borderRadius: 6, background: '#94a3b8', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 11, fontWeight: 800 }}>X</button>
-                                                </div>
-                                            </td>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <td style={{ padding: '12px' }}><div className="asset-data-cell" style={{ fontWeight: 800 }}>{row.assetClass}</div></td>
-                                            <td style={{ padding: '12px' }}><div className="asset-data-cell">{row.productName}</div></td>
-                                            <td style={{ padding: '12px' }}><div className="asset-data-cell" style={{ fontWeight: 900 }}>{row.assetCode}</div></td>
-                                            <td style={{ padding: '12px' }}><div className="asset-data-cell">{row.user}</div></td>
-                                            <td style={{ padding: '12px' }}><div className="asset-data-cell">{row.department}</div></td>
-                                            <td style={{ padding: '12px' }}><div className="asset-data-cell">{row.responsibility}</div></td>
-                                            <td style={{ padding: '12px' }}><div className="asset-data-cell">{row.make}</div></td>
-                                            <td style={{ padding: '12px' }}><div className="asset-data-cell">{row.model}</div></td>
-                                            <td style={{ padding: '12px' }}><div className="asset-data-cell">{row.description}</div></td>
-                                            <td style={{ padding: '12px' }}><div className="asset-data-cell">{row.status}</div></td>
-                                            <td style={{ padding: '12px' }}><div className="asset-data-cell">{row.lastMaintenance || '-'}</div></td>
-                                            <td style={{ padding: '12px' }}><div className="asset-data-cell">{row.additionalSupport || '-'}</div></td>
-                                            <td style={{ padding: '12px' }}><div className="asset-data-cell">{row.remarks || '-'}</div></td>
-                                            <td style={{ padding: '12px' }}>
-                                                <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                                                    <button onClick={() => onViewHistory && onViewHistory(row)} style={{ border: '1px solid #e2e8f0', background: '#fff', color: '#64748b', borderRadius: 8, padding: '5px 6px', fontSize: 10, cursor: 'pointer', fontWeight: 800 }} title="View row history"><Info size={14} /></button>
-                                                    {canEdit && (
-                                                        <div style={{ display: 'flex', gap: 6 }}>
-                                                            <button onClick={() => startEdit(row, index)} style={{ border: '1px solid #cbd5e1', background: '#fff', color: '#1e293b', borderRadius: 8, padding: '5px 6px', fontSize: 10, cursor: 'pointer', fontWeight: 800 }}>Edit</button>
-                                                            <button onClick={() => deleteAsset(row, globalIndex)} style={{ border: '1px solid #fecaca', background: '#fff', color: '#dc2626', borderRadius: 8, padding: '5px 6px', fontSize: 10, cursor: 'pointer', fontWeight: 800 }}>Delete</button>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </td>
-                                        </>
-                                    )}
+                                    <td style={{ padding: '12px' }}><div className="asset-data-cell" style={{ fontWeight: 800 }}>{row.assetClass}</div></td>
+                                    <td style={{ padding: '12px' }}><div className="asset-data-cell" style={{ fontWeight: 900 }}>{row.assetCode}</div></td>
+                                    <td style={{ padding: '12px' }}><div className="asset-data-cell">{row.user}</div></td>
+                                    <td style={{ padding: '12px' }}><div className="asset-data-cell">{row.department}</div></td>
+                                    <td style={{ padding: '12px' }}><div className="asset-data-cell">{row.status}</div></td>
+                                    <td style={{ padding: '12px' }}>
+                                        <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                                            <button onClick={() => setViewingAsset(row)} style={{ border: '1px solid #cbd5e1', background: '#fff', color: '#1e293b', borderRadius: 8, padding: '6px 8px', fontSize: 10, cursor: 'pointer', fontWeight: 800 }}>View</button>
+                                            {canEdit && (
+                                                <button onClick={() => deleteAsset(row, globalIndex)} style={{ border: '1px solid #fecaca', background: '#fff', color: '#dc2626', borderRadius: 8, padding: '6px 10px', fontSize: 11, cursor: 'pointer', fontWeight: 800 }}>Delete</button>
+                                            )}
+                                        </div>
+                                    </td>
                                 </tr>
                                 )
                             })}
@@ -340,6 +283,8 @@ export default function FixturesTab({ canEdit, data, onViewHistory }) {
                     </div>
                 )}
             </div>
+            </>
+            )}
         </div>
     );
 }

@@ -332,7 +332,7 @@ export default function MonthlyReviewForm() {
 
     // --- Inline Editor Actions ---
     const addSection = (partName = 'Part A') => {
-        if (isReadOnly) return;
+        if (isReadOnly && !editInputsMode) return;
         setSections([...sections, {
             id: `sec-${Date.now()}`,
             name: 'New Section',
@@ -342,24 +342,24 @@ export default function MonthlyReviewForm() {
     };
 
     const updateSectionName = (secId, newName) => {
-        if (isReadOnly) return;
+        if (isReadOnly && !editInputsMode) return;
         setSections(sections.map(s => s.id === secId ? { ...s, name: newName } : s));
     };
 
     const deleteSection = (secId) => {
-        if (isReadOnly) return;
+        if (isReadOnly && !editInputsMode) return;
         setSections(sections.filter(s => s.id !== secId));
     };
 
     const deletePart = (partName) => {
-        if (isReadOnly) return;
+        if (isReadOnly && !editInputsMode) return;
         if (window.confirm(`Are you sure you want to delete all sections in ${partName}?`)) {
             setSections(sections.filter(s => (s.partName || 'Part A') !== partName));
         }
     };
 
     const addItem = (secId) => {
-        if (isReadOnly) return;
+        if (isReadOnly && !editInputsMode) return;
         setSections(sections.map(s => {
             if (s.id === secId) {
                 return { ...s, items: [...s.items, { id: `itm-${Date.now()}`, parameterName: '', projectName: '', rating: '', remark: '' }] };
@@ -369,7 +369,7 @@ export default function MonthlyReviewForm() {
     };
 
     const resetTableData = () => {
-        if (isReadOnly) return;
+        if (isReadOnly && !editInputsMode) return;
         if (!window.confirm("Are you sure you want to clear all ratings and remarks?")) return;
         setSections(sections.map(s => ({
             ...s,
@@ -378,7 +378,7 @@ export default function MonthlyReviewForm() {
     };
 
     const updateItem = (secId, itemId, field, value) => {
-        if (isReadOnly) return;
+        if (isReadOnly && !editInputsMode) return;
         setSections(sections.map(s => {
             if (s.id === secId) {
                 return {
@@ -391,7 +391,7 @@ export default function MonthlyReviewForm() {
     };
 
     const deleteItem = (secId, itemId) => {
-        if (isReadOnly) return;
+        if (isReadOnly && !editInputsMode) return;
         setSections(sections.map(s => {
             if (s.id === secId) {
                 return { ...s, items: s.items.filter(i => i.id !== itemId) };
@@ -557,7 +557,7 @@ export default function MonthlyReviewForm() {
                     {/* Save / Cancel for Edit Inputs mode */}
                     {editInputsMode && (
                         <div style={{ display: 'flex', gap: 8 }}>
-                            <button onClick={() => handleSaveReview('DRAFT')} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 16px', background: '#10b981', color: '#fff', border: 'none', borderRadius: 8, fontWeight: 800, cursor: 'pointer' }}>
+                            <button onClick={() => handleSaveReview(formData.status)} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 16px', background: '#10b981', color: '#fff', border: 'none', borderRadius: 8, fontWeight: 800, cursor: 'pointer' }}>
                                 <Save size={16} /> Save
                             </button>
                             <button onClick={() => {
@@ -570,11 +570,7 @@ export default function MonthlyReviewForm() {
                             </button>
                         </div>
                     )}
-                    {editInputsMode && (
-                        <div style={{ marginLeft: 12, fontSize: 12, color: '#334155' }}>
-                            <strong>Debug:</strong> {`isReadOnly=${isReadOnly} editInputsMode=${editInputsMode} role=${role}`}
-                        </div>
-                    )}
+
                 </div>
             </div>
 
@@ -748,7 +744,7 @@ export default function MonthlyReviewForm() {
                                                         <tr key={item.id} style={{ borderBottom: '1px solid #e2e8f0', background: rowBg, transition: 'all 0.2s' }}>
                                                             {/* Activity Column - Only rendered on the first row of each section */}
                                                                     {iIdx === 0 && (
-                                                                <td rowSpan={rowSpanCount} style={{ padding: '4px 12px', background: sIdx % 2 === 0 ? '#ffffff' : '#f1f5f9', borderRight: '1px solid #e2e8f0', verticalAlign: 'middle', borderBottom: '2px solid #374151' }}>
+                                                                <td rowSpan={rowSpanCount} style={{ padding: '4px 12px', background: sIdx % 2 === 0 ? '#ffffff' : '#f1f5f9', borderRight: '1px solid #e2e8f0', verticalAlign: 'middle', borderBottom: '2px solid #94a3b8' }}>
                                                                     <textarea 
                                                                         rows={1}
                                                                         value={section.name} 
@@ -779,7 +775,7 @@ export default function MonthlyReviewForm() {
                                                             )}
                                                             
                                                             {/* Responsibility Column */}
-                                                            <td style={{ padding: '4px 12px', borderRight: '1px solid #e2e8f0', verticalAlign: 'middle' }}>
+                                                            <td style={{ padding: '4px 12px', borderRight: '1px solid #e2e8f0', verticalAlign: 'middle', borderBottom: iIdx === section.items.length - 1 ? '2px solid #94a3b8' : '1px solid #e2e8f0' }}>
                                                                 <textarea 
                                                                     rows={1}
                                                                     value={item.parameterName}
@@ -796,7 +792,7 @@ export default function MonthlyReviewForm() {
 
                                                             {/* Optional Project Name Column */}
                                                             {columnsConfig.showProject && (
-                                                                <td style={{ padding: '4px 12px', borderRight: '1px solid #e2e8f0', verticalAlign: 'middle' }}>
+                                                                <td style={{ padding: '4px 12px', borderRight: '1px solid #e2e8f0', verticalAlign: 'middle', borderBottom: iIdx === section.items.length - 1 ? '2px solid #94a3b8' : '1px solid #e2e8f0' }}>
                                                                     <input 
                                                                         value={item.projectName || ''}
                                                                         onChange={e => updateItem(section.id, item.id, 'projectName', e.target.value)}
@@ -808,7 +804,7 @@ export default function MonthlyReviewForm() {
                                                             )}
 
                                                             {/* Rating Column */}
-                                                            <td style={{ padding: '4px 12px', borderRight: '1px solid #e2e8f0', textAlign: 'center', verticalAlign: 'middle' }}>
+                                                            <td style={{ padding: '4px 12px', borderRight: '1px solid #e2e8f0', textAlign: 'center', verticalAlign: 'middle', borderBottom: iIdx === section.items.length - 1 ? '2px solid #94a3b8' : '1px solid #e2e8f0' }}>
                                                                 <select 
                                                                     value={item.rating} 
                                                                     onChange={e => updateItem(section.id, item.id, 'rating', e.target.value)}
@@ -829,7 +825,7 @@ export default function MonthlyReviewForm() {
 
                                                             {/* Optional Remarks Column */}
                                                             {columnsConfig.showRemarks && (
-                                                                <td style={{ padding: '4px 12px', borderRight: '1px solid #e2e8f0', verticalAlign: 'middle' }}>
+                                                                <td style={{ padding: '4px 12px', borderRight: '1px solid #e2e8f0', verticalAlign: 'middle', borderBottom: iIdx === section.items.length - 1 ? '2px solid #94a3b8' : '1px solid #e2e8f0' }}>
                                                                     <input 
                                                                         value={item.remark}
                                                                         onChange={e => updateItem(section.id, item.id, 'remark', e.target.value)}
@@ -841,7 +837,7 @@ export default function MonthlyReviewForm() {
                                                             )}
 
                                                             {/* Actions Column */}
-                                                            <td style={{ padding: '4px 4px', textAlign: 'center', verticalAlign: 'middle' }}>
+                                                            <td style={{ padding: '4px 4px', textAlign: 'center', verticalAlign: 'middle', borderBottom: iIdx === section.items.length - 1 ? '2px solid #94a3b8' : '1px solid #e2e8f0' }}>
                                                                 {!isReadOnly && (
                                                                     <button onClick={() => deleteItem(section.id, item.id)} style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer' }} title="Delete Row">
                                                                         <Trash2 size={14} />
@@ -854,7 +850,7 @@ export default function MonthlyReviewForm() {
 
                                                 {/* Add Responsibility Button Row */}
                                                 {!isReadOnly && (
-                                                    <tr style={{ background: '#fff', borderBottom: '2px solid #374151' }}>
+                                                    <tr style={{ background: '#fff', borderBottom: '2px solid #94a3b8' }}>
                                                         <td colSpan={1 + (columnsConfig.showProject ? 1 : 0) + 1 + (columnsConfig.showRemarks ? 1 : 0) + 1} style={{ padding: '6px 16px' }}>
                                                             <button 
                                                                 onClick={() => addItem(section.id)}
@@ -906,13 +902,12 @@ export default function MonthlyReviewForm() {
             {/* YEAR VIEW TABLE */}
             {viewMode === 'year' && (
                 <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 12, boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
-                    <div style={{ position: 'sticky', top: 0, zIndex: 50, background: '#4b5563', padding: '12px 16px', borderBottom: '1px solid #374151', borderTopLeftRadius: 12, borderTopRightRadius: 12 }}>
+                    <div style={{ position: 'sticky', top: -1, zIndex: 50, background: '#4b5563', padding: '12px 16px', borderBottom: '1px solid #374151', borderTopLeftRadius: 12, borderTopRightRadius: 12 }}>
                         <h3 style={{ margin: 0, color: '#fff', fontSize: 14, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 1 }}>Monthly Performance Report - {formData.year}</h3>
                     </div>
-                    <div style={{ overflowX: 'auto' }}>
-                        <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: 0, textAlign: 'left', minWidth: 1000 }}>
-                            <thead style={{ position: 'sticky', top: 4.5, zIndex: 45, background: '#e2e8f0 !important', color: '#334155', fontWeight: 800, fontSize: 12, letterSpacing: 0.5 }}>
-                                <tr>
+                    <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: 0, textAlign: 'left', minWidth: 1000 }}>
+                        <thead style={{ position: 'sticky', top: 41, zIndex: 45, background: '#e2e8f0 !important', color: '#334155', fontWeight: 800, fontSize: 12, letterSpacing: 0.5 }}>
+                            <tr>
                                     <th style={{ padding: '12px 16px', width: '15%', borderRight: '1px solid #cbd5e1', borderBottom: '1px solid #cbd5e1', background: '#e2e8f0' }}>Team</th>
                                     <th style={{ padding: '12px 16px', borderRight: '1px solid #cbd5e1', borderBottom: '1px solid #cbd5e1', width: '25%', background: '#e2e8f0' }}>Responsibilities</th>
                                     {['Jan', 'Feb', 'Mar', 'April', 'May', 'June', 'July', 'August', 'Sep', 'Oct', 'Nov', 'Dec'].map(m => (
@@ -929,11 +924,11 @@ export default function MonthlyReviewForm() {
                                                 return (
                                                     <tr key={item.id} style={{ borderBottom: '1px solid #cbd5e1', background: '#fff' }}>
                                                         {iIdx === 0 && (
-                                                            <td rowSpan={rowSpanCount} style={{ padding: '8px 16px', background: sIdx % 2 === 0 ? '#fdfdfd' : '#f8fafc', borderRight: '1px solid #cbd5e1', verticalAlign: 'middle', borderBottom: '2px solid #374151', fontWeight: 800, color: '#1e293b' }}>
+                                                            <td rowSpan={rowSpanCount} style={{ padding: '8px 16px', background: sIdx % 2 === 0 ? '#fdfdfd' : '#f8fafc', borderRight: '1px solid #cbd5e1', verticalAlign: 'middle', borderBottom: '2px solid #94a3b8', fontWeight: 800, color: '#1e293b' }}>
                                                                 {section.name || 'Unnamed Activity'}
                                                             </td>
                                                         )}
-                                                        <td style={{ padding: '8px 16px', borderRight: '1px solid #cbd5e1', verticalAlign: 'middle', fontSize: 12, color: '#334155' }}>
+                                                        <td style={{ padding: '8px 16px', borderRight: '1px solid #cbd5e1', verticalAlign: 'middle', fontSize: 12, color: '#334155', borderBottom: iIdx === section.items.length - 1 ? '2px solid #94a3b8' : '1px solid #cbd5e1' }}>
                                                             {item.parameterName || '-'}
                                                         </td>
                                                         {/* 12 Months Columns */}
@@ -943,7 +938,7 @@ export default function MonthlyReviewForm() {
                                                             const colors = getRatingColor(ratingToShow);
 
                                                             return (
-                                                                <td key={mIdx} style={{ padding: '4px', borderRight: '1px solid #cbd5e1', textAlign: 'center', verticalAlign: 'middle' }}>
+                                                                <td key={mIdx} style={{ padding: '4px', borderRight: '1px solid #cbd5e1', textAlign: 'center', verticalAlign: 'middle', borderBottom: iIdx === section.items.length - 1 ? '2px solid #94a3b8' : '1px solid #cbd5e1' }}>
                                                                     <div style={{ background: colors.bg, color: colors.color, borderRadius: 6, padding: '4px 0', fontSize: 12, fontWeight: 700, minHeight: 24, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                                                         {ratingToShow}
                                                                     </div>
@@ -982,7 +977,6 @@ export default function MonthlyReviewForm() {
                                 </tr>
                             </tfoot>
                         </table>
-                    </div>
                 </div>
             )}
 

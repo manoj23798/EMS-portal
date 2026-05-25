@@ -532,7 +532,6 @@ export default function ReimbursementApply() {
                         <NavPill label="LOCAL" id="conveyances" icon={<Car size={14}/>} />
                         <NavPill label="FOOD/PARKING" id="foods" icon={<Coffee size={14}/>} />
                         <NavPill label="OTHERS" id="others" icon={<MoreHorizontal size={14}/>} />
-                        <NavPill label="STAFF WAGES" id="wages" icon={<Users size={14}/>} />
                     </div>
 
                     {/* SECTIONS */}
@@ -732,33 +731,6 @@ export default function ReimbursementApply() {
                                     </tbody>
                                 </table>
                                 <button type="button" className="add-row-btn" onClick={() => handleAddRow(setOthers, { date:'', description:'', amount:0, billAvailable:false })}>
-                                    <Plus size={12}/> New row
-                                </button>
-                            </div>
-                        </div>
-                    )}
-
-                    {visibleSections.wages && (
-                        <div className="section-container">
-                            <div className="sec-title">STAFF WAGES  <FileText size={14}/></div>
-                            <div className="data-wrapper">
-                                <table className="data-table">
-                                    <thead><tr><th>NAME</th><th className="center">FROM</th><th className="center">TO</th><th className="center">DAYS</th><th className="right">RATE</th><th className="right">AMOUNT</th><th></th></tr></thead>
-                                    <tbody>
-                                        {wages.map((r,i)=>(
-                                            <tr key={i}>
-                                                <td><input type="text" className="tbl-input" placeholder="Worker" value={r.name} onChange={e=>{const n=[...wages]; n[i].name=e.target.value; setWages(n)}}/></td>
-                                                <td><input type="date" className="tbl-input center" value={r.fromDate} onChange={e=>{const n=[...wages]; n[i].fromDate=e.target.value; setWages(n)}}/></td>
-                                                <td><input type="date" className="tbl-input center" value={r.toDate} onChange={e=>{const n=[...wages]; n[i].toDate=e.target.value; setWages(n)}}/></td>
-                                                <td><input type="number" className="tbl-input center" placeholder="0" value={r.daysWorked||''} onChange={e=>{const n=[...wages]; n[i].daysWorked=Number(e.target.value); n[i].totalAmount=(n[i].daysWorked||0)*(n[i].perDaySalary||0); setWages(n)}}/></td>
-                                                <td><input type="number" className="tbl-input right" placeholder="0" value={r.perDaySalary||''} onChange={e=>{const n=[...wages]; n[i].perDaySalary=Number(e.target.value); n[i].totalAmount=(n[i].daysWorked||0)*(n[i].perDaySalary||0); setWages(n)}}/></td>
-                                                <td><input type="text" className="tbl-input right" style={{background:'#f9fafb'}} readOnly value={`₹${r.totalAmount}`}/></td>
-                                                <td><div className="cell-flex"><button type="button" className="del-btn" onClick={()=>handleRemoveRow(setWages,i)}><Trash2 size={14}/></button></div></td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                                <button type="button" className="add-row-btn" onClick={() => handleAddRow(setWages, { name:'', fromDate:'', toDate:'', daysWorked:0, perDaySalary:0, totalAmount:0 })}>
                                     <Plus size={12}/> New row
                                 </button>
                             </div>

@@ -101,7 +101,7 @@ public class PermissionServiceImpl implements PermissionService {
 
     @Override
     @Transactional
-    public PermissionRequestResponse rejectPermission(Long permissionId, Long managerId) {
+    public PermissionRequestResponse rejectPermission(Long permissionId, Long managerId, String remarks) {
         PermissionRequest permission = permissionRequestRepository.findById(permissionId)
                 .orElseThrow(() -> new ResourceNotFoundException("Permission request not found."));
         Employee manager = getEmployeeOrThrow(managerId);
@@ -112,6 +112,7 @@ public class PermissionServiceImpl implements PermissionService {
 
         permission.setStatus("Rejected");
         permission.setApprovedBy(manager);
+        permission.setRemarks(remarks);
 
         return mapToResponse(permissionRequestRepository.save(permission));
     }
@@ -135,6 +136,7 @@ public class PermissionServiceImpl implements PermissionService {
                 .endTime(p.getEndTime())
                 .totalHours(p.getTotalHours())
                 .reason(p.getReason())
+                .remarks(p.getRemarks())
                 .status(p.getStatus())
                 .approvedByName(p.getApprovedBy() != null
                         ? p.getApprovedBy().getFirstName() + " " + p.getApprovedBy().getLastName()

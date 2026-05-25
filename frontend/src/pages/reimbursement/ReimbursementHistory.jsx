@@ -3,7 +3,7 @@ import {
     Plus, Search, History, Calendar, ArrowRight, Receipt, Filter, BadgeCheck, 
     TrendingUp, Clock, CheckCircle, ChevronLeft, ChevronRight, ChevronsLeft, 
     ChevronsRight, Eye, EyeOff, ChevronDown, Download, FileText, Printer, RotateCcw,
-    XCircle, AlertCircle
+    XCircle, AlertCircle, Info
 } from 'lucide-react';
 import { ReimbursementAPI } from '../../services/api';
 import { useNavigate } from 'react-router-dom';
@@ -260,6 +260,18 @@ const ReimbursementHistory = () => {
                 .dropdown-item:hover { background: #f8fafc; color: #f97316; }
                 .inline-filter-input { height: 34px; padding: 0 12px; border-radius: 8px; border: 1.5px solid #cbd5e1; font-size: 12px; font-weight: 700; background: #f8fafc; outline: none; }
                 @keyframes popup { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+                .ap-tooltip-container { position: relative; display: inline-flex; align-items: center; cursor: pointer; margin-left: 4px; }
+                .ap-tooltip-content {
+                    display: none; position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%);
+                    background: #1e293b; color: white; padding: 10px 12px; border-radius: 8px; font-size: 11px; font-weight: 600;
+                    white-space: normal; text-transform: none; text-align: left; margin-bottom: 8px; z-index: 100;
+                    box-shadow: 0 10px 25px rgba(0,0,0,0.2); min-width: 200px;
+                }
+                .ap-tooltip-container:hover .ap-tooltip-content { display: block; }
+                .ap-tooltip-content::after {
+                    content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+                    border-width: 5px; border-style: solid; border-color: #1e293b transparent transparent transparent;
+                }
             `}</style>
 
             {/* Header section */}
@@ -395,7 +407,6 @@ const ReimbursementHistory = () => {
                     <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                         <thead>
                             <tr style={{ background: '#f8fafc', borderBottom: '2px solid #cbd5e1' }}>
-                                <th style={{ padding: '12px 24px', fontSize: '12px', fontWeight: 950, color: '#475569', textTransform: 'uppercase' }}>REQ ID</th>
                                 <th style={{ padding: '12px 24px', fontSize: '12px', fontWeight: 950, color: '#475569', textTransform: 'uppercase' }}>PROJECT/REASON</th>
                                 <th style={{ padding: '12px 24px', fontSize: '12px', fontWeight: 950, color: '#475569', textTransform: 'uppercase' }}>SUBMITTED DATE</th>
                                 <th style={{ padding: '12px 24px', fontSize: '12px', fontWeight: 950, color: '#475569', textTransform: 'uppercase', textAlign: 'right' }}>TOTAL</th>
@@ -408,14 +419,6 @@ const ReimbursementHistory = () => {
                         <tbody>
                             {filteredClaims.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage).map((c) => (
                                 <tr key={c.id} style={{ borderBottom: '1px solid #cbd5e1' }}>
-                                    <td style={{ padding: '10px 24px' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                            <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#f8fafc', border: '1px solid #cbd5e1', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b' }}>
-                                                <Receipt size={14} />
-                                            </div>
-                                            <span style={{ fontSize: '12px', fontWeight: 950, color: '#94a3b8' }}>#{String(c.id).padStart(5, '0')}</span>
-                                        </div>
-                                    </td>
                                     <td style={{ padding: '10px 24px' }}>
                                         <p style={{ margin: 0, fontSize: '12.5px', fontWeight: 950, color: '#1e293b', textTransform: 'uppercase', letterSpacing: '-0.3px' }}>{c.reasonForTravel}</p>
                                         {(c.travelStartDate || c.travelEndDate) && (
@@ -434,28 +437,39 @@ const ReimbursementHistory = () => {
                                     </td>
                                     <td style={{ padding: '10px 24px', textAlign: 'center' }}>
                                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                            <span style={{ 
-                                                padding: '4px 10px', borderRadius: '10px', fontSize: '10px', fontWeight: 950, textTransform: 'uppercase', 
-                                                background: c.status === 'PENDING' ? '#f1f5f9' : (['APPROVED', 'ACCOUNTS_SETTLED', 'SETTLED', 'MANAGER_APPROVED'].includes(c.status) ? '#f0fdf4' : '#fef2f2'), 
-                                                color: c.status === 'PENDING' ? '#64748b' : (['APPROVED', 'ACCOUNTS_SETTLED', 'SETTLED', 'MANAGER_APPROVED'].includes(c.status) ? '#16a34a' : '#ef4444'), 
-                                                border: '1.5px solid currentColor' 
-                                            }}>
-                                                {c.status === 'ACCOUNTS_SETTLED' ? 'APPROVED' : (c.status === 'PENDING' ? 'PENDING' : (['APPROVED', 'SETTLED', 'MANAGER_APPROVED'].includes(c.status) ? 'APPROVED' : 'REJECTED'))}
-                                            </span>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                <span style={{ 
+                                                    padding: '4px 10px', borderRadius: '10px', fontSize: '10px', fontWeight: 950, textTransform: 'uppercase', 
+                                                    background: c.status === 'PENDING' ? '#f1f5f9' : (['APPROVED', 'ACCOUNTS_SETTLED', 'SETTLED', 'MANAGER_APPROVED'].includes(c.status) ? '#f0fdf4' : '#fef2f2'), 
+                                                    color: c.status === 'PENDING' ? '#64748b' : (['APPROVED', 'ACCOUNTS_SETTLED', 'SETTLED', 'MANAGER_APPROVED'].includes(c.status) ? '#16a34a' : '#ef4444'), 
+                                                    border: '1.5px solid currentColor' 
+                                                }}>
+                                                    {c.status === 'ACCOUNTS_SETTLED' ? 'APPROVED' : (c.status === 'PENDING' ? 'PENDING' : (['APPROVED', 'SETTLED', 'MANAGER_APPROVED'].includes(c.status) ? 'APPROVED' : 'REJECTED'))}
+                                                </span>
+                                                {c.status === 'REJECTED' && c.managerRemarks && (
+                                                    <div className="ap-tooltip-container">
+                                                        <Info size={14} color="#ef4444" />
+                                                        <div className="ap-tooltip-content">
+                                                            <div style={{ fontWeight: 900, marginBottom: '4px', color: '#cbd5e1', borderBottom: '1px solid #334155', paddingBottom: '4px', textTransform: 'uppercase' }}>Rejection Remarks</div>
+                                                            <div style={{ color: '#f8fafc', lineHeight: 1.4 }}>{c.managerRemarks}</div>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
                                     </td>
                                     <td style={{ padding: '10px 24px', textAlign: 'right' }}>
                                         <button 
                                             onClick={() => navigate(`/reimbursement/view/${c.id}`)}
                                             style={{ 
-                                                background: 'white', color: '#f97316', border: '1.5px solid #f97316', 
-                                                padding: '8px 14px', borderRadius: '8px', fontSize: '10px', 
-                                                fontWeight: 950, textTransform: 'uppercase', cursor: 'pointer', 
+                                                background: '#f8fafc', color: '#64748b', border: '1.5px solid #cbd5e1', 
+                                                padding: '6px 12px', borderRadius: '8px', fontSize: '10px', 
+                                                fontWeight: 900, textTransform: 'uppercase', cursor: 'pointer', 
                                                 display: 'flex', alignItems: 'center', gap: '6px', transition: '0.2s',
                                                 marginLeft: 'auto'
                                             }}
-                                            onMouseOver={(e) => { e.currentTarget.style.background = '#fff7ed'; }}
-                                            onMouseOut={(e) => { e.currentTarget.style.background = 'white'; }}
+                                            onMouseOver={(e) => { e.currentTarget.style.background = '#e2e8f0'; }}
+                                            onMouseOut={(e) => { e.currentTarget.style.background = '#f8fafc'; }}
                                         >
                                             VIEW <ChevronRight size={14}/>
                                         </button>
@@ -494,8 +508,8 @@ const ReimbursementHistory = () => {
                                             onClick={() => setCurrentPage(p)}
                                             style={{
                                                 width: '24px', height: '24px', borderRadius: '50%', border: '1.5px solid',
-                                                borderColor: currentPage === p ? '#f97316' : '#cbd5e1',
-                                                background: currentPage === p ? '#f97316' : 'white',
+                                                borderColor: currentPage === p ? '#334155' : '#cbd5e1',
+                                                background: currentPage === p ? '#334155' : 'white',
                                                 color: currentPage === p ? 'white' : '#431407',
                                                 fontSize: '10px', fontWeight: 900, cursor: 'pointer', transition: '0.2s',
                                                 display: 'flex', alignItems: 'center', justifyContent: 'center'

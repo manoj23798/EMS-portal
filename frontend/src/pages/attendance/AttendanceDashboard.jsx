@@ -43,6 +43,7 @@ export default function AttendanceDashboard() {
     const [showFilters, setShowFilters] = useState(false);
     const [statusFilter, setStatusFilter] = useState('ALL');
     const [breakType, setBreakType] = useState('');
+    const [showBreakDropdown, setShowBreakDropdown] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const rowsPerPage = 10;
     const [selectedMonth, setSelectedMonth] = useState(() => {
@@ -167,8 +168,9 @@ export default function AttendanceDashboard() {
         }
     };
 
-    const handleAction = async (actionFn, label) => {
-        if (label === 'Break' && !breakType) {
+    const handleAction = async (actionFn, label, typeParam) => {
+        const activeBreakType = typeParam || breakType;
+        if (label === 'Break' && !activeBreakType) {
             setError('Please select break type (Lunch Break or Tea Break) before taking break.');
             return;
         }
@@ -196,7 +198,7 @@ export default function AttendanceDashboard() {
 
             let res;
             if (label === 'Break') {
-                res = await actionFn(EMPLOYEE_ID, breakType);
+                res = await actionFn(EMPLOYEE_ID, activeBreakType);
             } else {
                 res = await actionFn(EMPLOYEE_ID);
             }
@@ -448,7 +450,7 @@ export default function AttendanceDashboard() {
                     --ap-orange: #f97316;
                     --ap-orange-soft: #fff7ed;
                     --ap-line: #cbd5e1;
-                    padding: 0 24px 24px 24px;
+                    padding: 24px;
                     background: #ffffff;
                     min-height: 100vh;
                     font-family: 'Outfit', sans-serif;
@@ -827,9 +829,9 @@ export default function AttendanceDashboard() {
                     flex-direction: column;
                     min-width: 76px;
                     padding: 5px 10px;
-                    border: 1px solid #dbe4ef;
+                    border: 1px solid #e2e8f0;
                     border-radius: 10px;
-                    background: #f1f5f9;
+                    background: #f8fafc;
                 }
                 .ap-header-metric-label { font-size: 10px; font-weight: 950; color: #8ca0bc; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 0; }
                 .ap-header-metric-value { font-size: 18px; font-weight: 950; color: #0b1b3b; line-height: 1; }
@@ -1084,190 +1086,227 @@ export default function AttendanceDashboard() {
 
             {error && (
                 <div style={{ padding: '12px 14px', borderRadius: '12px', background: '#fef2f2', border: '1.5px solid #fecaca', color: '#dc2626', fontSize: '12px', fontWeight: 800, marginBottom: 12 }}>
-                    {error}
+                    error}
                 </div>
             )}
 
             <div className="ap-top-grid">
-                <section className="ap-punch-card">
-                    <div className="ap-clock-box">
-                        <div className="ap-analog-shell">
-                            <svg width="96" height="96" viewBox="0 0 200 200" role="img" aria-label="Attendance analog clock">
-                                <circle cx="100" cy="100" r="88" fill="white" stroke="#3f4349" strokeWidth="8" />
+                <section className="ap-punch-card" style={{ padding: '16px', background: '#fff', border: 'none', boxShadow: '0 10px 40px rgba(0, 0, 0, 0.08)', borderRadius: '20px', display: 'flex', flexDirection: 'column', gap: '16px', justifyContent: 'center' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#f1f5f9', padding: '20px 24px', borderRadius: '16px', border: '2px solid #fff', boxShadow: 'inset 0 2px 10px rgba(0,0,0,0.02), 0 4px 15px rgba(0,0,0,0.03)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+                            <div className="ap-analog-shell" style={{ width: 110, height: 110, margin: 0 }}>
+                                <svg width="110" height="110" viewBox="0 0 200 200" role="img" aria-label="Attendance analog clock">
+                                    <circle cx="100" cy="100" r="88" fill="white" stroke="#0f172a" strokeWidth="8" />
 
-                                {[1, 2, 4, 5, 7, 8, 10, 11].map((hour) => {
-                                    const angle = (hour * 30 - 90) * (Math.PI / 180);
-                                    const x1 = 100 + 70 * Math.cos(angle);
-                                    const y1 = 100 + 70 * Math.sin(angle);
-                                    const x2 = 100 + 80 * Math.cos(angle);
-                                    const y2 = 100 + 80 * Math.sin(angle);
-                                    return <line key={hour} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#3f4349" strokeWidth="6" strokeLinecap="square" />;
-                                })}
+                                    {[1, 2, 4, 5, 7, 8, 10, 11].map((hour) => {
+                                        const angle = (hour * 30 - 90) * (Math.PI / 180);
+                                        const x1 = 100 + 70 * Math.cos(angle);
+                                        const y1 = 100 + 70 * Math.sin(angle);
+                                        const x2 = 100 + 80 * Math.cos(angle);
+                                        const y2 = 100 + 80 * Math.sin(angle);
+                                        return <line key={hour} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#0f172a" strokeWidth="6" strokeLinecap="square" />;
+                                    })}
 
-                                <text x="100" y="38" textAnchor="middle" fontSize="20" fontWeight="900" fill="#3f4349">12</text>
-                                <text x="170" y="108" textAnchor="middle" fontSize="20" fontWeight="900" fill="#3f4349">3</text>
-                                <text x="100" y="178" textAnchor="middle" fontSize="20" fontWeight="900" fill="#3f4349">6</text>
-                                <text x="30" y="108" textAnchor="middle" fontSize="20" fontWeight="900" fill="#3f4349">9</text>
+                                    <text x="100" y="38" textAnchor="middle" fontSize="20" fontWeight="900" fill="#0f172a">12</text>
+                                    <text x="170" y="108" textAnchor="middle" fontSize="20" fontWeight="900" fill="#0f172a">3</text>
+                                    <text x="100" y="178" textAnchor="middle" fontSize="20" fontWeight="900" fill="#0f172a">6</text>
+                                    <text x="30" y="108" textAnchor="middle" fontSize="20" fontWeight="900" fill="#0f172a">9</text>
 
-                                <line
-                                    x1="100"
-                                    y1="100"
-                                    x2={100 + 28 * Math.cos(((currentTime.getHours() % 12 + currentTime.getMinutes() / 60) / 12 * 360 - 90) * Math.PI / 180)}
-                                    y2={100 + 28 * Math.sin(((currentTime.getHours() % 12 + currentTime.getMinutes() / 60) / 12 * 360 - 90) * Math.PI / 180)}
-                                    stroke="#3f4349"
-                                    strokeWidth="7"
-                                    strokeLinecap="round"
-                                />
+                                    <line
+                                        x1="100"
+                                        y1="100"
+                                        x2={100 + 28 * Math.cos(((currentTime.getHours() % 12 + currentTime.getMinutes() / 60) / 12 * 360 - 90) * Math.PI / 180)}
+                                        y2={100 + 28 * Math.sin(((currentTime.getHours() % 12 + currentTime.getMinutes() / 60) / 12 * 360 - 90) * Math.PI / 180)}
+                                        stroke="#f97316"
+                                        strokeWidth="7"
+                                        strokeLinecap="round"
+                                    />
 
-                                <line
-                                    x1="100"
-                                    y1="100"
-                                    x2={100 + 44 * Math.cos((currentTime.getMinutes() / 60 * 360 - 90) * Math.PI / 180)}
-                                    y2={100 + 44 * Math.sin((currentTime.getMinutes() / 60 * 360 - 90) * Math.PI / 180)}
-                                    stroke="#3f4349"
-                                    strokeWidth="5"
-                                    strokeLinecap="round"
-                                />
+                                    <line
+                                        x1="100"
+                                        y1="100"
+                                        x2={100 + 44 * Math.cos((currentTime.getMinutes() / 60 * 360 - 90) * Math.PI / 180)}
+                                        y2={100 + 44 * Math.sin((currentTime.getMinutes() / 60 * 360 - 90) * Math.PI / 180)}
+                                        stroke="#f97316"
+                                        strokeWidth="5"
+                                        strokeLinecap="round"
+                                    />
 
-                                <circle cx="100" cy="100" r="5" fill="#3f4349" />
-                            </svg>
-                        </div>
-                        <div className="ap-clock-meta">
-                            <div className="ap-clock-row">
-                                <Clock size={16} />
-                                <div className="ap-clock-time">{currentTime.toLocaleTimeString('en-US', { hour12: true, hour: '2-digit', minute: '2-digit', second: '2-digit' })}</div>
+                                    <circle cx="100" cy="100" r="5" fill="#f97316" />
+                                </svg>
                             </div>
-                            <div className="ap-clock-date">
-                                <CalendarIcon size={12} />
-                                {currentTime.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
+                            <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#f97316', fontSize: 32, fontWeight: 950, lineHeight: 1 }}>
+                                    <Clock size={20} style={{ color: '#f97316' }} />
+                                    {currentTime.toLocaleTimeString('en-US', { hour12: true, hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                                </div>
+                                <div style={{ color: '#64748b', fontSize: 13, fontWeight: 800, display: 'flex', alignItems: 'center', gap: 6, marginTop: 10 }}>
+                                    <CalendarIcon size={14} />
+                                    {currentTime.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
+                                </div>
                             </div>
                         </div>
-                        <div style={{ paddingRight: '24px' }}>
-                            <div className="ap-shift-chip" style={{ background: '#ffffff' }}>Status: {attendance?.status || '---'}</div>
+                        <div>
+                            {attendance?.status ? (
+                                <span style={{ border: '2px solid #fdba74', color: '#f97316', padding: '6px 20px', borderRadius: 999, fontSize: 13, fontWeight: 900, background: '#fff' }}>
+                                    {attendance.status}
+                                </span>
+                            ) : (
+                                <span style={{ border: '2px solid #e2e8f0', color: '#94a3b8', padding: '6px 20px', borderRadius: 999, fontSize: 13, fontWeight: 900, background: '#fff' }}>
+                                    ---
+                                </span>
+                            )}
                         </div>
                     </div>
 
-                    <div className="ap-action-row">
-                        <button
-                            type="button"
-                            className="ap-btn ap-btn-in"
-                            disabled={timerInDisabled}
-                            onClick={() => handleAction(AttendanceAPI.timerIn, 'In')}
-                        >
-                            <Play size={18} />
-                            Timer In
-                        </button>
-                        <button
-                            type="button"
-                            className="ap-btn ap-btn-out"
-                            disabled={timerOutDisabled}
-                            onClick={() => handleAction(AttendanceAPI.timerOut, 'Out')}
-                        >
-                            <LogOut size={18} />
-                            Timer Out
-                        </button>
-                    </div>
+                    <div style={{ display: 'flex', gap: '12px' }}>
+                        {attendance?.inTime && !attendance?.outTime ? (
+                            <button
+                                type="button"
+                                disabled={timerOutDisabled}
+                                onClick={() => handleAction(AttendanceAPI.timerOut, 'Out')}
+                                style={{ flex: 1, background: '#ef4444', color: '#fff', border: 'none', height: 48, borderRadius: 12, fontSize: 16, fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, cursor: 'pointer', transition: 'all 0.2s' }}
+                            >
+                                <LogOut size={20} /> Timer Out
+                            </button>
+                        ) : (
+                            <button
+                                type="button"
+                                disabled={timerInDisabled}
+                                onClick={() => handleAction(AttendanceAPI.timerIn, 'In')}
+                                style={{ flex: 1, background: '#f97316', color: '#fff', border: 'none', height: 48, borderRadius: 12, fontSize: 16, fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, cursor: 'pointer', transition: 'all 0.2s' }}
+                                onMouseOver={(e) => { e.currentTarget.style.background = '#ea580c'; }}
+                                onMouseOut={(e) => { e.currentTarget.style.background = '#f97316'; }}
+                            >
+                                <Play size={20} /> Timer In
+                            </button>
+                        )}
 
-                    <div className="ap-break-strip">
-                        <div className="ap-break-title">
-                            <Coffee size={12} style={{ verticalAlign: 'middle', marginRight: 6 }} />
-                            {breakType ? (breakType === 'LUNCH' ? 'Lunch Break' : 'Tea Break') : 'Break'}
-                        </div>
-                        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-                            <select
-                                className="ap-break-type"
-                                value={breakType}
-                                onChange={(e) => setBreakType(e.target.value)}
-                                disabled={isOnBreak || actionLoading || timedOut}
-                            >
-                                <option value="">type</option>
-                                <option value="LUNCH">Lunch Break</option>
-                                <option value="TEA">Tea Break</option>
-                            </select>
-                            <button
-                                type="button"
-                                className="ap-btn ap-btn-break"
-                                disabled={startBreakDisabled}
-                                onClick={() => handleAction(AttendanceAPI.startBreak, 'Break')}
-                            >
-                                Take Break
-                            </button>
-                            <button
-                                type="button"
-                                className="ap-btn ap-btn-break"
-                                disabled={endBreakDisabled}
-                                onClick={() => handleAction(AttendanceAPI.endBreak, 'End break')}
-                            >
-                                End Break
-                            </button>
+                        <div style={{ position: 'relative', width: '140px' }}>
+                            {isOnBreak ? (
+                                <button
+                                    type="button"
+                                    disabled={endBreakDisabled}
+                                    onClick={() => handleAction(AttendanceAPI.endBreak, 'End break')}
+                                    style={{ width: '100%', height: 48, borderRadius: 12, border: '2px solid #fdba74', color: '#f97316', background: '#fff', fontSize: 15, fontWeight: 900, cursor: 'pointer' }}
+                                >
+                                    End Break
+                                </button>
+                            ) : (
+                                <>
+                                    <button
+                                        type="button"
+                                        disabled={startBreakDisabled || timedOut}
+                                        onClick={() => setShowBreakDropdown(!showBreakDropdown)}
+                                        style={{ width: '100%', height: 48, borderRadius: 12, border: '2px solid #fdba74', color: '#f97316', background: '#fff', fontSize: 15, fontWeight: 900, cursor: 'pointer' }}
+                                    >
+                                        Take Break
+                                    </button>
+                                    {showBreakDropdown && (
+                                        <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: 8, background: '#fff', border: 'none', boxShadow: '0 10px 40px rgba(0,0,0,0.1)', borderRadius: 12, padding: 8, zIndex: 50 }}>
+                                            <button 
+                                                onClick={() => { setShowBreakDropdown(false); setTimeout(() => handleAction(AttendanceAPI.startBreak, 'Break', 'LUNCH'), 50); }}
+                                                style={{ width: '100%', padding: '10px', textAlign: 'center', background: 'transparent', border: 'none', cursor: 'pointer', fontWeight: 800, color: '#334155', borderRadius: 8 }}
+                                                onMouseOver={(e) => e.currentTarget.style.background = '#f1f5f9'}
+                                                onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}
+                                            >
+                                                Lunch Break
+                                            </button>
+                                            <button 
+                                                onClick={() => { setShowBreakDropdown(false); setTimeout(() => handleAction(AttendanceAPI.startBreak, 'Break', 'TEA'), 50); }}
+                                                style={{ width: '100%', padding: '10px', textAlign: 'center', background: 'transparent', border: 'none', cursor: 'pointer', fontWeight: 800, color: '#334155', borderRadius: 8, marginTop: 4 }}
+                                                onMouseOver={(e) => e.currentTarget.style.background = '#f1f5f9'}
+                                                onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}
+                                            >
+                                                Tea Break
+                                            </button>
+                                        </div>
+                                    )}
+                                </>
+                            )}
                         </div>
                     </div>
                 </section>
 
-                <section className="ap-summary-card">
-                    <div className="ap-summary-head">
-                        <div className="ap-mini-title" style={{ gap: 0 }}>Today's Summary</div>
-                    </div>
-
-                    <div className="ap-summary-grid">
-                        <article className="ap-summary-box ap-feature-box ap-feature-box-nochip ap-box-green">
-                            <div className="ap-summary-icon"><MapPin size={16} /></div>
-                            <div className="ap-punch-wrap">
+                <section className="ap-summary-card" style={{ background: 'transparent', border: 'none', boxShadow: 'none', padding: 0 }}>
+                    <div className="ap-summary-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+                        
+                        {/* Punch In/Out */}
+                        <article className="ap-summary-box" style={{ background: '#fff', border: 'none', boxShadow: '0 10px 40px rgba(0, 0, 0, 0.08)', borderRadius: 16, padding: '16px', display: 'flex', alignItems: 'center', gap: 16 }}>
+                            <div style={{ width: 48, height: 48, borderRadius: 12, background: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b' }}><MapPin size={20} /></div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 20, flex: 1 }}>
                                 <div>
-                                    <div className="ap-summary-label">Punch In</div>
-                                    <div className="ap-summary-value">{formatTime(attendance?.inTime)}</div>
+                                    <div style={{ fontSize: 9, fontWeight: 900, color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>Punch In</div>
+                                    <div style={{ fontSize: 18, fontWeight: 900, color: '#0f172a' }}>{formatTime(attendance?.inTime)}</div>
                                 </div>
-                                <div className="ap-punch-arrow">{'->'}</div>
+                                <div style={{ color: '#f97316', fontSize: 20, fontWeight: 900 }}>-&gt;</div>
                                 <div>
-                                    <div className="ap-summary-label">Punch Out</div>
-                                    <div className="ap-summary-value">{formatTime(attendance?.outTime)}</div>
+                                    <div style={{ fontSize: 9, fontWeight: 900, color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>Punch Out</div>
+                                    <div style={{ fontSize: 18, fontWeight: 900, color: '#0f172a' }}>{formatTime(attendance?.outTime)}</div>
                                 </div>
                             </div>
                         </article>
 
-                        <article className="ap-summary-box ap-box-orange">
-                            <div className="ap-summary-icon"><Laptop size={16} /></div>
-                            <div>
-                                <div className="ap-summary-label">Work Hours</div>
-                                <div className="ap-summary-value">{formatLiveDuration(workSeconds)}</div>
-                            </div>
-                            <div className="ap-summary-side-chip">Remaining: {formatLiveDuration(remainingWorkSeconds)}</div>
-                        </article>
-
-                        <article className="ap-summary-box ap-box-blue ap-break-box">
-                            <div className="ap-summary-icon"><Coffee size={16} /></div>
-                            <div className="ap-break-main">
-                                <div className="ap-summary-label">Break Time</div>
-                                <div className="ap-summary-value">{formatLiveDuration(breakSeconds)}</div>
-                                <div className="ap-summary-side-chip">Remaining: {formatLiveDuration(breakRemainingSeconds)}</div>
-                            </div>
-                            <div className="ap-break-divider" />
-                            <div className="ap-break-right">
-                                <div className="ap-break-lines">
-                                    <div className="ap-break-line-item">
-                                        <span>Lunch break</span>
-                                        <span>{formatMinutesOnly(breakTypeMinutes.lunch)}</span>
-                                    </div>
-                                    <div className="ap-break-line-item">
-                                        <span>Tea break</span>
-                                        <span>{formatMinutesOnly(breakTypeMinutes.tea)}</span>
-                                    </div>
+                        {/* Late / Over Time */}
+                        <article className="ap-summary-box" style={{ background: '#fff', border: 'none', boxShadow: '0 10px 40px rgba(0, 0, 0, 0.08)', borderRadius: 16, padding: '16px', display: 'flex', alignItems: 'center', gap: 16 }}>
+                            <div style={{ width: 48, height: 48, borderRadius: 12, background: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b' }}><Info size={20} /></div>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flex: 1, paddingRight: 12 }}>
+                                <div>
+                                    <div style={{ display: 'inline-block', border: '1.5px solid #fca5a5', color: '#ef4444', padding: '2px 8px', borderRadius: 6, fontSize: 9, fontWeight: 900, textTransform: 'uppercase', marginBottom: 4 }}>Late</div>
+                                    <div style={{ fontSize: 18, fontWeight: 900, color: '#0f172a' }}>{formatMinutes(lateMinutes)}</div>
+                                </div>
+                                <div style={{ width: 1.5, height: 40, background: '#e2e8f0' }} />
+                                <div>
+                                    <div style={{ display: 'inline-block', border: '1.5px solid #86efac', color: '#22c55e', padding: '2px 8px', borderRadius: 6, fontSize: 9, fontWeight: 900, textTransform: 'uppercase', marginBottom: 4 }}>Over Time</div>
+                                    <div style={{ fontSize: 18, fontWeight: 900, color: '#0f172a' }}>{formatMinutes(overTimeMinutes)}</div>
                                 </div>
                             </div>
                         </article>
 
-                        <article className="ap-summary-box ap-box-orange" style={{ gridTemplateColumns: '34px 1fr' }}>
-                            <div className="ap-summary-icon"><CircleAlert size={16} /></div>
-                            <div className="ap-split-meta">
-                                <div className="ap-meta-col">
-                                    <span className="ap-meta-label ap-meta-label-late">Late</span>
-                                    <span>{formatMinutes(lateMinutes)}</span>
+                        {/* Break Time */}
+                        <article className="ap-summary-box" style={{ background: '#fff', border: 'none', boxShadow: '0 10px 40px rgba(0, 0, 0, 0.08)', borderRadius: 16, padding: '16px', display: 'flex', alignItems: 'center', gap: 16 }}>
+                            <div style={{ position: 'relative', width: 56, height: 56, flexShrink: 0 }}>
+                                <svg width="56" height="56" viewBox="0 0 36 36">
+                                    <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#e2e8f0" strokeWidth="3.5" />
+                                    <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#f97316" strokeWidth="3.5" strokeDasharray={`${(breakSeconds + breakRemainingSeconds) > 0 ? Math.round((breakSeconds / (breakSeconds + breakRemainingSeconds)) * 100) : 0}, 100`} />
+                                </svg>
+                                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 900, color: '#64748b' }}>
+                                    {(breakSeconds + breakRemainingSeconds) > 0 ? Math.round((breakSeconds / (breakSeconds + breakRemainingSeconds)) * 100) : 0}%
                                 </div>
-                                <div className="ap-divider" />
-                                <div className="ap-meta-col">
-                                    <span className="ap-meta-label ap-meta-label-over">Over Time</span>
-                                    <span>{formatMinutes(overTimeMinutes)}</span>
+                            </div>
+                            <div style={{ flex: 1 }}>
+                                <div style={{ fontSize: 9, fontWeight: 900, color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>Break Time</div>
+                                <div style={{ fontSize: 18, fontWeight: 900, color: '#0f172a' }}>{formatLiveDuration(breakSeconds)}</div>
+                                <div style={{ fontSize: 10, fontWeight: 800, color: '#64748b', background: '#f8fafc', padding: '2px 10px', borderRadius: 999, display: 'inline-block', marginTop: 6, border: '1.5px solid #f1f5f9' }}>Remaining: {formatLiveDuration(breakRemainingSeconds)}</div>
+                            </div>
+                            <div style={{ width: 1.5, height: 50, background: '#e2e8f0' }} />
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, minWidth: 80 }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 9, fontWeight: 900, color: '#64748b', textTransform: 'uppercase' }}>
+                                    <span>Lunch</span>
+                                    <span style={{ color: '#0f172a' }}>{formatMinutesOnly(breakTypeMinutes.lunch)}M</span>
                                 </div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 9, fontWeight: 900, color: '#64748b', textTransform: 'uppercase' }}>
+                                    <span>Tea</span>
+                                    <span style={{ color: '#0f172a' }}>{formatMinutesOnly(breakTypeMinutes.tea)}M</span>
+                                </div>
+                            </div>
+                        </article>
+
+                        {/* Work Hours */}
+                        <article className="ap-summary-box" style={{ background: '#fff', border: 'none', boxShadow: '0 10px 40px rgba(0, 0, 0, 0.08)', borderRadius: 16, padding: '16px', display: 'flex', alignItems: 'center', gap: 16 }}>
+                            <div style={{ position: 'relative', width: 56, height: 56, flexShrink: 0 }}>
+                                <svg width="56" height="56" viewBox="0 0 36 36">
+                                    <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#e2e8f0" strokeWidth="3.5" />
+                                    <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#f97316" strokeWidth="3.5" strokeDasharray={`${(workSeconds + remainingWorkSeconds) > 0 ? Math.round((workSeconds / (workSeconds + remainingWorkSeconds)) * 100) : 0}, 100`} />
+                                </svg>
+                                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 900, color: '#64748b' }}>
+                                    {(workSeconds + remainingWorkSeconds) > 0 ? Math.round((workSeconds / (workSeconds + remainingWorkSeconds)) * 100) : 0}%
+                                </div>
+                            </div>
+                            <div style={{ flex: 1 }}>
+                                <div style={{ fontSize: 9, fontWeight: 900, color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>Work Hours</div>
+                                <div style={{ fontSize: 18, fontWeight: 900, color: '#0f172a' }}>{formatLiveDuration(workSeconds)}</div>
+                                <div style={{ fontSize: 10, fontWeight: 800, color: '#64748b', background: '#f8fafc', padding: '2px 10px', borderRadius: 999, display: 'inline-block', marginTop: 6, border: '1.5px solid #f1f5f9' }}>Remaining: {formatLiveDuration(remainingWorkSeconds)}</div>
                             </div>
                         </article>
                     </div>
@@ -1433,7 +1472,7 @@ export default function AttendanceDashboard() {
                                                     )}
                                                 </span>
                                             </td>
-                                            <td style={{ color: '#0ea5e9' }}>{formatMinutes(record.totalHours)}</td>
+                                            <td style={{ color: '#94a3b8' }}>{formatMinutes(record.totalHours)}</td>
                                             <td>
                                                 <span className={`ap-status-pill ${statusClass}`}>
                                                     {normalized === 'Late' && lateDurationText ? (

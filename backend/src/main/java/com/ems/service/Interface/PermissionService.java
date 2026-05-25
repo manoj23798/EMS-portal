@@ -17,5 +17,5 @@ public interface PermissionService {
 
     PermissionRequestResponse approvePermission(Long id, Long managerId);
 
-    PermissionRequestResponse rejectPermission(Long permissionId, Long managerId);
+    PermissionRequestResponse rejectPermission(Long permissionId, Long managerId, String remarks);
 }

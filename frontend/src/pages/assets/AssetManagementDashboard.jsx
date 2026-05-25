@@ -40,6 +40,7 @@ import DynamicTables from './tabs/DynamicTables';
 import LogHistoryTable, { addTableLog } from './components/LogHistoryTable';
 import RowHistoryPopup from './components/RowHistoryPopup';
 import Pagination from './components/Pagination';
+import AssetDetailView from './components/AssetDetailView';
 
 const badgeStyles = {
     'In Use': { bg: '#ecfdf5', color: '#ea580c' },
@@ -131,22 +132,12 @@ export default function AssetManagementDashboard({ isHrView = false }) {
     // Scoped style for vertical borders in Asset module only
     const scopedStyle = (
         <style>{`
-            .asset-dashboard-table th, 
-            .asset-dashboard-table td {
-                border-right: 1px solid #e2e8f0 !important;
-            }
-            .asset-dashboard-table th:last-child, 
-            .asset-dashboard-table td:last-child {
-                border-right: none !important;
-            }
+
             .asset-data-cell {
                 display: flex;
                 align-items: center;
-                border: 1px solid #cbd5e1;
-                border-radius: 8px;
                 padding: 0 12px;
                 height: 38px;
-                background: #fff;
                 font-size: 13px;
                 color: #0f172a;
                 font-weight: 500;
@@ -182,6 +173,7 @@ export default function AssetManagementDashboard({ isHrView = false }) {
     const [selectedAssetForLog, setSelectedAssetForLog] = useState(null);
     const [assetRowLogs, setAssetRowLogs] = useState([]);
     const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+    const [viewingAsset, setViewingAsset] = useState(null);
 
     const fetchAssetLogs = async (row) => {
         console.log('Action: Info Clicked for row:', row);
@@ -469,6 +461,45 @@ export default function AssetManagementDashboard({ isHrView = false }) {
         setEditingRowId(null);
     };
 
+    const handleSaveView = async (updatedAsset) => {
+        try {
+            const payload = {
+                ...updatedAsset,
+                hddAndType: updatedAsset.hddType
+            };
+
+            const oldRow = inventory.find(r => r.id === updatedAsset.id);
+            const updated = await assetService.updateInventory(updatedAsset.id, payload);
+            
+            // Calculate changes for logs
+            const changes = [];
+            const ignoreFields = ['id', 'tempId', 'createdAt', 'updatedAt', 'lastModified', 'hddAndType'];
+            
+            Object.keys(payload).forEach(key => {
+                if (ignoreFields.includes(key)) return;
+                
+                const oldVal = (oldRow[key] || '').toString();
+                const newVal = (payload[key] || '').toString();
+                
+                if (oldVal !== newVal) {
+                    const label = key.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').toUpperCase().trim();
+                    changes.push({ field: label, old: oldVal, new: newVal });
+                }
+            });
+
+            if (changes.length > 0) {
+                addTableLog('Laptops', 'MODIFIED', payload.assetCode || 'Unknown', `Updated ${changes.length} fields.`, updatedAsset.id, changes);
+            }
+
+            setInventory((prev) => prev.map((row) => row.id === updatedAsset.id
+                ? { ...updated, hddType: updated.hddAndType || updated.hddType || '' }
+                : row));
+        } catch (error) {
+            console.error('Failed to save asset', error);
+            throw error;
+        }
+    };
+
     const saveAsset = async () => {
         try {
             const payload = {
@@ -663,9 +694,15 @@ export default function AssetManagementDashboard({ isHrView = false }) {
     const handleCreateAC = async () => {
         if (!newACData.assetName) return;
         try {
+            const currentYear = new Date().getFullYear();
             const created = await assetService.createSchedule({
                 ...newACData,
-                entries: []
+                entries: [
+                    { year: currentYear, monthRange: 'Jan - Mar', plannedDate: '', actualDate: '', status: 'Pending', remarks: '' },
+                    { year: currentYear, monthRange: 'Apr - June', plannedDate: '', actualDate: '', status: 'Pending', remarks: '' },
+                    { year: currentYear, monthRange: 'July - Sep', plannedDate: '', actualDate: '', status: 'Pending', remarks: '' },
+                    { year: currentYear, monthRange: 'Oct - Dec', plannedDate: '', actualDate: '', status: 'Pending', remarks: '' }
+                ]
             });
             setServiceSchedules(prev => [...prev, normalizeSchedule(created)]);
             addTableLog('Maintenance Schedule', 'CREATED', newACData.assetName, `Created new maintenance schedule schedule for ${newACData.assetCode}`);
@@ -882,14 +919,20 @@ export default function AssetManagementDashboard({ isHrView = false }) {
             </div>
 
             <div style={{ marginTop: 20 }}>
-                {activeTab === 'inventory' && (
+                {activeTab === 'inventory' && viewingAsset ? (
+                    <AssetDetailView 
+                        asset={viewingAsset} 
+                        onBack={() => setViewingAsset(null)}
+                        onSave={canEdit ? handleSaveView : undefined}
+                    />
+                ) : activeTab === 'inventory' && (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                         <TableShell>
                         <div style={{ overflowX: 'auto' }}>
-                            <table className="asset-dashboard-table" style={{ width: '100%', borderCollapse: 'collapse', minWidth: 1800 }}>
+                            <table className="asset-dashboard-table" style={{ width: '100%', borderCollapse: 'collapse', minWidth: 800 }}>
                                 <thead style={{ position: 'sticky', top: 0, zIndex: 2 }}>
                                     <tr style={{ background: '#f8fafc' }}>
-                                        {['SL No', 'Created At', 'Asset Code', 'Computer Name', 'User Name', 'Department', 'Email ID', 'Mobile Number', 'IP ADDRESS', 'MAKE', 'MODEL', 'CPU', 'RAM', 'HDD and Type', 'OS', 'Status', 'Remarks', 'Maintenance', 'Actions'].map(head => (
+                                        {['SL No', 'Created At', 'Asset Code', 'Computer Name', 'User Name', 'Department', 'Status', 'Actions'].map(head => (
                                             <th key={head} style={{ textAlign: 'left', padding: '14px 12px', fontSize: 12, textTransform: 'uppercase', letterSpacing: 0.6, fontWeight: 900, color: '#334155', borderBottom: '1px solid #dbe3ea' }}>{head}</th>
                                         ))}
                                     </tr>
@@ -903,15 +946,6 @@ export default function AssetManagementDashboard({ isHrView = false }) {
                                             <td style={{ padding: '10px 12px' }}><input value={row.computerName} onChange={(e) => setNewInventoryRows(prev => prev.map(r => r.tempId === row.tempId ? { ...r, computerName: e.target.value } : r))} placeholder="Computer" style={{ width: 120, height: 32, borderRadius: 8, border: '1px solid #cbd5e1', padding: '0 8px' }} /></td>
                                             <td style={{ padding: '10px 12px' }}><input value={row.userName} onChange={(e) => setNewInventoryRows(prev => prev.map(r => r.tempId === row.tempId ? { ...r, userName: e.target.value } : r))} placeholder="User" style={{ width: 120, height: 32, borderRadius: 8, border: '1px solid #cbd5e1', padding: '0 8px' }} /></td>
                                             <td style={{ padding: '10px 12px' }}><input value={row.department} onChange={(e) => setNewInventoryRows(prev => prev.map(r => r.tempId === row.tempId ? { ...r, department: e.target.value } : r))} placeholder="Department" style={{ width: 140, height: 32, borderRadius: 8, border: '1px solid #cbd5e1', padding: '0 8px' }} /></td>
-                                            <td style={{ padding: '10px 12px' }}><input value={row.emailId} onChange={(e) => setNewInventoryRows(prev => prev.map(r => r.tempId === row.tempId ? { ...r, emailId: e.target.value } : r))} placeholder="Email" style={{ width: 150, height: 32, borderRadius: 8, border: '1px solid #cbd5e1', padding: '0 8px' }} /></td>
-                                            <td style={{ padding: '10px 12px' }}><input value={row.mobileNumber} onChange={(e) => setNewInventoryRows(prev => prev.map(r => r.tempId === row.tempId ? { ...r, mobileNumber: e.target.value } : r))} placeholder="Mobile" style={{ width: 120, height: 32, borderRadius: 8, border: '1px solid #cbd5e1', padding: '0 8px' }} /></td>
-                                            <td style={{ padding: '10px 12px' }}><input value={row.ipAddress} onChange={(e) => setNewInventoryRows(prev => prev.map(r => r.tempId === row.tempId ? { ...r, ipAddress: e.target.value } : r))} placeholder="IP" style={{ width: 110, height: 32, borderRadius: 8, border: '1px solid #cbd5e1', padding: '0 8px' }} /></td>
-                                            <td style={{ padding: '10px 12px' }}><input value={row.make} onChange={(e) => setNewInventoryRows(prev => prev.map(r => r.tempId === row.tempId ? { ...r, make: e.target.value } : r))} placeholder="Make" style={{ width: 100, height: 32, borderRadius: 8, border: '1px solid #cbd5e1', padding: '0 8px' }} /></td>
-                                            <td style={{ padding: '10px 12px' }}><input value={row.model} onChange={(e) => setNewInventoryRows(prev => prev.map(r => r.tempId === row.tempId ? { ...r, model: e.target.value } : r))} placeholder="Model" style={{ width: 120, height: 32, borderRadius: 8, border: '1px solid #cbd5e1', padding: '0 8px' }} /></td>
-                                            <td style={{ padding: '10px 12px' }}><input value={row.cpu} onChange={(e) => setNewInventoryRows(prev => prev.map(r => r.tempId === row.tempId ? { ...r, cpu: e.target.value } : r))} placeholder="CPU" style={{ width: 150, height: 32, borderRadius: 8, border: '1px solid #cbd5e1', padding: '0 8px' }} /></td>
-                                            <td style={{ padding: '10px 12px' }}><input value={row.ram} onChange={(e) => setNewInventoryRows(prev => prev.map(r => r.tempId === row.tempId ? { ...r, ram: e.target.value } : r))} placeholder="RAM" style={{ width: 90, height: 32, borderRadius: 8, border: '1px solid #cbd5e1', padding: '0 8px' }} /></td>
-                                            <td style={{ padding: '10px 12px' }}><input value={row.hddType} onChange={(e) => setNewInventoryRows(prev => prev.map(r => r.tempId === row.tempId ? { ...r, hddType: e.target.value } : r))} placeholder="HDD" style={{ width: 130, height: 32, borderRadius: 8, border: '1px solid #cbd5e1', padding: '0 8px' }} /></td>
-                                            <td style={{ padding: '10px 12px' }}><input value={row.os} onChange={(e) => setNewInventoryRows(prev => prev.map(r => r.tempId === row.tempId ? { ...r, os: e.target.value } : r))} placeholder="OS" style={{ width: 120, height: 32, borderRadius: 8, border: '1px solid #cbd5e1', padding: '0 8px' }} /></td>
                                             <td style={{ padding: '10px 12px' }}>
                                                 <select value={row.status} onChange={(e) => setNewInventoryRows(prev => prev.map(r => r.tempId === row.tempId ? { ...r, status: e.target.value } : r))} style={{ width: 110, height: 32, borderRadius: 8, border: '1px solid #cbd5e1', padding: '0 8px' }}>
                                                     <option value="Available">Available</option>
@@ -920,89 +954,31 @@ export default function AssetManagementDashboard({ isHrView = false }) {
                                                     <option value="Scrap">Scrap</option>
                                                 </select>
                                             </td>
-                                            <td style={{ padding: '10px 12px' }}><input value={row.remarks} onChange={(e) => setNewInventoryRows(prev => prev.map(r => r.tempId === row.tempId ? { ...r, remarks: e.target.value } : r))} placeholder="Remarks" style={{ width: 160, height: 32, borderRadius: 8, border: '1px solid #cbd5e1', padding: '0 8px' }} /></td>
-                                            <td style={{ padding: '10px 12px' }}><input value={row.maintenance || ''} onChange={(e) => setNewInventoryRows(prev => prev.map(r => r.tempId === row.tempId ? { ...r, maintenance: e.target.value } : r))} placeholder="Maintenance" style={{ width: 140, height: 32, borderRadius: 8, border: '1px solid #cbd5e1', padding: '0 8px' }} /></td>
                                             <td style={{ padding: '10px 12px' }}>
-                                                <div style={{ display: 'flex', gap: 6 }}>
-                                                    <button onClick={() => setNewInventoryRows(prev => prev.filter(r => r.tempId !== row.tempId))} style={{ height: 28, padding: '0 8px', borderRadius: 6, border: '1px solid #fecaca', background: '#fff', color: '#dc2626', fontWeight: 800, cursor: 'pointer' }}>Cancel</button>
-                                                </div>
+                                                <button onClick={() => setNewInventoryRows(prev => prev.filter(r => r.tempId !== row.tempId))} style={{ height: 28, padding: '0 8px', borderRadius: 6, border: '1px solid #fecaca', background: '#fff', color: '#dc2626', fontWeight: 800, cursor: 'pointer' }}>Cancel</button>
                                             </td>
                                         </tr>
                                     ))}
                                     {paginatedInventory.map((row, index) => {
                                         const globalIndex = (inventoryPage - 1) * 8 + index;
-                                        const isEditing = editingRowId === row.id;
 
                                         return (
-                                            <tr key={row.id} style={{ borderBottom: '1px solid #edf2f7', background: isEditing ? '#f8fbff' : 'transparent' }}>
+                                            <tr key={row.id} style={{ borderBottom: '1px solid #edf2f7', background: 'transparent' }}>
                                                 <td style={{ padding: '12px' }}><div className="asset-data-cell">{canEdit ? newInventoryRows.length + globalIndex + 1 : globalIndex + 1}</div></td>
-                                                {isEditing ? (
-                                                    <>
-                                                        <td style={{ padding: '10px 12px' }}><div className="asset-data-cell" style={{ border: 'none', background: '#f8fafc', color: '#64748b' }}>{row.createdAt ? new Date(row.createdAt).toLocaleDateString() : '-'}</div></td>
-                                                        <td style={{ padding: '10px 12px' }}><input value={formData.assetCode} onChange={(e) => setFormData(prev => ({...prev, assetCode: e.target.value}))} style={{ width: 140, height: 32, borderRadius: 8, border: '1px solid #cbd5e1', padding: '0 8px' }} /></td>
-                                                        <td style={{ padding: '10px 12px' }}><input value={formData.computerName} onChange={(e) => setFormData(prev => ({...prev, computerName: e.target.value}))} style={{ width: 120, height: 32, borderRadius: 8, border: '1px solid #cbd5e1', padding: '0 8px' }} /></td>
-                                                        <td style={{ padding: '10px 12px' }}><input value={formData.userName} onChange={(e) => setFormData(prev => ({...prev, userName: e.target.value}))} style={{ width: 120, height: 32, borderRadius: 8, border: '1px solid #cbd5e1', padding: '0 8px' }} /></td>
-                                                        <td style={{ padding: '10px 12px' }}><input value={formData.department} onChange={(e) => setFormData(prev => ({...prev, department: e.target.value}))} style={{ width: 140, height: 32, borderRadius: 8, border: '1px solid #cbd5e1', padding: '0 8px' }} /></td>
-                                                        <td style={{ padding: '10px 12px' }}><input value={formData.emailId} onChange={(e) => setFormData(prev => ({...prev, emailId: e.target.value}))} style={{ width: 150, height: 32, borderRadius: 8, border: '1px solid #cbd5e1', padding: '0 8px' }} /></td>
-                                                        <td style={{ padding: '10px 12px' }}><input value={formData.mobileNumber} onChange={(e) => setFormData(prev => ({...prev, mobileNumber: e.target.value}))} style={{ width: 120, height: 32, borderRadius: 8, border: '1px solid #cbd5e1', padding: '0 8px' }} /></td>
-                                                        <td style={{ padding: '10px 12px' }}><input value={formData.ipAddress} onChange={(e) => setFormData(prev => ({...prev, ipAddress: e.target.value}))} style={{ width: 110, height: 32, borderRadius: 8, border: '1px solid #cbd5e1', padding: '0 8px' }} /></td>
-                                                        <td style={{ padding: '10px 12px' }}><input value={formData.make} onChange={(e) => setFormData(prev => ({...prev, make: e.target.value}))} style={{ width: 100, height: 32, borderRadius: 8, border: '1px solid #cbd5e1', padding: '0 8px' }} /></td>
-                                                        <td style={{ padding: '10px 12px' }}><input value={formData.model} onChange={(e) => setFormData(prev => ({...prev, model: e.target.value}))} style={{ width: 120, height: 32, borderRadius: 8, border: '1px solid #cbd5e1', padding: '0 8px' }} /></td>
-                                                        <td style={{ padding: '10px 12px' }}><input value={formData.cpu} onChange={(e) => setFormData(prev => ({...prev, cpu: e.target.value}))} style={{ width: 150, height: 32, borderRadius: 8, border: '1px solid #cbd5e1', padding: '0 8px' }} /></td>
-                                                        <td style={{ padding: '10px 12px' }}><input value={formData.ram} onChange={(e) => setFormData(prev => ({...prev, ram: e.target.value}))} style={{ width: 90, height: 32, borderRadius: 8, border: '1px solid #cbd5e1', padding: '0 8px' }} /></td>
-                                                        <td style={{ padding: '10px 12px' }}><input value={formData.hddType} onChange={(e) => setFormData(prev => ({...prev, hddType: e.target.value}))} style={{ width: 130, height: 32, borderRadius: 8, border: '1px solid #cbd5e1', padding: '0 8px' }} /></td>
-                                                        <td style={{ padding: '10px 12px' }}><input value={formData.os} onChange={(e) => setFormData(prev => ({...prev, os: e.target.value}))} style={{ width: 120, height: 32, borderRadius: 8, border: '1px solid #cbd5e1', padding: '0 8px' }} /></td>
-                                                        <td style={{ padding: '10px 12px' }}>
-                                                            <select value={formData.status} onChange={(e) => setFormData(prev => ({...prev, status: e.target.value}))} style={{ width: 110, height: 32, borderRadius: 8, border: '1px solid #cbd5e1', padding: '0 8px' }}>
-                                                                <option value="Available">Available</option>
-                                                                <option value="In Use">In Use</option>
-                                                                <option value="Repair">Repair</option>
-                                                                <option value="Scrap">Scrap</option>
-                                                            </select>
-                                                        </td>
-                                                        <td style={{ padding: '10px 12px' }}><input value={formData.remarks} onChange={(e) => setFormData(prev => ({...prev, remarks: e.target.value}))} style={{ width: 160, height: 32, borderRadius: 8, border: '1px solid #cbd5e1', padding: '0 8px' }} /></td>
-                                                        <td style={{ padding: '10px 12px' }}><input value={formData.maintenance || ''} onChange={(e) => setFormData(prev => ({...prev, maintenance: e.target.value}))} placeholder="Maintenance" style={{ width: 140, height: 32, borderRadius: 8, border: '1px solid #cbd5e1', padding: '0 8px' }} /></td>
-                                                        <td style={{ padding: '10px 12px' }}>
-                                                            <div style={{ display: 'flex', gap: 6 }}>
-                                                                <button onClick={saveAsset} style={{ height: 28, padding: '0 8px', borderRadius: 6, border: '1px solid #bbf7d0', background: '#fff', color: '#16a34a', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}><Save size={12} /> Save</button>
-                                                                <button onClick={cancelInlineEdit} style={{ height: 28, padding: '0 8px', borderRadius: 6, border: '1px solid #cbd5e1', background: '#fff', color: '#64748b', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}><X size={12} /> Cancel</button>
-                                                            </div>
-                                                        </td>
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <td style={{ padding: '12px' }}><div className="asset-data-cell" style={{ color: '#64748b' }}>{row.createdAt ? new Date(row.createdAt).toLocaleDateString() : '-'}</div></td>
-                                                        <td style={{ padding: '12px' }}><div className="asset-data-cell" style={{ fontWeight: 900 }}>{row.assetCode}</div></td>
-                                                        <td style={{ padding: '12px' }}><div className="asset-data-cell">{row.computerName || '-'}</div></td>
-                                                        <td style={{ padding: '12px' }}><div className="asset-data-cell">{row.userName || '-'}</div></td>
-                                                        <td style={{ padding: '12px' }}><div className="asset-data-cell">{row.department || '-'}</div></td>
-                                                        <td style={{ padding: '12px' }}><div className="asset-data-cell">{row.emailId || '-'}</div></td>
-                                                        <td style={{ padding: '12px' }}><div className="asset-data-cell">{row.mobileNumber || '-'}</div></td>
-                                                        <td style={{ padding: '12px' }}><div className="asset-data-cell">{row.ipAddress || '-'}</div></td>
-                                                        <td style={{ padding: '12px' }}><div className="asset-data-cell">{row.make || '-'}</div></td>
-                                                        <td style={{ padding: '12px' }}><div className="asset-data-cell">{row.model || '-'}</div></td>
-                                                        <td style={{ padding: '12px' }}><div className="asset-data-cell">{row.cpu || '-'}</div></td>
-                                                        <td style={{ padding: '12px' }}><div className="asset-data-cell">{row.ram || '-'}</div></td>
-                                                        <td style={{ padding: '12px' }}><div className="asset-data-cell">{row.hddType || '-'}</div></td>
-                                                        <td style={{ padding: '12px' }}><div className="asset-data-cell">{row.os || '-'}</div></td>
-                                                        <td style={{ padding: '12px' }}><div className="asset-data-cell" style={{ border: 'none', background: 'transparent' }}><Badge value={row.status} /></div></td>
-                                                        <td style={{ padding: '12px' }}><div className="asset-data-cell">{row.remarks || '-'}</div></td>
-                                                        <td style={{ padding: '12px' }}><div className="asset-data-cell">{row.maintenance || '-'}</div></td>
-                                                        <td style={{ padding: '12px' }}>
-                                                            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                                                                <button onClick={() => fetchAssetLogs(row)} style={{ border: '1px solid #e2e8f0', background: '#fff', color: '#64748b', borderRadius: 8, padding: '5px 8px', display: 'inline-flex', alignItems: 'center', cursor: 'pointer' }} title="View row history"><Info size={14} /></button>
-                                                                {canEdit ? (
-                                                                    <div style={{ display: 'flex', gap: 8 }}>
-                                                                        <button onClick={() => startInlineEdit(row)} style={{ border: '1px solid #cbd5e1', background: '#fff', borderRadius: 8, padding: '6px 10px', display: 'inline-flex', gap: 6, alignItems: 'center', cursor: 'pointer' }}><Edit size={14} /> Edit</button>
-                                                                        <button onClick={() => deleteAsset(row)} style={{ border: '1px solid #fecaca', background: '#fff', color: '#dc2626', borderRadius: 8, padding: '6px 10px', display: 'inline-flex', gap: 6, alignItems: 'center', cursor: 'pointer' }}><Trash2 size={14} /> Delete</button>
-                                                                    </div>
-                                                                ) : (
-                                                                    <span style={{ color: '#94a3b8', fontSize: 12 }}>View only</span>
-                                                                )}
-                                                            </div>
-                                                        </td>
-                                                    </>
-                                                )}
+                                                <td style={{ padding: '12px' }}><div className="asset-data-cell" style={{ color: '#64748b' }}>{row.createdAt ? new Date(row.createdAt).toLocaleDateString() : '-'}</div></td>
+                                                <td style={{ padding: '12px' }}><div className="asset-data-cell" style={{ fontWeight: 900 }}>{row.assetCode}</div></td>
+                                                <td style={{ padding: '12px' }}><div className="asset-data-cell">{row.computerName || '-'}</div></td>
+                                                <td style={{ padding: '12px' }}><div className="asset-data-cell">{row.userName || '-'}</div></td>
+                                                <td style={{ padding: '12px' }}><div className="asset-data-cell">{row.department || '-'}</div></td>
+                                                <td style={{ padding: '12px' }}><div className="asset-data-cell" style={{ border: 'none', background: 'transparent' }}><Badge value={row.status} /></div></td>
+                                                <td style={{ padding: '12px' }}>
+                                                    <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                                                        <button onClick={() => setViewingAsset(row)} style={{ border: '1px solid #cbd5e1', background: '#fff', color: '#1e293b', borderRadius: 8, padding: '6px 8px', fontSize: 10, cursor: 'pointer', fontWeight: 800 }}>View</button>
+                                                        {canEdit && (
+                                                            <button onClick={() => deleteAsset(row)} style={{ border: '1px solid #fecaca', background: '#fff', color: '#dc2626', borderRadius: 8, padding: '6px 10px', display: 'inline-flex', gap: 6, alignItems: 'center', cursor: 'pointer', fontWeight: 800 }}>Delete</button>
+                                                        )}
+                                                    </div>
+                                                </td>
                                             </tr>
                                         );
                                     })}
@@ -1267,11 +1243,17 @@ export default function AssetManagementDashboard({ isHrView = false }) {
                                                 <button
                                                     onClick={() => setNewScheduleRowsById((prev) => ({
                                                         ...prev,
-                                                        [schedule.id]: [...(prev[schedule.id] || []), { tempId: Date.now() + Math.random(), year: selectedACYear, monthRange: '', plannedDate: '', actualDate: '', remarks: '', status: '' }]
+                                                        [schedule.id]: [
+                                                            ...(prev[schedule.id] || []),
+                                                            { tempId: Date.now() + Math.random() + 1, year: selectedACYear, monthRange: 'Jan - Mar', plannedDate: '', actualDate: '', remarks: '', status: '' },
+                                                            { tempId: Date.now() + Math.random() + 2, year: selectedACYear, monthRange: 'Apr - June', plannedDate: '', actualDate: '', remarks: '', status: '' },
+                                                            { tempId: Date.now() + Math.random() + 3, year: selectedACYear, monthRange: 'July - Sep', plannedDate: '', actualDate: '', remarks: '', status: '' },
+                                                            { tempId: Date.now() + Math.random() + 4, year: selectedACYear, monthRange: 'Oct - Dec', plannedDate: '', actualDate: '', remarks: '', status: '' }
+                                                        ]
                                                     }))}
                                                     style={{ height: 36, padding: '0 16px', borderRadius: 8, border: '1px solid #cbd5e1', background: '#fff', color: '#0f172a', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: 8, cursor: 'pointer', boxShadow: '0 4px 15px rgba(156,163,175,0.3)' }}
                                                 >
-                                                    <Plus size={16} /> ADD ROW
+                                                    <Plus size={16} /> ADD YEAR QUARTERS
                                                 </button>
 
                                                 <Pagination 
@@ -1314,41 +1296,45 @@ export default function AssetManagementDashboard({ isHrView = false }) {
                                                 </div>
 
                                                 <div style={{ marginTop: 24, padding: '20px 0 8px', borderTop: '2px dashed #edf2f7', display: 'flex', flexDirection: 'column', gap: 16 }}>
-                                                    <div style={{ display: 'grid', gap: 16, gridTemplateColumns: 'repeat(4, minmax(0, 1fr))' }}>
-                                                        <input 
-                                                            placeholder="Vendor Name" 
-                                                            value={currentChecklist.vendor || ''}
-                                                            onChange={e => updateChecklist('vendor', e.target.value)}
-                                                            style={{ height: 42, border: '1px solid #cbd5e1', borderRadius: 8, padding: '0 14px', fontSize: 14 }} 
-                                                        />
-                                                        <input 
-                                                            placeholder="Location" 
-                                                            value={currentChecklist.location || ''}
-                                                            onChange={e => updateChecklist('location', e.target.value)}
-                                                            style={{ height: 42, border: '1px solid #cbd5e1', borderRadius: 8, padding: '0 14px', fontSize: 14 }} 
-                                                        />
-                                                        <input 
-                                                            placeholder="Conducted Date" 
-                                                            type="date" 
-                                                            value={currentChecklist.date || ''}
-                                                            onChange={e => updateChecklist('date', e.target.value)}
-                                                            style={{ height: 42, border: '1px solid #cbd5e1', borderRadius: 8, padding: '0 14px', fontSize: 14, color: '#64748b' }} 
-                                                        />
-                                                        <input 
-                                                            placeholder="Time" 
-                                                            type="time" 
-                                                            value={currentChecklist.time || ''}
-                                                            onChange={e => updateChecklist('time', e.target.value)}
-                                                            style={{ height: 42, border: '1px solid #cbd5e1', borderRadius: 8, padding: '0 14px', fontSize: 14, color: '#64748b' }} 
+                                                    <div style={{ display: 'grid', gap: 16, gridTemplateColumns: '1fr 1fr 2fr' }}>
+                                                        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                                                            <input 
+                                                                placeholder="Vendor Name" 
+                                                                value={currentChecklist.vendor || ''}
+                                                                onChange={e => updateChecklist('vendor', e.target.value)}
+                                                                style={{ height: 42, border: '1px solid #cbd5e1', borderRadius: 8, padding: '0 14px', fontSize: 14 }} 
+                                                            />
+                                                            <input 
+                                                                placeholder="Location" 
+                                                                value={currentChecklist.location || ''}
+                                                                onChange={e => updateChecklist('location', e.target.value)}
+                                                                style={{ height: 42, border: '1px solid #cbd5e1', borderRadius: 8, padding: '0 14px', fontSize: 14 }} 
+                                                            />
+                                                        </div>
+                                                        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                                                            <input 
+                                                                placeholder="dd-mm-yyyy" 
+                                                                type="date" 
+                                                                value={currentChecklist.date || ''}
+                                                                onChange={e => updateChecklist('date', e.target.value)}
+                                                                style={{ height: 42, border: '1px solid #cbd5e1', borderRadius: 8, padding: '0 14px', fontSize: 14, color: '#64748b' }} 
+                                                            />
+                                                            <input 
+                                                                placeholder="--:-- --" 
+                                                                type="time" 
+                                                                value={currentChecklist.time || ''}
+                                                                onChange={e => updateChecklist('time', e.target.value)}
+                                                                style={{ height: 42, border: '1px solid #cbd5e1', borderRadius: 8, padding: '0 14px', fontSize: 14, color: '#64748b' }} 
+                                                            />
+                                                        </div>
+                                                        <textarea 
+                                                            placeholder="Overall comment / cost of air conditioner maintenance" 
+                                                            rows={4} 
+                                                            value={currentChecklist.comment || ''}
+                                                            onChange={e => updateChecklist('comment', e.target.value)}
+                                                            style={{ border: '1px solid #cbd5e1', borderRadius: 8, padding: '14px', fontSize: 14, resize: 'vertical', height: '100%' }} 
                                                         />
                                                     </div>
-                                                    <textarea 
-                                                        placeholder="Overall comment / cost of air conditioner maintenance" 
-                                                        rows={3} 
-                                                        value={currentChecklist.comment || ''}
-                                                        onChange={e => updateChecklist('comment', e.target.value)}
-                                                        style={{ border: '1px solid #cbd5e1', borderRadius: 8, padding: '14px', fontSize: 14, resize: 'vertical' }} 
-                                                    />
                                                     
                                                     {canDoMaintenance && (
                                                         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12, marginTop: 8 }}>

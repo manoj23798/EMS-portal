@@ -10,7 +10,7 @@ public interface ReimbursementService {
     List<ReimbursementResponse> getAllPendingForManager();
     List<ReimbursementResponse> getAllForAccounts();
     ReimbursementResponse getReimbursementById(Long id);
-    ReimbursementResponse managerApproveOrReject(Long id, boolean approve);
+    ReimbursementResponse managerApproveOrReject(Long id, boolean approve, String remarks);
     ReimbursementResponse accountsSettle(Long id, Double approvedAmount, String reason, boolean approve);
     void deleteReimbursement(Long id);
 }

@@ -178,9 +178,9 @@ const ReimbursementView = () => {
 
                 .pod-tabs { display: flex; gap: 8px; margin-bottom: 12px; }
                 .pod-tab { flex: 1; padding: 12px; border-radius: 12px; font-size: 12px; font-weight: 900; text-transform: uppercase; cursor: pointer; text-align: center; border: 2px solid transparent; transition: 0.2s; letter-spacing: 1px; }
-                .pod-tab.active { background: #ea580c; color: white; box-shadow: 0 4px 12px rgba(234,88,12,0.3); border-color: #c2410c; }
+                .pod-tab.active { background: #fff7ed; color: #f97316; box-shadow: 0 4px 12px rgba(249,115,22,0.1); border-color: #fdba74; }
                 .pod-tab.inactive { background: white; color: #6b7280; border: 2px solid #e5e7eb; }
-                .pod-tab.inactive:hover { border-color: #ea580c; color: #ea580c; }
+                .pod-tab.inactive:hover { border-color: #f97316; color: #f97316; }
 
                 .pod-header { display: flex; align-items: center; gap: 8px; font-size: 16px; font-weight: 900; color: #1f2937; text-transform: uppercase; margin-bottom: 4px; }
                 .pod-sub { font-size: 9px; font-weight: 800; color: #9ca3af; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 24px; }
@@ -204,7 +204,12 @@ const ReimbursementView = () => {
                             <button onClick={() => navigate(-1)} className="back-btn" style={{ margin: 0 }}>
                                 <ArrowLeft size={16}/>
                             </button>
-                            <h1 className="page-title">REVIEW CLAIM</h1>
+                            <h1 className="page-title" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                REVIEW CLAIM
+                                <span style={{ fontSize: '14px', fontWeight: 900, color: '#94a3b8', background: '#f8fafc', padding: '4px 10px', borderRadius: '8px', border: '1px solid #e2e8f0', letterSpacing: '0px', textTransform: 'none' }}>
+                                    #{String(claim.id).padStart(5, '0')}
+                                </span>
+                            </h1>
                         </div>
                         <div style={{ display: 'flex', gap: '12px' }}>
                             <span style={{ padding: '8px 16px', borderRadius: '12px', background: claim.status === 'PENDING' ? '#fff7ed' : '#f0fdf4', color: claim.status === 'PENDING' ? '#f97316' : '#10b981', fontWeight: 900, fontSize: '10px', textTransform: 'uppercase', border: '1px solid currentColor' }}>
@@ -218,12 +223,30 @@ const ReimbursementView = () => {
                         </div>
                     </div>
 
-                    <div className="subject-box">
-                        <span className="sb-label">Project / Reason</span>
-                        <div className="sb-val">{claim.reasonForTravel}</div>
-                        <div className="sb-date">
-                            <Calendar size={14} color="#f97316"/>
-                            <span style={{ fontSize: '11px', fontWeight: 900, color: '#94a3b8' }}>{claim.travelStartDate} — {claim.travelEndDate}</span>
+                    <div style={{ display: 'flex', gap: '12px', marginBottom: '24px', flexWrap: 'wrap', alignItems: 'stretch' }}>
+                        {isManager && (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '6px 12px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #94a3b8', flexShrink: 0 }}>
+                                {claim.profilePhotoUrl ? (
+                                    <img src={claim.profilePhotoUrl.startsWith('http') || claim.profilePhotoUrl.startsWith('data:') ? claim.profilePhotoUrl : `http://localhost:8087${claim.profilePhotoUrl.startsWith('/') ? claim.profilePhotoUrl : `/${claim.profilePhotoUrl}`}`} alt="profile" style={{ width: '30px', height: '30px', borderRadius: '6px', objectFit: 'cover' }} />
+                                ) : (
+                                    <div style={{ width: '30px', height: '30px', borderRadius: '6px', background: '#f1f5f9', border: '1.5px solid #cbd5e1', color: '#64748b', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '900', fontSize: '14px' }}>
+                                        {claim.employeeName?.charAt(0) || '?'}
+                                    </div>
+                                )}
+                                <div style={{ paddingRight: '8px' }}>
+                                    <p style={{ margin: 0, fontSize: '13px', fontWeight: 950, color: '#1e293b' }}>{claim.employeeName || 'Unknown Employee'}</p>
+                                    <p style={{ margin: '2px 0 0 0', fontSize: '10px', fontWeight: 900, color: '#94a3b8' }}>{claim.employeeCode || 'N/A'}</p>
+                                </div>
+                            </div>
+                        )}
+
+                        <div className="subject-box" style={{ flex: 1, margin: 0, minWidth: '300px', padding: '6px 16px', borderRadius: '8px', gap: '8px' }}>
+                            <span className="sb-label" style={{ fontSize: '9px' }}>Project / Reason</span>
+                            <div className="sb-val" style={{ color: '#0f172a', fontSize: '13px', fontWeight: 900 }}>{claim.reasonForTravel}</div>
+                            <div className="sb-date">
+                                <Calendar size={13} color="#f97316"/>
+                                <span style={{ fontSize: '10px', fontWeight: 900, color: '#94a3b8' }}>{claim.travelStartDate} — {claim.travelEndDate}</span>
+                            </div>
                         </div>
                     </div>
 
@@ -323,23 +346,7 @@ const ReimbursementView = () => {
                         </div>
                     )}
 
-                    {claim.wages?.length > 0 && (
-                        <div className="section-container">
-                            <div className="sec-title">STAFF WAGES <FileText size={14}/></div>
-                            <div className="data-wrapper">
-                                <table className="data-table">
-                                    <thead><tr><th>NAME</th><th className="center">DAYS</th><th className="right">RATE</th><th className="right">TOTAL</th></tr></thead>
-                                    <tbody>
-                                        {claim.wages.map((r, i) => (
-                                            <tr key={i}>
-                                                <td>{r.name}</td><td className="center">{r.daysWorked}</td><td className="right">₹{r.perDaySalary?.toLocaleString()}</td><td className="right">₹{r.totalAmount?.toLocaleString()}</td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    )}
+                    {/* Staff wages removed */}
                 </div>
 
                 {/* RIGHT COLUMN */}
@@ -361,8 +368,7 @@ const ReimbursementView = () => {
                                             { key: 'lodgings', label: 'Lodging Total', data: claim.lodgings, total: claim.lodgingTotal },
                                             { key: 'conveyances', label: 'Local Total', data: claim.conveyances, total: claim.conveyTotal },
                                             { key: 'foods', label: 'Food Total', data: claim.foods, total: claim.foodTotal },
-                                            { key: 'others', label: 'Others Total', data: claim.others, total: claim.otherTotal },
-                                            { key: 'wages', label: 'Staff Wages Total', data: claim.wages, total: claim.wageTotal }
+                                            { key: 'others', label: 'Others Total', data: claim.others, total: claim.otherTotal }
                                         ].map((cat) => {
                                             if (!cat.data || cat.data.length === 0) return null;
                                             const isExpanded = expandedCategories[cat.key];
@@ -437,7 +443,7 @@ const ReimbursementView = () => {
                                             if (list.length === 0) return null;
                                             const isActive = previewCategory === cat;
                                             return (
-                                                <button key={cat} onClick={() => { setPreviewCategory(cat); setPreviewIndex(0); }} style={{ padding: '6px 12px', fontSize: '10px', fontWeight: 900, borderRadius: '8px', background: isActive ? '#f97316' : '#f3f4f6', color: isActive ? 'white' : '#6b7280', border: 'none', cursor: 'pointer' }}>
+                                                <button key={cat} onClick={() => { setPreviewCategory(cat); setPreviewIndex(0); }} style={{ padding: '6px 12px', fontSize: '10px', fontWeight: 900, borderRadius: '8px', background: isActive ? '#fff7ed' : '#f3f4f6', color: isActive ? '#f97316' : '#6b7280', border: isActive ? '1px solid #fdba74' : '1px solid transparent', cursor: 'pointer', transition: '0.2s' }}>
                                                     {cat.toUpperCase()} ({list.length})
                                                 </button>
                                             );

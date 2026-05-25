@@ -121,8 +121,8 @@ export default function PermissionHistory() {
                 .action-btn:hover { border-color: #3b82f6; color: #3b82f6; background: #eff6ff; }
                 .filter-input { padding: 6px 12px; border-radius: 8px; border: 1.5px solid #cbd5e1; background: #f8fafc; font-size: 11px; font-weight: 800; outline: none; }
                 .btn-pagination { width: 32px; height: 32px; border-radius: 10px; border: 1.5px solid #cbd5e1; background: white; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #1e293b; transition: 0.2s; }
-                .btn-pagination:hover:not(:disabled) { border-color: #3b82f6; color: #3b82f6; }
-                .btn-pagination.active { background: #3b82f6; color: white; border-color: #3b82f6; }
+                .btn-pagination:hover:not(:disabled) { border-color: #334155; color: #334155; }
+                .btn-pagination.active { background: #334155; color: white; border-color: #334155; }
             `}</style>
 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 0 20px 0' }}>

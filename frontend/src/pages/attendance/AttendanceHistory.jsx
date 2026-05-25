@@ -244,7 +244,7 @@ export default function AttendanceHistory() {
                                         <td>{formatTime(record.inTime)}</td>
                                         <td>{formatTime(record.outTime)}</td>
                                         <td>{formatMinutes(record.breakDuration)}</td>
-                                        <td style={{ color: '#0ea5e9', fontWeight: 900 }}>{formatMinutes(record.totalHours)}</td>
+                                        <td style={{ color: '#94a3b8', fontWeight: 900 }}>{formatMinutes(record.totalHours)}</td>
                                         <td>
                                             <span className={`ah-status-pill ${
                                                 normalizeStatus(record.status) === 'Present' ? 'ah-status-present' : 

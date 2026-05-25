@@ -9,8 +9,8 @@ export default function HandbookSidebar() {
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
 
-    const userRole = tokenManager.getUserRole() || '';
-    const isHRorAdmin = ['HR', 'ADMIN'].includes(userRole);
+    const userRole = (tokenManager.getUserRole() || '').toUpperCase();
+    const isHRorAdmin = userRole.includes('HR') || userRole.includes('ADMIN');
 
     useEffect(() => {
         const fetchPolicies = async () => {
@@ -37,7 +37,15 @@ export default function HandbookSidebar() {
                         <BookOpen size={20} color="var(--primary)" />
                         Hand Book
                     </h2>
-                    {/* Create/Edit disabled: handbook is view-only */}
+                    {isHRorAdmin && (
+                        <button
+                            onClick={() => navigate('/handbook/create')}
+                            style={{ background: 'var(--primary)', color: 'white', border: 'none', borderRadius: 'var(--radius-md)', padding: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+                            title="Create New Policy"
+                        >
+                            <Plus size={16} />
+                        </button>
+                    )}
                 </div>
             </div>
 

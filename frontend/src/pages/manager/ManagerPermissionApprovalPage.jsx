@@ -15,8 +15,10 @@ import {
     MoreHorizontal,
     Eye,
     EyeOff,
-    LayoutDashboard
+    LayoutDashboard,
+    Info
 } from 'lucide-react';
+import RejectModal from '../../components/RejectModal';
 import {
     PieChart,
     Pie,
@@ -192,6 +194,7 @@ const ManagerPermissionApprovalPage = () => {
         dateFrom: '',
         dateTo: ''
     });
+    const [rejectModal, setRejectModal] = useState({ isOpen: false, requestId: null });
 
     useEffect(() => {
         fetchAllData();
@@ -306,13 +309,32 @@ const ManagerPermissionApprovalPage = () => {
 
     const handleAction = async (id, action) => {
         try {
-            const managerId = tokenManager.getUserData()?.employeeId || 1;
             setActionLoading(id);
-            if (action === 'approve') await ManagerAPI.approvePermission(id, managerId);
-            else await ManagerAPI.rejectPermission(id, managerId);
-            await fetchAllData();
+            const managerId = tokenManager.getUserId() || 1;
+            if (action === 'approve') {
+                await ManagerAPI.approvePermission(id, managerId);
+                const res = await ManagerAPI.getPendingPermissions();
+                setAllRequests(res.data || []);
+            } else if (action === 'reject') {
+                setRejectModal({ isOpen: true, requestId: id });
+            }
         } catch (err) {
-            console.error(err);
+            console.error('Error performing action:', err);
+        } finally {
+            setActionLoading(null);
+        }
+    };
+
+    const handleConfirmReject = async (remarks) => {
+        try {
+            setActionLoading(rejectModal.requestId);
+            const managerId = tokenManager.getUserId() || 1;
+            await ManagerAPI.rejectPermission(rejectModal.requestId, managerId, remarks);
+            setRejectModal({ isOpen: false, requestId: null });
+            const res = await ManagerAPI.getPendingPermissions();
+            setAllRequests(res.data || []);
+        } catch (err) {
+            console.error('Error performing action:', err);
         } finally {
             setActionLoading(null);
         }
@@ -687,6 +709,19 @@ const ManagerPermissionApprovalPage = () => {
                         justify-content: flex-start;
                     }
                 }
+
+                .mp-tooltip-container { position: relative; display: inline-flex; align-items: center; cursor: pointer; margin-left: 4px; }
+                .mp-tooltip-content {
+                    display: none; position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%);
+                    background: #1e293b; color: white; padding: 10px 12px; border-radius: 8px; font-size: 11px; font-weight: 600;
+                    white-space: normal; text-transform: none; text-align: left; margin-bottom: 8px; z-index: 100;
+                    box-shadow: 0 10px 25px rgba(0,0,0,0.2); min-width: 200px;
+                }
+                .mp-tooltip-container:hover .mp-tooltip-content { display: block; }
+                .mp-tooltip-content::after {
+                    content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+                    border-width: 5px; border-style: solid; border-color: #1e293b transparent transparent transparent;
+                }
             `}</style>
 
             <div className="ma-portal-switch">
@@ -837,6 +872,13 @@ const ManagerPermissionApprovalPage = () => {
                 </div>
             )}
 
+            <RejectModal 
+                isOpen={rejectModal.isOpen} 
+                onClose={() => setRejectModal({ isOpen: false, requestId: null })} 
+                onReject={handleConfirmReject} 
+                title="Reject Permission Request"
+            />
+
             <section className="mp-table-container">
                 <div className="mp-filter-shell">
                     <div className="mp-filter-topbar">
@@ -967,7 +1009,18 @@ const ManagerPermissionApprovalPage = () => {
                                         </div>
                                     ) : item.status === 'Rejected' ? (
                                         <div style={{ textAlign: 'center' }}>
-                                            <span className="mp-status-label" style={{ background: '#fef2f2', color: '#dc2626' }}>Rejected</span>
+                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                                                <span className="mp-status-label" style={{ background: '#fef2f2', color: '#dc2626' }}>Rejected</span>
+                                                {item.remarks && (
+                                                    <div className="mp-tooltip-container">
+                                                        <Info size={14} color="#ef4444" />
+                                                        <div className="mp-tooltip-content">
+                                                            <div style={{ fontWeight: 900, marginBottom: '4px', color: '#cbd5e1', borderBottom: '1px solid #334155', paddingBottom: '4px', textTransform: 'uppercase' }}>Rejection Remarks</div>
+                                                            <div style={{ color: '#f8fafc', lineHeight: 1.4 }}>{item.remarks}</div>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
                                             {item.updatedAt && <div style={{ fontSize: '9px', fontWeight: 900, color: '#94a3b8', marginTop: '4px', textTransform: 'uppercase' }}>{new Date(item.updatedAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}</div>}
                                         </div>
                                     ) : (

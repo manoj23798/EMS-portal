@@ -52,6 +52,9 @@ public class ReimbursementMaster {
     @Column(name = "manager_approval_by")
     private String managerApprovalBy;
 
+    @Column(name = "manager_remarks", columnDefinition = "TEXT")
+    private String managerRemarks;
+
     // Accounts section fields
     @Column(name = "accounts_approved_amount")
     private Double accountsApprovedAmount;

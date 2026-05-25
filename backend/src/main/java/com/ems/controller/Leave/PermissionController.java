@@ -48,8 +48,9 @@ public class PermissionController {
     @PutMapping("/manager/permissions/{id}/reject")
     public ResponseEntity<PermissionRequestResponse> rejectPermission(
             @PathVariable("id") Long id,
-            @RequestParam("managerId") Long managerId) {
-        return ResponseEntity.ok(permissionService.rejectPermission(id, managerId));
+            @RequestParam("managerId") Long managerId,
+            @RequestParam(value = "remarks", required = false) String remarks) {
+        return ResponseEntity.ok(permissionService.rejectPermission(id, managerId, remarks));
     }
 
     // ===================== ADMIN ENDPOINTS =====================
