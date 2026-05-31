@@ -3,6 +3,18 @@ import { Users, CheckCircle, Clock, TrendingUp } from 'lucide-react';
 import { PerformanceAPI } from '../../services/api';
 import { tokenManager } from '../../utils/tokenManager';
 
+const StatCard = ({ title, value, icon, color, bg }) => (
+    <div style={{ background: '#fff', padding: 24, borderRadius: 16, border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: 16, boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
+        <div style={{ width: 56, height: 56, borderRadius: '50%', background: bg, color: color, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            {icon}
+        </div>
+        <div>
+            <div style={{ fontSize: 14, color: '#64748b', fontWeight: 600, marginBottom: 4 }}>{title}</div>
+            <div style={{ fontSize: 24, color: '#0f172a', fontWeight: 800 }}>{value}</div>
+        </div>
+    </div>
+);
+
 export default function PerformanceDashboard() {
     const [stats, setStats] = useState({
         totalEmployees: 0,
@@ -40,6 +52,7 @@ export default function PerformanceDashboard() {
         }
     }
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     useEffect(() => {
         loadDashboard();
     }, []);
