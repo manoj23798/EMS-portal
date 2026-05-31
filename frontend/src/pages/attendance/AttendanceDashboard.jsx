@@ -1086,7 +1086,7 @@ export default function AttendanceDashboard() {
 
             {error && (
                 <div style={{ padding: '12px 14px', borderRadius: '12px', background: '#fef2f2', border: '1.5px solid #fecaca', color: '#dc2626', fontSize: '12px', fontWeight: 800, marginBottom: 12 }}>
-                    error}
+                    {error}
                 </div>
             )}
 
