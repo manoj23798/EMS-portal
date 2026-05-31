@@ -20,10 +20,6 @@ export default function MonthlyReviewList() {
         role: ''
     });
 
-    useEffect(() => {
-        loadReviews();
-    }, []);
-
     async function loadReviews() {
         try {
             const response = await PerformanceAPI.getAllMPRs();
@@ -38,6 +34,10 @@ export default function MonthlyReviewList() {
             setReviews([]);
         }
     }
+
+    useEffect(() => {
+        loadReviews();
+    }, []);
 
     const getMonthName = (m) => new Date(2000, m - 1).toLocaleString('default', { month: 'long' });
 

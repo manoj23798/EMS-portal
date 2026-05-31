@@ -11,10 +11,6 @@ export default function YearlyPerformance() {
     const [employeeId, setEmployeeId] = useState('EMP101');
     const [data, setData] = useState([]);
     
-    useEffect(() => {
-        loadYearlyData();
-    }, [year, employeeId]);
-
     async function loadYearlyData() {
         try {
             // const response = await PerformanceAPI.getMPRsByEmployeeAndYear(employeeId, year);
@@ -33,6 +29,10 @@ export default function YearlyPerformance() {
             console.error("Failed to load yearly data");
         }
     }
+
+    useEffect(() => {
+        loadYearlyData();
+    }, [year, employeeId]);
 
     const months = Array.from({length: 12}, (_, i) => new Date(2000, i).toLocaleString('default', { month: 'short' }));
     

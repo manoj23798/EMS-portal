@@ -14,10 +14,6 @@ export default function PerformanceDashboard() {
     const [recentService, setRecentService] = useState([]);
     const role = tokenManager.getUserRole();
 
-    useEffect(() => {
-        loadDashboard();
-    }, []);
-
     async function loadDashboard() {
         try {
             const { data } = await PerformanceAPI.getDashboardStats();
@@ -43,6 +39,10 @@ export default function PerformanceDashboard() {
             console.error("Failed to load dashboard", error);
         }
     }
+
+    useEffect(() => {
+        loadDashboard();
+    }, []);
 
     const StatCard = ({ title, value, icon, color, bg }) => (
         <div style={{ background: '#fff', padding: 24, borderRadius: 16, border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: 16, boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
