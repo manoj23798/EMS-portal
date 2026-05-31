@@ -15,7 +15,7 @@ export default function YearlyPerformance() {
         loadYearlyData();
     }, [year, employeeId]);
 
-    const loadYearlyData = async () => {
+    async function loadYearlyData() {
         try {
             // const response = await PerformanceAPI.getMPRsByEmployeeAndYear(employeeId, year);
             // setData(response.data);
@@ -32,7 +32,7 @@ export default function YearlyPerformance() {
         } catch (error) {
             console.error("Failed to load yearly data");
         }
-    };
+    }
 
     const months = Array.from({length: 12}, (_, i) => new Date(2000, i).toLocaleString('default', { month: 'short' }));
     

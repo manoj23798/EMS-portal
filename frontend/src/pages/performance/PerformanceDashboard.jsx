@@ -18,7 +18,7 @@ export default function PerformanceDashboard() {
         loadDashboard();
     }, []);
 
-    const loadDashboard = async () => {
+    async function loadDashboard() {
         try {
             const { data } = await PerformanceAPI.getDashboardStats();
             setStats({
@@ -42,7 +42,7 @@ export default function PerformanceDashboard() {
         } catch (error) {
             console.error("Failed to load dashboard", error);
         }
-    };
+    }
 
     const StatCard = ({ title, value, icon, color, bg }) => (
         <div style={{ background: '#fff', padding: 24, borderRadius: 16, border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: 16, boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>

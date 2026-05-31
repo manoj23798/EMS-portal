@@ -24,7 +24,7 @@ export default function MonthlyReviewList() {
         loadReviews();
     }, []);
 
-    const loadReviews = async () => {
+    async function loadReviews() {
         try {
             const response = await PerformanceAPI.getAllMPRs();
             
@@ -37,7 +37,7 @@ export default function MonthlyReviewList() {
             // Mock data removed to avoid confusion when API fails
             setReviews([]);
         }
-    };
+    }
 
     const getMonthName = (m) => new Date(2000, m - 1).toLocaleString('default', { month: 'long' });
 
