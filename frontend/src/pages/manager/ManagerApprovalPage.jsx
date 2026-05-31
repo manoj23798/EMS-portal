@@ -1748,7 +1748,7 @@ const ManagerApprovalPage = () => {
                     <div className="ma-card-ui">
                         <div className="ma-card-title-ui">By Category</div>
                         <div ref={categoryChartRef} style={{ height: '175px', position: 'relative', minWidth: 0 }}>
-                            <ResponsiveContainer width="100%" height="100%">
+                            <ResponsiveContainer width="100%" height={175}>
                                 <PieChart>
                                     <Pie
                                         data={categoryStats.entries}

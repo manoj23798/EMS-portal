@@ -176,7 +176,7 @@ export default function AssetManagementDashboard({ isHrView = false }) {
     const [viewingAsset, setViewingAsset] = useState(null);
 
     const fetchAssetLogs = async (row) => {
-        console.log('Action: Info Clicked for row:', row);
+        // Open log popup for selected row
         setSelectedAssetForLog(row);
         setIsLogPopupOpen(true);
         
@@ -184,7 +184,6 @@ export default function AssetManagementDashboard({ isHrView = false }) {
             // First try backend by ID
             let filtered = [];
             if (row.id) {
-                console.log('Fetching logs from backend for recordId:', row.id);
                 filtered = await assetService.getLogsByRecordId(row.id);
             }
 
@@ -783,7 +782,7 @@ export default function AssetManagementDashboard({ isHrView = false }) {
     }
 
     return (
-        <div style={{ padding: 24, background: '#f8fafc', minHeight: '100vh' }}>
+        <div style={{ padding: 24, background: '#f8fafc' }}>
             {scopedStyle}
             {renderTopBar()}
 

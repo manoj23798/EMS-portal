@@ -20,10 +20,7 @@ import ManagerPermissionApprovalPage from './pages/manager/ManagerPermissionAppr
 import AdminLeaveDashboard from './pages/leave/admin/AdminLeaveDashboard';
 
 
-import AdminCommunicationDashboard from './pages/communications/AdminCommunicationDashboard';
-import AdminCommunicationCreate from './pages/communications/AdminCommunicationCreate';
-import EmployeeCommunicationDashboard from './pages/communications/EmployeeCommunicationDashboard';
-import CommunicationDetails from './pages/communications/CommunicationDetails';
+// Communications module removed
 
 
 import HandbookPage from './pages/handbook/HandbookPage';
@@ -84,10 +81,7 @@ function App() {
             <Route path="leave/calendar" element={<Navigate to="/leave" replace />} />
 
             {/* Communications Modules */}
-            {/* <Route path="communications" element={<RoleGuard allowedRoles={['ADMIN', 'HR', 'PROJECT_MANAGER', 'IT_MANAGER', 'EMPLOYEE']}><EmployeeCommunicationDashboard /></RoleGuard>} />
-            <Route path="communications/:id" element={<RoleGuard allowedRoles={['ADMIN', 'HR', 'PROJECT_MANAGER', 'IT_MANAGER', 'EMPLOYEE']}><CommunicationDetails /></RoleGuard>} />
-            <Route path="admin/communications" element={<RoleGuard allowedRoles={['ADMIN', 'HR']}><AdminCommunicationDashboard /></RoleGuard>} />
-            <Route path="admin/communications/create" element={<RoleGuard allowedRoles={['ADMIN', 'HR']}><AdminCommunicationCreate /></RoleGuard>} /> */}
+            {/* Communications routes removed */}
             
             {/* Employee Handbook Modules */}
             <Route path="handbook" element={<RoleGuard allowedRoles={['ADMIN', 'HR', 'PROJECT_MANAGER', 'IT_MANAGER', 'EMPLOYEE']}><HandbookPage /></RoleGuard>}>

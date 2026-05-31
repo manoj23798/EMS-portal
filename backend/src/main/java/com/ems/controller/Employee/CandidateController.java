@@ -37,6 +37,7 @@ public class CandidateController {
     }
 
     @PostMapping("/{employeeId}")
+    @SuppressWarnings("unchecked")
     public ResponseEntity<Candidate> saveCandidate(@PathVariable Long employeeId,
             @RequestBody Map<String, Object> payload) {
         Employee employee = employeeRepository.findById(employeeId)

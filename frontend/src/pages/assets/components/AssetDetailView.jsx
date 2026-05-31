@@ -196,22 +196,9 @@ export default function AssetDetailView({ asset, onBack, onSave }) {
                             </div>
                         </div>
                     )}
-
-                    {/* PURCHASE DETAILS */}
-                    <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #e2e8f0', boxShadow: '0 4px 20px rgba(156,163,175,0.1)' }}>
-                        <div style={{ padding: '16px 20px', borderBottom: '1px solid #f1f5f9' }}>
-                            <h3 style={{ margin: 0, fontSize: 12, fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.8 }}>Purchase & Support</h3>
-                        </div>
-                        <div style={{ padding: 20 }}>
-                            <div style={{ display: 'grid', gap: 16 }}>
-                                <InfoRow label="Created At" value={editedAsset.createdAt ? new Date(editedAsset.createdAt).toLocaleDateString() : null} isEditing={false} onChange={() => {}} />
-                                <InfoRow label="Support / Warranty" value={editedAsset.additionalSupport} isEditing={isEditing} onChange={v => handleChange('additionalSupport', v)} />
-                                <InfoRow label="Last Maintenance" value={editedAsset.lastMaintenance} isEditing={isEditing} onChange={v => handleChange('lastMaintenance', v)} />
-                            </div>
-                        </div>
-                    </div>
                 </div>
 
+                {/* RIGHT COLUMN: Assignment + Purchase & Support */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
                     {/* ASSIGNMENT */}
                     <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #e2e8f0', boxShadow: '0 4px 20px rgba(156,163,175,0.1)' }}>
@@ -226,6 +213,20 @@ export default function AssetDetailView({ asset, onBack, onSave }) {
                                 <InfoRow label="Department" value={editedAsset.department} isEditing={isEditing} onChange={v => handleChange('department', v)} />
                                 <InfoRow label="Responsibility" value={editedAsset.responsibility} isEditing={isEditing} onChange={v => handleChange('responsibility', v)} />
                                 <InfoRow label="Description/Remarks" value={getVal('remarks', 'description')} isEditing={isEditing} onChange={v => setVal('remarks', 'description', v)} />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* PURCHASE & SUPPORT */}
+                    <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #e2e8f0', boxShadow: '0 4px 20px rgba(156,163,175,0.1)' }}>
+                        <div style={{ padding: '16px 20px', borderBottom: '1px solid #f1f5f9' }}>
+                            <h3 style={{ margin: 0, fontSize: 12, fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.8 }}>Purchase & Support</h3>
+                        </div>
+                        <div style={{ padding: 20 }}>
+                            <div style={{ display: 'grid', gap: 16 }}>
+                                <InfoRow label="Created At" value={editedAsset.createdAt ? new Date(editedAsset.createdAt).toLocaleDateString() : null} isEditing={false} onChange={() => {}} />
+                                <InfoRow label="Support / Warranty" value={editedAsset.additionalSupport} isEditing={isEditing} onChange={v => handleChange('additionalSupport', v)} />
+                                <InfoRow label="Last Maintenance" value={editedAsset.lastMaintenance} isEditing={isEditing} onChange={v => handleChange('lastMaintenance', v)} />
                             </div>
                         </div>
                     </div>

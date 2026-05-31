@@ -79,7 +79,7 @@ export default function EmployeeProfile() {
     const userRole = tokenManager.getUserRole();
     const isHR = ['ADMIN', 'HR'].includes(userRole);
 
-    const employeeId = paramId || currentUser?.employeeId || currentUser?.id;
+    const employeeId = paramId || currentUser?.id;
 
     const [employee, setEmployee] = useState(null);
     const [activeTab, setActiveTab] = useState('candidate');
@@ -260,9 +260,9 @@ export default function EmployeeProfile() {
     ];
 
     return (
-        <div style={{ padding: '24px', fontFamily: 'Outfit, sans-serif' }}>
+        <div style={{ fontFamily: 'Outfit, sans-serif' }}>
             {/* COMPACT Header Card */}
-            <div style={{ background: THEME.white, borderRadius: 24, border: `1px solid ${THEME.border}`, overflow: 'hidden', marginBottom: 24, boxShadow: '0 18px 32px rgba(148, 163, 184, 0.22), 0 3px 0 rgba(255, 255, 255, 0.85) inset, 0 1px 2px rgba(15, 23, 42, 0.05)' }}>
+            <div style={{ background: THEME.white, borderRadius: 24, border: `1px solid ${THEME.border}`, overflow: 'hidden', marginBottom: 24, boxShadow: '0 4px 20px rgba(0,0,0,0.03)' }}>
                 <div style={{ height: 56, background: '#f1f5f9', position: 'relative' }}>
                     <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)`, opacity: 0.6 }} />
                 </div>
@@ -328,93 +328,91 @@ export default function EmployeeProfile() {
                                         <h1 style={{ margin: 0, fontSize: 26, fontWeight: 900, color: '#1e293b' }}>{employee.firstName} {employee.lastName}</h1>
                                         <span style={{ fontSize: 16, fontWeight: 800, color: '#475569', letterSpacing: 0.5 }}>{employee.employeeId}</span>
                                     </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginTop: 4, flexWrap: 'wrap' }}>
-                                        <div style={{ fontSize: 13, fontWeight: 700, color: '#94a3b8' }}>{employee.designation?.title || 'Professional'} • {employee.department?.name || 'Corporate'}</div>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                                            <span style={{ fontSize: 14, fontWeight: 900, color: THEME.primary }}>SKILLS :</span>
-                                            {isEditingSkills ? (
-                                                <>
-                                                    <input
-                                                        value={skillsDraft}
-                                                        onChange={(e) => setSkillsDraft(e.target.value)}
-                                                        placeholder="Java, SQL, React"
-                                                        style={{
-                                                            height: 32,
-                                                            minWidth: 260,
-                                                            border: `1px solid ${THEME.border}`,
-                                                            borderRadius: 8,
-                                                            padding: '0 10px',
-                                                            fontSize: 13,
-                                                            fontWeight: 700,
-                                                            color: THEME.greyDark,
-                                                            outline: 'none'
-                                                        }}
-                                                    />
+                                    <div style={{ fontSize: 13, fontWeight: 700, color: '#94a3b8', marginTop: 4 }}>{employee.designation?.title || 'Professional'} • {employee.department?.name || 'Corporate'}</div>
+                                    <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                                        <span style={{ fontSize: 14, fontWeight: 900, color: THEME.primary }}>SKILLS :</span>
+                                        {isEditingSkills ? (
+                                            <>
+                                                <input
+                                                    value={skillsDraft}
+                                                    onChange={(e) => setSkillsDraft(e.target.value)}
+                                                    placeholder="Java, SQL, React"
+                                                    style={{
+                                                        height: 32,
+                                                        minWidth: 260,
+                                                        border: `1px solid ${THEME.border}`,
+                                                        borderRadius: 8,
+                                                        padding: '0 10px',
+                                                        fontSize: 13,
+                                                        fontWeight: 700,
+                                                        color: THEME.greyDark,
+                                                        outline: 'none'
+                                                    }}
+                                                />
+                                                <button
+                                                    onClick={handleSkillsSave}
+                                                    style={{
+                                                        border: 'none',
+                                                        background: THEME.primary,
+                                                        color: '#fff',
+                                                        borderRadius: 8,
+                                                        height: 32,
+                                                        padding: '0 12px',
+                                                        fontSize: 12,
+                                                        fontWeight: 800,
+                                                        cursor: 'pointer',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        gap: 6
+                                                    }}
+                                                >
+                                                    <Save size={14} /> Save
+                                                </button>
+                                                <button
+                                                    onClick={() => {
+                                                        setSkillsDraft(candidateData?.skills || '');
+                                                        setIsEditingSkills(false);
+                                                    }}
+                                                    style={{
+                                                        border: `1px solid ${THEME.border}`,
+                                                        background: '#fff',
+                                                        color: THEME.greyDark,
+                                                        borderRadius: 8,
+                                                        height: 32,
+                                                        padding: '0 10px',
+                                                        fontSize: 12,
+                                                        fontWeight: 800,
+                                                        cursor: 'pointer'
+                                                    }}
+                                                >
+                                                    Cancel
+                                                </button>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <span style={{ fontSize: 14, color: '#64748b', fontWeight: 700 }}>{formatSkillsForDisplay(candidateData?.skills)}</span>
+                                                {isHR && (
                                                     <button
-                                                        onClick={handleSkillsSave}
+                                                        onClick={() => setIsEditingSkills(true)}
+                                                        title="Edit skills"
                                                         style={{
                                                             border: 'none',
-                                                            background: THEME.primary,
-                                                            color: '#fff',
-                                                            borderRadius: 8,
-                                                            height: 32,
-                                                            padding: '0 12px',
-                                                            fontSize: 12,
-                                                            fontWeight: 800,
+                                                            background: 'transparent',
+                                                            color: THEME.greyDark,
                                                             cursor: 'pointer',
+                                                            width: 26,
+                                                            height: 26,
+                                                            borderRadius: 6,
                                                             display: 'flex',
                                                             alignItems: 'center',
-                                                            gap: 6
+                                                            justifyContent: 'center'
                                                         }}
                                                     >
-                                                        <Save size={14} /> Save
+                                                        <Pencil size={14} />
                                                     </button>
-                                                    <button
-                                                        onClick={() => {
-                                                            setSkillsDraft(candidateData?.skills || '');
-                                                            setIsEditingSkills(false);
-                                                        }}
-                                                        style={{
-                                                            border: `1px solid ${THEME.border}`,
-                                                            background: '#fff',
-                                                            color: THEME.greyDark,
-                                                            borderRadius: 8,
-                                                            height: 32,
-                                                            padding: '0 10px',
-                                                            fontSize: 12,
-                                                            fontWeight: 800,
-                                                            cursor: 'pointer'
-                                                        }}
-                                                    >
-                                                        Cancel
-                                                    </button>
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <span style={{ fontSize: 14, color: '#64748b', fontWeight: 700 }}>{formatSkillsForDisplay(candidateData?.skills)}</span>
-                                                    {isHR && (
-                                                        <button
-                                                            onClick={() => setIsEditingSkills(true)}
-                                                            title="Edit skills"
-                                                            style={{
-                                                                border: 'none',
-                                                                background: 'transparent',
-                                                                color: THEME.greyDark,
-                                                                cursor: 'pointer',
-                                                                width: 26,
-                                                                height: 26,
-                                                                borderRadius: 6,
-                                                                display: 'flex',
-                                                                alignItems: 'center',
-                                                                justifyContent: 'center'
-                                                            }}
-                                                        >
-                                                            <Pencil size={14} />
-                                                        </button>
-                                                    )}
-                                                </>
-                                            )}
-                                        </div>
+                                                )}
+                                            </>
+                                        )}
                                     </div>
                                 </div>
 
@@ -452,7 +450,7 @@ export default function EmployeeProfile() {
             )}
 
             {/* OPTIMIZED PILL TABS */}
-            <div style={{ display: 'flex', gap: 8, marginBottom: 24, overflowX: 'auto', padding: '8px', scrollbarWidth: 'none', background: '#f8fafc', border: `1px solid ${THEME.border}`, borderRadius: 20, boxShadow: '0 14px 28px rgba(148, 163, 184, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.9)' }}>
+            <div style={{ display: 'flex', gap: 8, marginBottom: 24, overflowX: 'auto', padding: '4px', scrollbarWidth: 'none' }}>
                 {tabs.map(tab => (
                     <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{
                         padding: '8px 18px', border: activeTab === tab.id ? 'none' : `1px solid ${THEME.border}`,
@@ -460,7 +458,7 @@ export default function EmployeeProfile() {
                         fontSize: 13, fontWeight: 800, transition: 'all 0.2s',
                         background: activeTab === tab.id ? THEME.primary : THEME.white,
                         color: activeTab === tab.id ? THEME.white : THEME.greyDark,
-                        boxShadow: activeTab === tab.id ? '0 8px 18px rgba(249, 115, 22, 0.32)' : '0 8px 16px rgba(148, 163, 184, 0.16), inset 0 1px 0 rgba(255,255,255,0.75)',
+                        boxShadow: activeTab === tab.id ? '0 6px 16px rgba(249, 115, 22, 0.35)' : '0 2px 8px rgba(0, 0, 0, 0.04)',
                         flexShrink: 0,
                     }}>
                         {React.cloneElement(tab.icon, { size: 16, color: activeTab === tab.id ? THEME.white : THEME.greyDark })}
@@ -662,13 +660,13 @@ export default function EmployeeProfile() {
     );
 }
 
-function ChecklistPod({ employeeId, activeTab, onClose, ...props }) {
+function ChecklistPod({ onClose, ...props }) {
     return (
-        <div className="checklist-pod" style={{
-            width: 380,
+        <div style={{
+            width: 450,
             background: THEME.white,
-            border: `1px solid ${THEME.border}`,
-            boxShadow: '-8px 0 24px rgba(0,0,0,0.03)',
+            borderLeft: `1px solid ${THEME.border}`,
+            boxShadow: '-10px 0 30px rgba(0,0,0,0.05)',
             height: 'calc(100vh - 40px)',
             position: 'sticky',
             top: 20,
@@ -678,40 +676,13 @@ function ChecklistPod({ employeeId, activeTab, onClose, ...props }) {
             borderRadius: '20px 0 0 20px'
         }}>
             <div style={{ padding: '20px 24px', borderBottom: `1px solid ${THEME.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <h3 style={{ margin: 0, fontSize: 16, fontWeight: 900, color: THEME.greyDark }}>Joining Checklist</h3>
-                    <button
-                        onClick={() => {
-                            const newVal = !props.isChecklistCompleted;
-                            props.setIsChecklistCompleted(newVal);
-                            localStorage.setItem(`checklist_completed_${employeeId}`, String(newVal));
-                        }}
-                        title={props.isChecklistCompleted ? 'Checklist Completed' : 'Mark Checklist Completed'}
-                        style={{
-                            background: props.isChecklistCompleted ? '#22c55e' : THEME.primary,
-                            color: THEME.white,
-                            border: 'none',
-                            padding: '6px 12px',
-                            borderRadius: 8,
-                            fontWeight: 800,
-                            fontSize: 12,
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 6,
-                            boxShadow: props.isChecklistCompleted ? '0 4px 10px rgba(34, 197, 94, 0.18)' : '0 4px 10px rgba(249, 115, 22, 0.18)',
-                            transition: 'all 0.15s'
-                        }}
-                    >
-                        {props.isChecklistCompleted ? <><CheckCircle size={14} /> Completed</> : <><CheckCircle size={14} /> Mark Completed</>}
-                    </button>
-                </div>
+                <h3 style={{ margin: 0, fontSize: 16, fontWeight: 900, color: THEME.greyDark }}>Joining Checklist</h3>
                 <button onClick={onClose} style={{ background: THEME.greyLight, border: 'none', width: 32, height: 32, borderRadius: 10, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <X size={18} />
                 </button>
             </div>
             <div className="checklist-pod-scroll-container" style={{ flex: 1, overflowY: 'auto', padding: 24 }}>
-                <OnboardingChecklistSection {...props} employeeId={employeeId} isPod={true} />
+                <OnboardingChecklistSection {...props} isPod={true} />
             </div>
         </div>
     );
@@ -773,7 +744,7 @@ function SidebarPreview({ doc, onClose }) {
             width: 450,
             background: THEME.white,
             borderRadius: 24,
-            border: `1px solid ${THEME.border}`,
+            border: `2px solid ${THEME.primary}`,
             padding: 16,
             display: 'flex',
             flexDirection: 'column',
@@ -870,42 +841,10 @@ function CandidateInfoSection({ employee, employeeId, isHR, data, onUpdate, depa
     }, [data, employee]);
 
     const handleSave = async () => {
-        if (!empData.firstName?.trim()) {
-            alert("First Name is required.");
-            return;
-        }
-        if (!empData.lastName?.trim()) {
-            alert("Last Name is required.");
-            return;
-        }
-        if (!empData.email?.trim()) {
-            alert("Email Address is required.");
-            return;
-        }
-        if (!empData.joiningDate?.trim()) {
-            alert("Joining Date is required.");
-            return;
-        }
-
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(empData.email.trim())) {
-            alert("Please enter a valid email address.");
-            return;
-        }
-
         try {
-            const deptId = empData.department?.id || departments.find(d => d.name === empData.departmentName)?.id;
-            const desigId = empData.designation?.id || designations.find(d => d.title === empData.designationTitle)?.id;
-
-            const payload = {
-                ...empData,
-                departmentId: deptId || null,
-                designationId: desigId || null,
-            };
-
             await Promise.all([
                 CandidateAPI.save(employeeId, localData),
-                EmployeeAPI.update(employee.id, payload)
+                EmployeeAPI.update(employee.id, empData)
             ]);
             setEdit(false); alert("All information saved."); onUpdate();
         }
@@ -973,10 +912,10 @@ function CandidateInfoSection({ employee, employeeId, isHR, data, onUpdate, depa
                                 <select
                                     disabled={!edit}
                                     style={inputStyle}
-                                    value={empData.department?.id || departments.find(d => d.name === empData.departmentName)?.id || ''}
+                                    value={empData.department?.id || ''}
                                     onChange={e => {
                                         const dept = departments.find(d => d.id === parseInt(e.target.value));
-                                        setEmpData({ ...empData, department: dept, departmentName: dept?.name });
+                                        setEmpData({ ...empData, department: dept });
                                     }}
                                 >
                                     <option value="">Select Department</option>
@@ -987,10 +926,10 @@ function CandidateInfoSection({ employee, employeeId, isHR, data, onUpdate, depa
                                 <select
                                     disabled={!edit}
                                     style={inputStyle}
-                                    value={empData.designation?.id || designations.find(d => d.title === empData.designationTitle)?.id || ''}
+                                    value={empData.designation?.id || ''}
                                     onChange={e => {
                                         const desig = designations.find(d => d.id === parseInt(e.target.value));
-                                        setEmpData({ ...empData, designation: desig, designationTitle: desig?.title });
+                                        setEmpData({ ...empData, designation: desig });
                                     }}
                                 >
                                     <option value="">Select Designation</option>
@@ -1056,15 +995,7 @@ function CandidateInfoSection({ employee, employeeId, isHR, data, onUpdate, depa
                             <h4 style={{ margin: 0, fontSize: 15, fontWeight: 900, color: THEME.primary }}>Account Info</h4>
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                            <div><label style={labelStyle}>Role *</label>
-                                <select disabled={!edit} style={{ ...inputStyle, background: edit ? THEME.white : 'transparent' }} value={empData.role || ''} onChange={e => setEmpData({ ...empData, role: e.target.value })}>
-                                    <option value="">Select Role</option>
-                                    <option value="EMPLOYEE">EMPLOYEE</option>
-                                    <option value="HR">HR</option>
-                                    <option value="MANAGER">MANAGER</option>
-                                    <option value="ADMIN">ADMIN</option>
-                                </select>
-                            </div>
+                            <div><label style={labelStyle}>Role *</label><input disabled style={{ ...inputStyle, background: THEME.white }} value={employee.role || ''} /></div>
                             <div><label style={labelStyle}>Username</label><input disabled={!edit} style={{ ...inputStyle, background: edit ? THEME.white : 'transparent' }} value={empData.username || ''} onChange={e => setEmpData({ ...empData, username: e.target.value })} /></div>
                             <div><label style={labelStyle}>Password</label><input disabled={!edit} type="password" style={{ ...inputStyle, background: edit ? THEME.white : 'transparent' }} placeholder="••••••••" value={empData.password || ''} onChange={e => setEmpData({ ...empData, password: e.target.value })} /></div>
                         </div>
@@ -1153,28 +1084,14 @@ function CandidateInfoSection({ employee, employeeId, isHR, data, onUpdate, depa
                     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
                         <thead>
                             <tr style={{ textAlign: 'left', background: THEME.greyLight }}>
-                                {['Interview Round', 'Interviewer', 'Date', 'Interviewer By', 'Status (Pass/Fail)', 'Joined', 'Remarks', ...(edit ? ['Action'] : [])].map(h => <th key={h} style={{ padding: 10, border: `1px solid ${THEME.border}`, color: THEME.greyMain, fontWeight: 900 }}>{h}</th>)}
+                                {['Interview Round', 'Interviewer', 'Date', 'Interviewer By', 'Status (Pass/Fail)', 'Joined', 'Remarks'].map(h => <th key={h} style={{ padding: 10, border: `1px solid ${THEME.border}`, color: THEME.greyMain, fontWeight: 900 }}>{h}</th>)}
                             </tr>
                         </thead>
                         <tbody>
-                            {localData.interview && Object.keys(localData.interview).map((key) => (
+                            {localData.interview && Object.keys(localData.interview).map((key, i, arr) => (
                                 <tr key={key}>
-                                    <td style={{ padding: edit ? 0 : 10, border: `1px solid ${THEME.border}`, fontWeight: 800, position: 'relative' }}>
-                                        {edit ? (
-                                            <input
-                                                type="text"
-                                                style={{ ...inputStyle, border: 'none', borderRadius: 0, background: 'transparent', fontWeight: 800 }}
-                                                value={localData.interview[key].mode || ''}
-                                                onChange={e => {
-                                                    const d = { ...localData };
-                                                    d.interview[key].mode = e.target.value;
-                                                    setLocalData(d);
-                                                }}
-                                                placeholder="Round Name"
-                                            />
-                                        ) : (
-                                            localData.interview[key].mode
-                                        )}
+                                    <td style={{ padding: 10, border: `1px solid ${THEME.border}`, fontWeight: 800, position: 'relative' }}>
+                                        {localData.interview[key].mode}
                                     </td>
                                     {['interviewer', 'date', 'by', 'status', 'joined', 'remarks'].map(field => (
                                         <td key={field} style={{ padding: 0, border: `1px solid ${THEME.border}` }}>
@@ -1191,56 +1108,10 @@ function CandidateInfoSection({ employee, employeeId, isHR, data, onUpdate, depa
                                             )}
                                         </td>
                                     ))}
-                                    {edit && (
-                                        <td style={{ padding: 10, border: `1px solid ${THEME.border}`, textAlign: 'center' }}>
-                                            <button
-                                                type="button"
-                                                onClick={() => {
-                                                    const d = { ...localData };
-                                                    delete d.interview[key];
-                                                    setLocalData(d);
-                                                }}
-                                                style={{ background: 'none', border: 'none', color: THEME.primary, cursor: 'pointer', padding: 4 }}
-                                                title="Delete Round"
-                                            >
-                                                <Trash2 size={16} />
-                                            </button>
-                                        </td>
-                                    )}
                                 </tr>
                             ))}
                         </tbody>
                     </table>
-                    {edit && (
-                        <div style={{ marginTop: 12, textAlign: 'right' }}>
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    const d = { ...localData };
-                                    if (!d.interview) d.interview = {};
-                                    const nextIdx = Object.keys(d.interview).length + 1;
-                                    const newKey = `round_${Date.now()}`;
-                                    d.interview[newKey] = { mode: `Round ${nextIdx}`, interviewer: '', date: '', by: '', status: '', joined: '', remarks: '' };
-                                    setLocalData(d);
-                                }}
-                                style={{
-                                    background: THEME.primaryLight,
-                                    color: THEME.primaryDark,
-                                    border: `1px solid ${THEME.primary}`,
-                                    padding: '6px 12px',
-                                    borderRadius: 6,
-                                    fontSize: 11,
-                                    fontWeight: 700,
-                                    cursor: 'pointer',
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    gap: 6
-                                }}
-                            >
-                                <Plus size={14} /> Add Interview Round
-                            </button>
-                        </div>
-                    )}
                 </div>
             </div>
         </div>
@@ -1417,7 +1288,7 @@ function EmployeeHistorySection({ employeeId, isHR, data, workData, documents, o
     return (
         <div style={{ position: 'relative' }}>
             {isHR && (
-                <div style={{ position: 'absolute', right: 0, top: 0, zIndex: 10 }}>
+                <div style={{ position: 'absolute', right: 0, top: -45 }}>
                     <button onClick={() => edit ? handleSave() : setEdit(true)} style={{ background: THEME.primary, color: THEME.white, border: 'none', padding: '10px 28px', borderRadius: 12, fontWeight: 800, fontSize: 14, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, boxShadow: '0 4px 12px rgba(249, 115, 22, 0.2)' }}>
                         {edit ? <><Save size={18} /> Save History</> : <><RefreshCw size={18} /> Edit History</>}
                     </button>
@@ -1438,8 +1309,8 @@ function EmployeeHistorySection({ employeeId, isHR, data, workData, documents, o
                                     <div style={{ fontSize: 26, fontWeight: 900, color: THEME.primary, textTransform: 'uppercase', letterSpacing: 0.5 }}>{w.companyName || 'Company'}</div>
                                     <div style={{ fontSize: 18, fontWeight: 700, color: '#484b50ff' }}>{w.role || 'Position'}</div>
                                 </div>
-                                <div style={{ fontSize: 15, fontWeight: 800, color: THEME.greyMain, whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 8 }}>
-                                    {formatDateToDDMMYYYY(w.startDate) || 'Start'} <span style={{ color: THEME.greyMain, opacity: 0.8 }}>→</span> {w.endDate?.toLowerCase() === 'present' ? 'Present' : (formatDateToDDMMYYYY(w.endDate) || 'Present')}
+                                <div style={{ fontSize: 15, fontWeight: 800, color: THEME.primary, whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 8 }}>
+                                    {formatDateToDDMMYYYY(w.startDate) || 'Start'} <span style={{ color: THEME.primary, opacity: 0.8 }}>→</span> {w.endDate?.toLowerCase() === 'present' ? 'Present' : (formatDateToDDMMYYYY(w.endDate) || 'Present')}
                                     {edit && (
                                         <button
                                             onClick={() => {
@@ -1461,8 +1332,8 @@ function EmployeeHistorySection({ employeeId, isHR, data, workData, documents, o
 
                             <div style={{ display: 'flex', gap: 32, alignItems: 'center' }}>
                                 <div style={{
-                                    padding: '8px 16px', borderRadius: 12, background: THEME.greyLight,
-                                    fontSize: 13, fontWeight: 900, color: THEME.primary, border: `1px solid ${THEME.border}`
+                                    padding: '8px 16px', borderRadius: 12, background: '#fff7ed',
+                                    fontSize: 13, fontWeight: 900, color: THEME.primary, border: `1px solid #ffedd5`
                                 }}>
                                     CTC: {String(w.ctc || '0').replace(/\s*LPA/gi, '')} LPA
                                 </div>
@@ -1519,8 +1390,8 @@ function EmployeeHistorySection({ employeeId, isHR, data, workData, documents, o
                                         <div><label style={labelStyle}>Company Name</label><input style={inputStyle} value={w.companyName || ''} onChange={e => { const newList = [...localData.workHistory]; newList[i].companyName = e.target.value; setLocalData({ ...localData, workHistory: newList }); }} /></div>
                                         <div><label style={labelStyle}>Designation</label><input style={inputStyle} value={w.role || ''} onChange={e => { const newList = [...localData.workHistory]; newList[i].role = e.target.value; setLocalData({ ...localData, workHistory: newList }); }} /></div>
                                         <div><label style={labelStyle}>CTC (LPA)</label><input style={inputStyle} value={w.ctc || ''} onChange={e => { const newList = [...localData.workHistory]; newList[i].ctc = e.target.value; setLocalData({ ...localData, workHistory: newList }); }} /></div>
-                                        <div><label style={labelStyle}>Start Date</label><input type="date" style={inputStyle} value={w.startDate || ''} onChange={e => { const newList = [...localData.workHistory]; newList[i].startDate = e.target.value; setLocalData({ ...localData, workHistory: newList }); }} /></div>
-                                        <div><label style={labelStyle}>End Date</label><input type="date" style={inputStyle} value={w.endDate || ''} onChange={e => { const newList = [...localData.workHistory]; newList[i].endDate = e.target.value; setLocalData({ ...localData, workHistory: newList }); }} /></div>
+                                        <div><label style={labelStyle}>Start Date</label><input style={inputStyle} value={w.startDate || ''} onChange={e => { const newList = [...localData.workHistory]; newList[i].startDate = e.target.value; setLocalData({ ...localData, workHistory: newList }); }} /></div>
+                                        <div><label style={labelStyle}>End Date</label><input style={inputStyle} value={w.endDate || ''} onChange={e => { const newList = [...localData.workHistory]; newList[i].endDate = e.target.value; setLocalData({ ...localData, workHistory: newList }); }} /></div>
                                         <div><label style={labelStyle}>Reason For Leaving</label><input style={inputStyle} value={w.reasonForLeaving || ''} onChange={e => { const newList = [...localData.workHistory]; newList[i].reasonForLeaving = e.target.value; setLocalData({ ...localData, workHistory: newList }); }} /></div>
                                     </div>
                                     <button onClick={() => { if (window.confirm("Delete experience?")) { const newList = localData.workHistory.filter((_, idx) => idx !== i); setLocalData({ ...localData, workHistory: newList }); } }} style={{ marginTop: 12, color: '#ef4444', background: 'none', border: 'none', fontSize: 11, fontWeight: 800, cursor: 'pointer' }}>Delete This Entry</button>
@@ -1599,8 +1470,8 @@ function EmployeeHistorySection({ employeeId, isHR, data, workData, documents, o
 
                                 <div style={{ display: 'flex', gap: 32, alignItems: 'center' }}>
                                     <div style={{
-                                        padding: '8px 16px', borderRadius: 12, background: THEME.greyLight,
-                                        fontSize: 13, fontWeight: 900, color: THEME.primary, border: `1px solid ${THEME.border}`
+                                        padding: '8px 16px', borderRadius: 12, background: '#fff7ed',
+                                        fontSize: 13, fontWeight: 900, color: THEME.primary, border: `1px solid #ffedd5`
                                     }}>
                                         Score: {a.percentage || '0'} %
                                     </div>
@@ -1823,7 +1694,7 @@ function OnboardingChecklistSection({ employeeId, isHR, documents, employee, dat
         }
 
         return (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px', background: THEME.white, borderRadius: 10, border: `1px solid ${THEME.border}`, marginBottom: 6 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px', background: THEME.white, borderRadius: 10, border: `1px solid ${isDone ? THEME.primary : THEME.border}`, marginBottom: 6 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <button onClick={() => updateField(id, isDone ? 'PENDING' : 'COMPLETED')} disabled={!isHR} style={{ background: isDone ? THEME.primary : 'none', border: `2px solid ${isDone ? THEME.primary : THEME.border}`, width: 18, height: 18, borderRadius: 5, cursor: isHR ? 'pointer' : 'default', display: 'flex', alignItems: 'center', justifyContent: 'center', color: THEME.white }}>
                         {isDone && <CheckCircle size={12} />}
@@ -1843,36 +1714,34 @@ function OnboardingChecklistSection({ employeeId, isHR, documents, employee, dat
 
     return (
         <div>
-            {!isPod && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-                    <h3 style={{ margin: 0, fontSize: 20, fontWeight: 900, color: THEME.greyDark }}>Joining Checklist</h3>
-                    <button
-                        onClick={() => {
-                            const newVal = !isChecklistCompleted;
-                            setIsChecklistCompleted(newVal);
-                            localStorage.setItem(`checklist_completed_${employeeId}`, String(newVal));
-                        }}
-                        title={isChecklistCompleted ? 'Checklist Completed' : 'Mark Checklist Completed'}
-                        style={{
-                            background: isChecklistCompleted ? '#22c55e' : THEME.primary,
-                            color: THEME.white,
-                            border: 'none',
-                            padding: '6px 12px',
-                            borderRadius: 8,
-                            fontWeight: 800,
-                            fontSize: 12,
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 6,
-                            boxShadow: isChecklistCompleted ? '0 4px 10px rgba(34, 197, 94, 0.18)' : '0 4px 10px rgba(249, 115, 22, 0.18)',
-                            transition: 'all 0.15s'
-                        }}
-                    >
-                        {isChecklistCompleted ? <><CheckCircle size={14} /> Completed</> : <><CheckCircle size={14} /> Mark Completed</>}
-                    </button>
-                </div>
-            )}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+                <h3 style={{ margin: 0, fontSize: 20, fontWeight: 900, color: THEME.greyDark }}>Employee Joining Check List</h3>
+                <button
+                    onClick={() => {
+                        const newVal = !isChecklistCompleted;
+                        setIsChecklistCompleted(newVal);
+                        localStorage.setItem(`checklist_completed_${employeeId}`, String(newVal));
+                    }}
+                    title={isChecklistCompleted ? 'Checklist Completed' : 'Mark Checklist Completed'}
+                    style={{
+                        background: isChecklistCompleted ? '#22c55e' : THEME.primary,
+                        color: THEME.white,
+                        border: 'none',
+                        padding: '6px 12px',
+                        borderRadius: 8,
+                        fontWeight: 800,
+                        fontSize: 12,
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 6,
+                        boxShadow: isChecklistCompleted ? '0 4px 10px rgba(34, 197, 94, 0.18)' : '0 4px 10px rgba(249, 115, 22, 0.18)',
+                        transition: 'all 0.15s'
+                    }}
+                >
+                    {isChecklistCompleted ? <><CheckCircle size={14} /> Completed</> : <><CheckCircle size={14} /> Mark Completed</>}
+                </button>
+            </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: isPod ? '1fr' : 'repeat(3, 1fr)', gap: 20 }}>
                 {/* 1. ID Proof */}

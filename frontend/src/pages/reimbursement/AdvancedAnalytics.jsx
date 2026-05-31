@@ -505,7 +505,7 @@ const AdvancedAnalytics = () => {
                 <div className="glass-card" style={{ padding: '14px', height: '100%', marginBottom: 0, display: 'flex', flexDirection: 'column' }}>
                     <h4 style={{ margin: '0 0 8px 0', fontSize: '12.5px', fontWeight: 950, color: '#1e293b', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Expense Category Breakdown</h4>
                             <div style={{ height: '220px', flex: 1, minHeight: 220, minWidth: 200, position: 'relative' }}>
-                                <ResponsiveContainer width="100%" height="100%" minHeight={220}>
+                                <ResponsiveContainer width="100%" height={220}>
                             <PieChart>
                                 <Pie 
                                     data={Object.entries(analytics.categoryBreakdown || {}).map(([k, v]) => ({ name: k, value: v })).sort((a, b) => a.name.localeCompare(b.name))} 
@@ -537,7 +537,7 @@ const AdvancedAnalytics = () => {
                 <div className="glass-card" style={{ padding: '14px', height: '100%', marginBottom: 0, display: 'flex', flexDirection: 'column' }}>
                     <h4 style={{ margin: '0 0 12px 0', fontSize: '12.5px', fontWeight: 950, color: '#1e293b', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Audit Status Health</h4>
                     <div style={{ height: '220px', flex: 1, minHeight: 220, minWidth: 200, position: 'relative' }}>
-                        <ResponsiveContainer width="100%" height="100%" minHeight={220}>
+                        <ResponsiveContainer width="100%" height={220}>
                             <PieChart>
                                 <Pie data={(() => {
                                     const raw = analytics.statusDistribution || {};
@@ -616,7 +616,7 @@ const AdvancedAnalytics = () => {
                     </div>
                 </div>
 
-                <div className="glass-card" style={{ padding: '14px', height: '100%', marginBottom: 0, minWidth: 0 }}>
+                <div className="glass-card" style={{ padding: '14px', height: '100%', marginBottom: 0, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
                         <h4 style={{ margin: 0, fontSize: '12.5px', fontWeight: 950, color: '#1e293b', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Expenditure Trend</h4>
                         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
@@ -643,8 +643,8 @@ const AdvancedAnalytics = () => {
                             </button>
                         </div>
                     </div>
-                    <div style={{ height: '240px', minHeight: 180 }}>
-                        <ResponsiveContainer width="100%" height="100%" minHeight={140}>
+                    <div style={{ flex: 1, minHeight: 220 }}>
+                        <ResponsiveContainer width="100%" height="100%">
                             <AreaChart data={(() => {
                                 if (viewMode === 'YEAR') {
                                     return Object.entries(analytics.monthlyTrend || {}).map(([k, v]) => ({ name: k, amount: v }));

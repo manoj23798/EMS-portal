@@ -30,6 +30,7 @@ public class Notification {
     private String message;
 
     @Column(name = "is_read", nullable = false)
+    @Builder.Default
     private Boolean isRead = false;
 
     @CreationTimestamp

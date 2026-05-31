@@ -1,0 +1,34 @@
+services:
+  - type: web
+    name: ems-backend
+    env: docker
+    region: frankfurt
+    plan: free
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: DATABASE_URL
+        value: jdbc:postgresql://<HOST>:<PORT>/<DB>?sslmode=require
+      - key: DATABASE_USER
+        value: <DB_USER>
+      - key: DATABASE_PASSWORD
+        value: <DB_PASSWORD>
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      - key: FRONTEND_URL
+        sync: false
+
+  - type: static
+    name: ems-frontend3
+    rootDir: ./frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: ems-backend
+          envVarKey: RENDER_EXTERNAL_URL
+
+# NOTE: This example file does NOT contain real secrets. Fill in your real
+# credentials in Render's dashboard or in a CI secret store. Do NOT commit
+# real credentials to source control.

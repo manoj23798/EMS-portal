@@ -774,7 +774,7 @@ const ManagerPermissionApprovalPage = () => {
                             </div>
                         </div>
                         <div style={{ height: '240px', minWidth: 0 }}>
-                            <ResponsiveContainer width="100%" height="100%">
+                            <ResponsiveContainer width="100%" height={240}>
                                 <AreaChart data={activityData}>
                                     <defs>
                                         <linearGradient id="permActivityGrad" x1="0" y1="0" x2="0" y2="1">
@@ -841,7 +841,7 @@ const ManagerPermissionApprovalPage = () => {
                     <div className="mp-card slot-card">
                         <div className="mp-card-title">By Time Slot</div>
                         <div style={{ height: '140px', position: 'relative', minWidth: 0 }}>
-                            <ResponsiveContainer width="100%" height="100%">
+                            <ResponsiveContainer width="100%" height={140}>
                                 <PieChart>
                                     <Pie data={pieData} innerRadius={50} outerRadius={65} dataKey="v" stroke="none">
                                         {pieData.map((entry, index) => <Cell key={entry.name} fill={COLORS[index % COLORS.length]} />)}

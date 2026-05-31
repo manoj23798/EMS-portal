@@ -6,7 +6,7 @@ import {
     Plane, Car, Hotel, Coffee, User, Users, Paperclip, Printer, 
     Coins, Banknote, MoreHorizontal, Calendar, FileText, X, 
     CheckCircle, Clock, AlertTriangle, ArrowLeft, Send, Trash2, Eye, EyeOff, Maximize,
-    ChevronUp, ChevronDown, ChevronLeft, ChevronRight
+    ChevronUp, ChevronDown, ChevronLeft, ChevronRight, Download
 } from 'lucide-react';
 
 const ReimbursementView = () => {
@@ -215,7 +215,7 @@ const ReimbursementView = () => {
                             <span style={{ padding: '8px 16px', borderRadius: '12px', background: claim.status === 'PENDING' ? '#fff7ed' : '#f0fdf4', color: claim.status === 'PENDING' ? '#f97316' : '#10b981', fontWeight: 900, fontSize: '10px', textTransform: 'uppercase', border: '1px solid currentColor' }}>
                                 {claim.status}
                             </span>
-                            {claim.status === 'PENDING' && (
+                            {claim.status === 'PENDING' && !isManager && (
                                 <button onClick={handleCancel} disabled={processing} className="back-btn" style={{ margin: 0, borderColor: '#fee2e2', color: '#ef4444' }}>
                                     <Trash2 size={14}/> CANCEL REQUEST
                                 </button>
@@ -460,7 +460,17 @@ const ReimbursementView = () => {
                                                     </div>
                                                 )}
                                                 <img src={activeGalleryItem.file} className="vz-image" alt="Receipt"/>
-                                                <button onClick={() => setIsFullscreen(true)} style={{ position: 'absolute', top: 12, left: 12, background: 'rgba(0,0,0,0.5)', color: 'white', border: 'none', borderRadius: '50%', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Maximize size={16}/></button>
+                                                <button onClick={() => setIsFullscreen(true)} style={{ position: 'absolute', top: 12, left: 12, background: 'rgba(0,0,0,0.5)', color: 'white', border: 'none', borderRadius: '50%', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', zIndex: 11 }} title="Fullscreen"><Maximize size={16}/></button>
+                                                <button onClick={() => {
+                                                    const link = document.createElement('a');
+                                                    link.href = activeGalleryItem.file;
+                                                    link.download = `receipt_${activeGalleryItem.label}_${activeGalleryItem.date}.png`;
+                                                    document.body.appendChild(link);
+                                                    link.click();
+                                                    document.body.removeChild(link);
+                                                }} style={{ position: 'absolute', top: 12, right: 12, background: 'rgba(0,0,0,0.5)', color: 'white', border: 'none', borderRadius: '50%', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', zIndex: 11 }} title="Download Image">
+                                                    <Download size={16}/>
+                                                </button>
                                             </>
                                         ) : (
                                             <div className="vz-content"><EyeOff size={32}/><span className="vz-text">No Images Linked</span></div>

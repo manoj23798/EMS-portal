@@ -8,11 +8,11 @@ services:
     dockerfilePath: ./Dockerfile
     envVars:
       - key: DATABASE_URL
-        value: jdbc:postgresql://ep-sparkling-bonus-am0n47mt-pooler.c-5.us-east-1.aws.neon.tech/neondb?sslmode=require
+        value: jdbc:postgresql://<HOST>:<PORT>/<DB>?sslmode=require
       - key: DATABASE_USER
-        value: neondb_owner
+        value: REPLACE_WITH_DB_USER
       - key: DATABASE_PASSWORD
-        value: npg_QaJtRASH65Vl
+        value: REPLACE_WITH_DB_PASSWORD
       - key: JWT_SECRET_KEY
         generateValue: true # Render will securely generate a random 256-bit string
       - key: FRONTEND_URL

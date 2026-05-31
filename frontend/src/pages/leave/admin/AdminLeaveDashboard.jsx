@@ -608,7 +608,7 @@ const AdminLeaveDashboard = () => {
                     <div className="panel-title-premium">Leave Activity</div>
                     <div style={{ height: '280px' }}>
                         <div style={{ height: '220px', minWidth: 0 }}>
-                            <ResponsiveContainer width="100%" height="100%">
+                            <ResponsiveContainer width="100%" height={220}>
                             <AreaChart data={velocityData}>
                                 <defs>
                                     <linearGradient id="velocityGrad" x1="0" y1="0" x2="0" y2="1">
@@ -667,7 +667,7 @@ const AdminLeaveDashboard = () => {
                     <div style={{ height: '220px' }}>
                         {pieData.length > 0 ? (
                             <div style={{ height: '220px', minWidth: 0 }}>
-                                <ResponsiveContainer width="100%" height="100%">
+                                <ResponsiveContainer width="100%" height={220}>
                                 <PieChart>
                                     <Pie data={pieData} innerRadius={65} outerRadius={90} paddingAngle={5} dataKey="value" stroke="none">
                                         {pieData.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}

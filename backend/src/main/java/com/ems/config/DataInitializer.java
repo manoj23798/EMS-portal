@@ -15,6 +15,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Component
 @RequiredArgsConstructor
@@ -25,6 +27,7 @@ public class DataInitializer implements CommandLineRunner {
     private final UserRepository userRepository;
     private final EmployeeRepository employeeRepository;
     private final PasswordEncoder passwordEncoder;
+    private static final Logger logger = LoggerFactory.getLogger(DataInitializer.class);
 
     @Override
     @Transactional
@@ -86,6 +89,6 @@ public class DataInitializer implements CommandLineRunner {
         }
 
         userRepository.save(adminUser);
-        System.out.println("✅ Database seeded with default ADMIN account. Username: admin, Password: admin123");
+        logger.info("✅ Database seeded with default ADMIN account. Username: admin, Password: admin123");
     }
 }

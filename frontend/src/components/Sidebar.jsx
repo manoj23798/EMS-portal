@@ -68,7 +68,7 @@ export default function Sidebar() {
                 )}
 
                 {/* Module 3: Leave & Permission (Enterprise Upgrade) */}
-                <div style={{ borderTop: '1px solid var(--border)', margin: '16px 0 8px 0' }} />
+                <div style={{ borderTop: '1px solid var(--border)', margin: '8px 0 4px 0' }} />
                 
                 {userRole !== 'ADMIN' && (
                     <NavLink to="/leave"
@@ -80,7 +80,7 @@ export default function Sidebar() {
 
                 {isManager && (
                     <>
-                        <div style={{ margin: '8px 0' }} />
+                        <div style={{ margin: '4px 0' }} />
                         <NavLink to="/manager/leave-requests"
                             className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
                             <ShieldCheck size={18} />

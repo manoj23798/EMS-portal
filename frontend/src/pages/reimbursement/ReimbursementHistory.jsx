@@ -406,7 +406,7 @@ const ReimbursementHistory = () => {
                 <div style={{ overflowX: 'auto', flex: 1 }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                         <thead>
-                            <tr style={{ background: '#f8fafc', borderBottom: '2px solid #cbd5e1' }}>
+                            <tr style={{ background: '#f8fafc', borderBottom: '2px solid #e5ebf3' }}>
                                 <th style={{ padding: '12px 24px', fontSize: '12px', fontWeight: 950, color: '#475569', textTransform: 'uppercase' }}>PROJECT/REASON</th>
                                 <th style={{ padding: '12px 24px', fontSize: '12px', fontWeight: 950, color: '#475569', textTransform: 'uppercase' }}>SUBMITTED DATE</th>
                                 <th style={{ padding: '12px 24px', fontSize: '12px', fontWeight: 950, color: '#475569', textTransform: 'uppercase', textAlign: 'right' }}>TOTAL</th>
@@ -418,7 +418,7 @@ const ReimbursementHistory = () => {
                         </thead>
                         <tbody>
                             {filteredClaims.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage).map((c) => (
-                                <tr key={c.id} style={{ borderBottom: '1px solid #cbd5e1' }}>
+                                <tr key={c.id} style={{ borderBottom: '1px solid #edf2f7' }}>
                                     <td style={{ padding: '10px 24px' }}>
                                         <p style={{ margin: 0, fontSize: '12.5px', fontWeight: 950, color: '#1e293b', textTransform: 'uppercase', letterSpacing: '-0.3px' }}>{c.reasonForTravel}</p>
                                         {(c.travelStartDate || c.travelEndDate) && (

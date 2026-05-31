@@ -195,17 +195,6 @@ export const DocumentAPI = {
     },
 };
 
-export const CommunicationAPI = {
-    getAll: () => api.get('/communications'),
-    getById: (id) => api.get(`/communications/${id}`),
-};
-
-export const AdminCommunicationAPI = {
-    getAll: () => api.get('/admin/communications'),
-    create: (data) => api.post('/admin/communications', data),
-    update: (id, data) => api.put(`/admin/communications/${id}`, data),
-    delete: (id) => api.delete(`/admin/communications/${id}`),
-};
 
 export const ReimbursementAPI = {
     getAll: () => api.get('/reimbursement'),
