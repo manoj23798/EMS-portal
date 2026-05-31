@@ -113,6 +113,8 @@ export default function EmployeeProfile() {
         }
     }, [employeeId]);
 
+    // Intentional: initialize skills draft when candidateData changes.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     useEffect(() => {
         setSkillsDraft(candidateData?.skills || '');
     }, [candidateData]);
