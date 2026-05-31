@@ -3,6 +3,13 @@ import { Plus, Trash2, Send, FileText, ArrowLeft, Upload, CheckCircle, Plane, Ho
 import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 
+const NavPill = ({ label, icon, isActive, onClick }) => (
+    <button type="button" onClick={onClick} className={`pill-btn ${isActive ? 'active' : ''}`}>
+        <span className="pill-icon">{icon}</span>
+        {label}
+    </button>
+);
+
 export default function ReimbursementApply() {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
@@ -351,16 +358,6 @@ export default function ReimbursementApply() {
         }
     };
 
-    const NavPill = ({ label, id, icon }) => {
-        const isActive = visibleSections[id];
-        return (
-            <button type="button" onClick={() => toggleSection(id)} className={`pill-btn ${isActive ? 'active' : ''}`}>
-                <span className="pill-icon">{icon}</span>
-                {label}
-            </button>
-        );
-    };
-
     return (
         <div className="apply-container">
             <style>{`
@@ -527,11 +524,11 @@ export default function ReimbursementApply() {
 
                     {/* Pills */}
                     <div className="pill-row lg:overflow-visible">
-                        <NavPill label="TICKETS" id="tickets" icon={<Plane size={14}/>} />
-                        <NavPill label="LODGING" id="lodgings" icon={<Hotel size={14}/>} />
-                        <NavPill label="LOCAL" id="conveyances" icon={<Car size={14}/>} />
-                        <NavPill label="FOOD/PARKING" id="foods" icon={<Coffee size={14}/>} />
-                        <NavPill label="OTHERS" id="others" icon={<MoreHorizontal size={14}/>} />
+                        <NavPill label="TICKETS" isActive={visibleSections.tickets} onClick={() => toggleSection('tickets')} icon={<Plane size={14}/>} />
+                        <NavPill label="LODGING" isActive={visibleSections.lodgings} onClick={() => toggleSection('lodgings')} icon={<Hotel size={14}/>} />
+                        <NavPill label="LOCAL" isActive={visibleSections.conveyances} onClick={() => toggleSection('conveyances')} icon={<Car size={14}/>} />
+                        <NavPill label="FOOD/PARKING" isActive={visibleSections.foods} onClick={() => toggleSection('foods')} icon={<Coffee size={14}/>} />
+                        <NavPill label="OTHERS" isActive={visibleSections.others} onClick={() => toggleSection('others')} icon={<MoreHorizontal size={14}/>} />
                     </div>
 
                     {/* SECTIONS */}
