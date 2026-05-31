@@ -72,6 +72,7 @@ export default function ReimbursementApply() {
     const activeGalleryItem = activeGalleryList[previewIndex] || activeGalleryList[0];
     
     // Sync verificationFile state with gallery selection for FullScreen & Legacy support
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     useEffect(() => {
         if (activeGalleryItem?.file) {
             setVerificationFile(activeGalleryItem.file);
@@ -126,6 +127,8 @@ export default function ReimbursementApply() {
         }
     };
 
+    // Restoring draft from localStorage is synchronous and intentionally sets local state.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     useEffect(() => {
         try {
             const saved = localStorage.getItem(DRAFT_KEY);
