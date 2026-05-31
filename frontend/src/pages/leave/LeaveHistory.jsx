@@ -1,17 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { LeaveAPI } from '../../services/api';
 import { tokenManager } from '../../utils/tokenManager';
-import { 
+import {
     History, Search, Filter, Download, Plus, 
     Calendar, CheckCircle, XCircle, Clock, 
     ArrowRight, ChevronLeft, ChevronRight, 
     RotateCcw, FileText, Briefcase
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+ 
 import * as XLSX from 'xlsx';
 
 export default function LeaveHistory({ embedded = false } = {}) {
-    const navigate = useNavigate();
     const formatLeaveTypeLabel = (leaveType) => {
         const normalized = String(leaveType || '').trim().toLowerCase();
         return normalized === 'urgent leave' ? 'Unplanned Leave' : (leaveType || 'Leave');

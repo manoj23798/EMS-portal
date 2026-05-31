@@ -10,7 +10,6 @@ export default function ServiceRegisterList() {
     const [entries, setEntries] = useState([]);
     const [employees, setEmployees] = useState([]);
     const [search, setSearch] = useState('');
-    const [filter, setFilter] = useState('');
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
     const [showFilters, setShowFilters] = useState(false);

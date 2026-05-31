@@ -1,5 +1,5 @@
 import React from 'react';
-import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import HandbookSidebar from '../../components/handbook/Sidebar';
 import { Search, User, Bell, LogOut } from 'lucide-react';
 import { tokenManager } from '../../utils/tokenManager';
@@ -7,7 +7,6 @@ import { authService } from '../../services/authService';
 
 export default function HandbookPage() {
     const location = useLocation();
-    const navigate = useNavigate();
     const isMainPage = location.pathname === '/handbook';
 
     return (

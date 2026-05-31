@@ -21,6 +21,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -76,7 +77,23 @@ public class EmployeeController {
         }
 
         try {
-            String fileName = StringUtils.cleanPath(file.getOriginalFilename());
+            String originalFilename = file.getOriginalFilename();
+            if (originalFilename == null) {
+                return ResponseEntity.badRequest().body("Invalid file name");
+            }
+            String fileName = StringUtils.cleanPath(originalFilename);
+            String fileExtension = "";
+            int dotIndex = fileName.lastIndexOf(".");
+            if (dotIndex > 0) {
+                fileExtension = fileName.substring(dotIndex).toLowerCase();
+            }
+            
+            // Validate allowed extensions to prevent RCE / malicious uploads
+            List<String> allowedExtensions = Arrays.asList(".jpg", ".jpeg", ".png", ".pdf", ".doc", ".docx");
+            if (!allowedExtensions.contains(fileExtension)) {
+                return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE).body("File type not allowed");
+            }
+            
             // Make unique filename
             fileName = System.currentTimeMillis() + "_" + fileName;
             

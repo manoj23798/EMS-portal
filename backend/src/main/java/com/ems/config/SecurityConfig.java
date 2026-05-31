@@ -55,14 +55,15 @@ public class SecurityConfig {
                                                                                                               // (and
                                                                                                               // HR/Admin)
                         .requestMatchers("/api/it/**").hasAnyAuthority("IT_MANAGER", "ADMIN") // IT Manager APIs
+                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/employees/**", "/api/departments/**", "/api/designations/**", "/api/roles/**", "/api/leave-config/**").hasAnyAuthority("ADMIN", "HR")
+                        .requestMatchers(org.springframework.http.HttpMethod.PUT, "/api/employees/**", "/api/departments/**", "/api/designations/**", "/api/roles/**", "/api/leave-config/**").hasAnyAuthority("ADMIN", "HR")
+                        .requestMatchers(org.springframework.http.HttpMethod.DELETE, "/api/employees/**", "/api/departments/**", "/api/designations/**", "/api/roles/**", "/api/leave-config/**").hasAnyAuthority("ADMIN", "HR")
                         .requestMatchers("/api/employee/**", "/api/employees/**", "/api/candidates/**",
                                 "/api/onboarding/**", "/api/attendance/**", "/api/leaves/**", "/api/permissions/**",
                                 "/api/communications/**", "/api/handbook/**", "/api/notifications/**",
                                 "/api/departments/**", "/api/designations/**", "/api/roles/**", "/api/reimbursement/**",
                                 "/api/reimbursements/**", "/api/exit/**")
-                        .hasAnyAuthority("EMPLOYEE", "ADMIN", "HR", "PROJECT_MANAGER", "IT_MANAGER") // Core endpoints
-                                                                                                     // accessible by
-                                                                                                     // everyone
+                        .hasAnyAuthority("EMPLOYEE", "ADMIN", "HR", "PROJECT_MANAGER", "IT_MANAGER")
                         .anyRequest().authenticated() // All other endpoints require authentication
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

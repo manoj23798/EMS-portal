@@ -57,17 +57,8 @@ export default function PerformanceDashboard() {
         loadDashboard();
     }, []);
 
-    const StatCard = ({ title, value, icon, color, bg }) => (
-        <div style={{ background: '#fff', padding: 24, borderRadius: 16, border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: 16, boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
-            <div style={{ width: 56, height: 56, borderRadius: '50%', background: bg, color: color, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                {icon}
-            </div>
-            <div>
-                <div style={{ fontSize: 14, color: '#64748b', fontWeight: 600, marginBottom: 4 }}>{title}</div>
-                <div style={{ fontSize: 24, color: '#0f172a', fontWeight: 800 }}>{value}</div>
-            </div>
-        </div>
-    );
+    // Use the top-level StatCard component defined above to avoid recreating
+    // components during render which causes state resets and ESLint errors.
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>

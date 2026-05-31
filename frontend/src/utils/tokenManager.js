@@ -34,6 +34,7 @@ export const tokenManager = {
         try {
             return JSON.parse(userStr);
         } catch (e) {
+            console.error(e);
             return null;
         }
     },

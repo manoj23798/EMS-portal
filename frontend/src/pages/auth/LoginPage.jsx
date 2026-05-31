@@ -17,7 +17,7 @@ export default function LoginPage() {
         setLoading(true);
 
         try {
-            const user = await authService.login(username, password);
+            await authService.login(username, password);
             navigate('/'); // Navigate to default dashboard, RoleGuard/App router will handle specific routing
         } catch (err) {
             console.error('Login Failed', err);

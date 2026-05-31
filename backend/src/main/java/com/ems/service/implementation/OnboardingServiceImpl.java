@@ -45,7 +45,22 @@ public class OnboardingServiceImpl implements OnboardingService {
                 .orElseThrow(() -> new RuntimeException("Education entry not found"));
 
         try {
-            String fileName = System.currentTimeMillis() + "_" + StringUtils.cleanPath(file.getOriginalFilename());
+            String originalFilename = file.getOriginalFilename();
+            if (originalFilename == null) {
+                throw new RuntimeException("Invalid file name");
+            }
+            String cleanFileName = StringUtils.cleanPath(originalFilename);
+            String fileExtension = "";
+            int dotIndex = cleanFileName.lastIndexOf(".");
+            if (dotIndex > 0) {
+                fileExtension = cleanFileName.substring(dotIndex).toLowerCase();
+            }
+            java.util.List<String> allowedExtensions = java.util.Arrays.asList(".jpg", ".jpeg", ".png", ".pdf", ".doc", ".docx");
+            if (!allowedExtensions.contains(fileExtension)) {
+                throw new RuntimeException("File type not allowed");
+            }
+            
+            String fileName = System.currentTimeMillis() + "_" + cleanFileName;
             if (!Files.exists(rootLocation))
                 Files.createDirectories(rootLocation);
             try (InputStream inputStream = file.getInputStream()) {
@@ -109,8 +124,22 @@ public class OnboardingServiceImpl implements OnboardingService {
                 .orElseThrow(() -> new RuntimeException("Employee not found"));
 
         try {
-            String fileName = StringUtils.cleanPath(file.getOriginalFilename());
-            fileName = System.currentTimeMillis() + "_" + fileName;
+            String originalFilename = file.getOriginalFilename();
+            if (originalFilename == null) {
+                throw new RuntimeException("Invalid file name");
+            }
+            String cleanFileName = StringUtils.cleanPath(originalFilename);
+            String fileExtension = "";
+            int dotIndex = cleanFileName.lastIndexOf(".");
+            if (dotIndex > 0) {
+                fileExtension = cleanFileName.substring(dotIndex).toLowerCase();
+            }
+            java.util.List<String> allowedExtensions = java.util.Arrays.asList(".jpg", ".jpeg", ".png", ".pdf", ".doc", ".docx");
+            if (!allowedExtensions.contains(fileExtension)) {
+                throw new RuntimeException("File type not allowed");
+            }
+            
+            String fileName = System.currentTimeMillis() + "_" + cleanFileName;
 
             if (!Files.exists(rootLocation)) {
                 Files.createDirectories(rootLocation);
@@ -168,7 +197,22 @@ public class OnboardingServiceImpl implements OnboardingService {
                 .orElseThrow(() -> new RuntimeException("History entry not found"));
 
         try {
-            String fileName = System.currentTimeMillis() + "_" + StringUtils.cleanPath(file.getOriginalFilename());
+            String originalFilename = file.getOriginalFilename();
+            if (originalFilename == null) {
+                throw new RuntimeException("Invalid file name");
+            }
+            String cleanFileName = StringUtils.cleanPath(originalFilename);
+            String fileExtension = "";
+            int dotIndex = cleanFileName.lastIndexOf(".");
+            if (dotIndex > 0) {
+                fileExtension = cleanFileName.substring(dotIndex).toLowerCase();
+            }
+            java.util.List<String> allowedExtensions = java.util.Arrays.asList(".jpg", ".jpeg", ".png", ".pdf", ".doc", ".docx");
+            if (!allowedExtensions.contains(fileExtension)) {
+                throw new RuntimeException("File type not allowed");
+            }
+            
+            String fileName = System.currentTimeMillis() + "_" + cleanFileName;
             if (!Files.exists(rootLocation))
                 Files.createDirectories(rootLocation);
             try (InputStream inputStream = file.getInputStream()) {

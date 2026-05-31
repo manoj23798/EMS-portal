@@ -197,7 +197,7 @@ export default function MonthlyReviewForm() {
                 if (allRatings.length > 0) {
                     return (allRatings.reduce((a, b) => a + Number(b), 0) / allRatings.length).toFixed(1);
                 }
-            } catch (e) {}
+            } catch (e) { console.error(e); }
         }
         return 'NA';
     };

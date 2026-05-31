@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import {
     User, FileText, GraduationCap, Briefcase, DollarSign,
     Building2, AlertTriangle, Upload, Trash2, Eye, Download,
@@ -74,7 +74,6 @@ function HeaderStatusPill({ label, icon, completed, color = THEME.border, onClic
 
 export default function EmployeeProfile() {
     const { id: paramId } = useParams();
-    const navigate = useNavigate();
     const currentUser = tokenManager.getUserData();
     const userRole = tokenManager.getUserRole();
     const isHR = ['ADMIN', 'HR'].includes(userRole);
@@ -87,7 +86,7 @@ export default function EmployeeProfile() {
     const [showChecklistPod, setShowChecklistPod] = useState(false);
     const [previewDoc, setPreviewDoc] = useState(null);
 
-    const [education, setEducation] = useState([]);
+    // education state is managed in dedicated subcomponents
     const [employment, setEmployment] = useState([]);
     const [candidateData, setCandidateData] = useState(null);
     const [documents, setDocuments] = useState([]);
@@ -100,7 +99,7 @@ export default function EmployeeProfile() {
     const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
     const [departments, setDepartments] = useState([]);
     const [designations, setDesignations] = useState([]);
-    const [photoTimestamp, setPhotoTimestamp] = useState(Date.now());
+    const [, setPhotoTimestamp] = useState(Date.now());
     const [isChecklistCompleted, setIsChecklistCompleted] = useState(false);
     const [isBgvCompleted, setIsBgvCompleted] = useState(false);
     const [isEditingSkills, setIsEditingSkills] = useState(false);
@@ -481,6 +480,7 @@ export default function EmployeeProfile() {
                             onUpdate={loadAllData}
                             departments={departments}
                             designations={designations}
+                            onStartCrop={(dataUrl) => { setCropImage(dataUrl); setZoom(1); setOffsetX(0); setOffsetY(0); }}
                         />
                     )}
                     {activeTab === 'history' && <EmployeeHistorySection employeeId={employeeId} isHR={isHR} data={candidateData} workData={employment} documents={documents} onUpdate={loadAllData} onPreview={setPreviewDoc} setUploadMessage={setUploadMessage} />}
@@ -691,13 +691,14 @@ function ChecklistPod({ onClose, ...props }) {
 }
 
 function SidebarPreview({ doc, onClose }) {
+    const [previewSrc, setPreviewSrc] = useState('');
+    const [loadingPreview, setLoadingPreview] = useState(false);
+    const [previewError, setPreviewError] = useState('');
+
     if (!doc) return null;
 
     const url = doc.documentUrl;
     const isPDF = url?.toLowerCase().endsWith('.pdf');
-    const [previewSrc, setPreviewSrc] = useState('');
-    const [loadingPreview, setLoadingPreview] = useState(false);
-    const [previewError, setPreviewError] = useState('');
 
     const resolveFullUrl = (u) => {
         if (!u) return '';
@@ -832,11 +833,13 @@ function formatSkillsForDisplay(skills) {
         .join(', ');
 }
 
-function CandidateInfoSection({ employee, employeeId, isHR, data, onUpdate, departments = [], designations = [] }) {
+function CandidateInfoSection({ employee, employeeId, isHR, data, onUpdate, departments = [], designations = [], onStartCrop = () => {} }) {
     const [edit, setEdit] = useState(false);
     const [localData, setLocalData] = useState(data || getDefaultCandidateData());
     const [empData, setEmpData] = useState({ ...employee });
 
+    // Intentional: synchronize local form state from incoming props
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     useEffect(() => {
         setLocalData(data || getDefaultCandidateData());
         setEmpData({ ...employee });
@@ -850,7 +853,7 @@ function CandidateInfoSection({ employee, employeeId, isHR, data, onUpdate, depa
             ]);
             setEdit(false); alert("All information saved."); onUpdate();
         }
-        catch (e) { alert("Save failed."); }
+        catch (e) { console.error(e); alert("Save failed."); }
     };
 
     const inputStyle = { width: '100%', height: 38, padding: '0 12px', borderRadius: 8, border: `1px solid ${THEME.border}`, fontSize: 12, background: edit ? THEME.white : THEME.greyLight, color: THEME.greyDark, fontWeight: 600, outline: 'none' };
@@ -973,10 +976,7 @@ function CandidateInfoSection({ employee, employeeId, isHR, data, onUpdate, depa
                                     if (e.target.files[0]) {
                                         const reader = new FileReader();
                                         reader.onload = (ev) => {
-                                            setCropImage(ev.target.result);
-                                            setZoom(1);
-                                            setOffsetX(0);
-                                            setOffsetY(0);
+                                            onStartCrop && onStartCrop(ev.target.result);
                                         };
                                         reader.readAsDataURL(e.target.files[0]);
                                     }
@@ -1169,6 +1169,8 @@ function EmployeeHistorySection({ employeeId, isHR, data, workData, documents, o
         }
     };
 
+    // Intentional: derive local academic/work arrays from incoming props
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     useEffect(() => {
         const academic = data?.academic || [];
         const defaultLevels = [
@@ -1202,7 +1204,7 @@ function EmployeeHistorySection({ employeeId, isHR, data, workData, documents, o
             await OnboardingAPI.uploadEmploymentDoc(id, file, label);
             onUpdate();
             showMessage(`${label} uploaded`);
-        } catch (e) { showMessage("Upload failed"); }
+        } catch (e) { console.error(e); showMessage("Upload failed"); }
     };
 
     const handleDeleteWorkDoc = async (workHistoryId, key, label) => {
@@ -1218,7 +1220,7 @@ function EmployeeHistorySection({ employeeId, isHR, data, workData, documents, o
             await OnboardingAPI.saveEmploymentHistoryBatch(employeeId, updatedList);
             onUpdate();
             showMessage(`${label} deleted`);
-        } catch (e) { showMessage("Delete failed"); }
+        } catch (e) { console.error(e); showMessage("Delete failed"); }
     };
 
     const handleEduDocUpload = async (file, type) => {
@@ -1226,7 +1228,7 @@ function EmployeeHistorySection({ employeeId, isHR, data, workData, documents, o
             await OnboardingAPI.uploadDocument(employeeId, file, type, 'ONBOARDING');
             onUpdate();
             showMessage(`${type} uploaded`);
-        } catch (e) { showMessage("Upload failed"); }
+        } catch (e) { console.error(e); showMessage("Upload failed"); }
     };
 
     const handleDeleteEduDoc = async (docId) => {
@@ -1234,7 +1236,7 @@ function EmployeeHistorySection({ employeeId, isHR, data, workData, documents, o
         try {
             await OnboardingAPI.deleteDocument(docId);
             onUpdate();
-        } catch (e) { showMessage("Delete failed"); }
+        } catch (e) { console.error(e); showMessage("Delete failed"); }
     };
     const handleSave = async () => {
         try {
@@ -1258,7 +1260,7 @@ function EmployeeHistorySection({ employeeId, isHR, data, workData, documents, o
             showMessage("History saved.");
             onUpdate();
         }
-        catch (e) {
+        catch (e) { console.error(e);
             showMessage(`Save failed: ${e.message}`);
         }
     };
@@ -1650,7 +1652,7 @@ function OnboardingChecklistSection({ employeeId, isHR, documents, employee, dat
             const res = await OnboardingAPI.getChecklist(employeeId);
             setChecklistData(res.data?.checklistData || {});
         }
-        catch (e) { setChecklistData({}); }
+        catch (e) { console.error(e); setChecklistData({}); }
         finally { setLoading(false); }
     };
 
@@ -1660,14 +1662,14 @@ function OnboardingChecklistSection({ employeeId, isHR, documents, employee, dat
             const newData = { ...checklistData, [key]: value };
             setChecklistData(newData);
             await OnboardingAPI.saveChecklist(employeeId, newData);
-        } catch (e) { alert("Failed to update field"); }
+        } catch (e) { console.error(e); alert("Failed to update field"); }
     };
 
     const handleUpload = async (itemName, file, category = 'ONBOARDING') => {
         try {
             await OnboardingAPI.uploadDocument(employeeId, file, itemName, category);
             onRefresh();
-        } catch (e) { alert("Upload failed"); }
+        } catch (e) { console.error(e); alert("Upload failed"); }
     };
 
     const inputStyle = { width: '100%', height: 32, padding: '0 8px', borderRadius: 6, border: `1px solid ${THEME.border}`, fontSize: 11, background: THEME.white, outline: 'none' };
@@ -1869,14 +1871,14 @@ function InductionFeedbackSection({ employeeId, isHR }) {
                 const res = await OnboardingAPI.getFeedback(employeeId);
                 if (res.data?.feedbackData) setData(res.data.feedbackData);
             }
-            catch (e) { }
+            catch (e) { console.error(e); }
         };
         fetch();
     }, [employeeId]);
 
     const handleSave = async () => {
         try { await OnboardingAPI.saveFeedback(employeeId, data); setEdit(false); alert("Feedback saved."); }
-        catch (e) { alert("Save failed."); }
+        catch (e) { console.error(e); alert("Save failed."); }
     };
 
     const qStyle = { marginBottom: 16, padding: 16, background: THEME.white, borderRadius: 12, border: `1px solid ${THEME.border}` };
@@ -1984,7 +1986,7 @@ function BGVSection({ employeeId, isHR, isBgvCompleted, setIsBgvCompleted }) {
                 const res = await OnboardingAPI.getVerification(employeeId);
                 if (res.data?.verificationData) setData({ ...data, ...res.data.verificationData });
             }
-            catch (e) { }
+            catch (e) { console.error(e); }
         };
         fetch();
     }, [employeeId]);
@@ -1995,7 +1997,7 @@ function BGVSection({ employeeId, isHR, isBgvCompleted, setIsBgvCompleted }) {
             setEdit(false);
             alert("BGV data saved successfully.");
         }
-        catch (e) { alert("Save failed."); }
+        catch (e) { console.error(e); alert("Save failed."); }
     };
 
     const inputStyle = {
@@ -2157,7 +2159,7 @@ function ExitManagementSection({ employeeId, isHR, onPreview }) {
         try {
             const res = await OnboardingAPI.getDocuments(employeeId, 'EXIT');
             setExitDocs(res.data || []);
-        } catch (e) { }
+        } catch (e) { console.error(e); }
     };
 
     useEffect(() => {
@@ -2166,7 +2168,7 @@ function ExitManagementSection({ employeeId, isHR, onPreview }) {
                 const res = await ExitManagementAPI.get(employeeId);
                 if (res.data?.exitData) setData({ ...data, ...res.data.exitData });
             }
-            catch (e) { }
+            catch (e) { console.error(e); }
             finally { setLoading(false); }
         };
         fetch();
@@ -2179,7 +2181,7 @@ function ExitManagementSection({ employeeId, isHR, onPreview }) {
             setEdit(false);
             alert("Exit Management data saved successfully.");
         }
-        catch (e) { alert("Save failed."); }
+        catch (e) { console.error(e); alert("Save failed."); }
     };
 
     const handleUploadExitDoc = async (file, type) => {
@@ -2187,9 +2189,7 @@ function ExitManagementSection({ employeeId, isHR, onPreview }) {
             await OnboardingAPI.uploadDocument(employeeId, file, type, 'EXIT');
             fetchExitDocs();
             alert(`${type} uploaded successfully!`);
-        } catch (e) {
-            alert("Upload failed");
-        }
+        } catch (e) { console.error(e); alert("Upload failed"); }
     };
 
     const handleDeleteExitDoc = async (docId) => {
@@ -2198,9 +2198,7 @@ function ExitManagementSection({ employeeId, isHR, onPreview }) {
             await OnboardingAPI.deleteDocument(docId);
             fetchExitDocs();
             alert("Document deleted successfully!");
-        } catch (e) {
-            alert("Delete failed");
-        }
+        } catch (e) { console.error(e); alert("Delete failed"); }
     };
 
     const InlineDocSlot = ({ type }) => {

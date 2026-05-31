@@ -94,7 +94,22 @@ public class CandidateController {
                 });
 
         try {
-            String fileName = System.currentTimeMillis() + "_" + StringUtils.cleanPath(file.getOriginalFilename());
+            String originalFilename = file.getOriginalFilename();
+            if (originalFilename == null) {
+                return ResponseEntity.badRequest().build();
+            }
+            String cleanFileName = StringUtils.cleanPath(originalFilename);
+            String fileExtension = "";
+            int dotIndex = cleanFileName.lastIndexOf(".");
+            if (dotIndex > 0) {
+                fileExtension = cleanFileName.substring(dotIndex).toLowerCase();
+            }
+            java.util.List<String> allowedExtensions = java.util.Arrays.asList(".jpg", ".jpeg", ".png", ".pdf", ".doc", ".docx");
+            if (!allowedExtensions.contains(fileExtension)) {
+                return ResponseEntity.status(org.springframework.http.HttpStatus.UNSUPPORTED_MEDIA_TYPE).build();
+            }
+            
+            String fileName = System.currentTimeMillis() + "_" + cleanFileName;
             if (!Files.exists(rootLocation))
                 Files.createDirectories(rootLocation);
             try (InputStream inputStream = file.getInputStream()) {
