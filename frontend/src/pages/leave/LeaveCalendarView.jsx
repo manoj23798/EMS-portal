@@ -277,7 +277,7 @@ const LeaveCalendarView = () => {
                     position: absolute;
                     inset: 0;
                     background: rgba(255,255,255,0.8);
-                    backdrop-filter: blur(8px);
+
                     z-index: 50;
                     display: flex;
                     align-items: center;

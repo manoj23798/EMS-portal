@@ -68,6 +68,22 @@ public class LeaveRequest {
     @Column(name = "cancel_reason", columnDefinition = "TEXT")
     private String cancelReason;
 
+    @Column(name = "action_status", length = 20)
+    @Builder.Default
+    private String actionStatus = "NONE"; // NONE, CANCEL_REQUESTED, MODIFY_REQUESTED
+
+    @Column(name = "proposed_start_date")
+    private LocalDate proposedStartDate;
+
+    @Column(name = "proposed_end_date")
+    private LocalDate proposedEndDate;
+
+    @Column(name = "proposed_total_days")
+    private Double proposedTotalDays;
+
+    @Column(columnDefinition = "TEXT", name = "proposed_reason")
+    private String proposedReason;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

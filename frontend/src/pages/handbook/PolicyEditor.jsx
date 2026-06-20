@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import ReactQuill from 'react-quill-new';
-import 'react-quill-new/dist/quill.snow.css'; // ES6
+import { CKEditor } from '@ckeditor/ckeditor5-react';
+import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import { handbookService } from '../../services/handbookService';
 import { Save, ArrowLeft, FileText, Maximize, Minimize, ZoomIn, ZoomOut } from 'lucide-react';
 
@@ -48,11 +48,7 @@ export default function PolicyEditor() {
         setMounted(true);
     }, []);
 
-    const modules = React.useMemo(() => ({
-        toolbar: {
-            container: "#policy-toolbar"
-        }
-    }), []);
+    // CKEditor config can be added here if needed
 
     useEffect(() => {
         const initData = async () => {
@@ -108,12 +104,7 @@ export default function PolicyEditor() {
         }
     };
 
-    const formats = [
-        'header', 'font', 'size',
-        'bold', 'italic', 'underline', 'strike',
-        'list', 'indent',
-        'link', 'image', 'align'
-    ];
+    // CKEditor formats are built-in
 
     if (loading) return <div style={{ padding: 24, textAlign: 'center', color: 'var(--text-muted)' }}>Loading editor...</div>;
 
@@ -146,7 +137,7 @@ export default function PolicyEditor() {
                     borderRadius: '30px',
                     border: '1px solid var(--border)', 
                     boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
-                    backdropFilter: 'blur(8px)'
+
                 }}>
                     <div style={{ display: 'flex', gap: 4, alignItems: 'center', borderRight: '1px solid var(--border)', paddingRight: 12, marginRight: 4 }}>
                         <button 
@@ -259,71 +250,16 @@ export default function PolicyEditor() {
             <div style={{ width: '100%', maxWidth: '1200px', display: 'flex', flexDirection: 'column', gap: 12 }}>
                 <label className="form-label" style={{ fontWeight: 600, color: 'inherit' }}>Document Content *</label>
                 
-                {/* TOOLBAR OUTSIDE THE PAPER AREA */}
-                <div id="policy-toolbar" className="ql-toolbar ql-snow" style={{ 
-                    position: 'sticky', 
-                    top: isFullScreen ? '72px' : '-40px', 
-                    zIndex: 1000, 
-                    background: '#fff', 
-                    border: '1px solid var(--border)', 
-                    borderRadius: 'var(--radius-md) var(--radius-md) 0 0',
-                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)',
-                    display: 'flex',
-                    flexWrap: 'wrap',
-                    padding: '8px',
-                    width: '100%',
-                    borderBottom: '1px solid var(--border)' 
-                }}>
-                    <span className="ql-formats">
-                        <select className="ql-header">
-                            <option value="1"></option>
-                            <option value="2"></option>
-                            <option value="3"></option>
-                            <option value="4"></option>
-                            <option value="5"></option>
-                            <option value="6"></option>
-                            <option value=""></option>
-                        </select>
-                        <select className="ql-font"></select>
-                        <select className="ql-size">
-                            <option value="small"></option>
-                            <option value=""></option>
-                            <option value="large"></option>
-                            <option value="huge"></option>
-                        </select>
-                    </span>
-                    <span className="ql-formats">
-                        <button className="ql-bold"></button>
-                        <button className="ql-italic"></button>
-                        <button className="ql-underline"></button>
-                        <button className="ql-strike"></button>
-                    </span>
-                    <span className="ql-formats">
-                        <button className="ql-list" value="ordered"></button>
-                        <button className="ql-list" value="bullet"></button>
-                        <button className="ql-indent" value="-1"></button>
-                        <button className="ql-indent" value="+1"></button>
-                    </span>
-                    <span className="ql-formats">
-                        <select className="ql-align"></select>
-                        <button className="ql-link"></button>
-                        <button className="ql-image"></button>
-                    </span>
-                    <span className="ql-formats">
-                        <button className="ql-clean"></button>
-                    </span>
-                </div>
-
                 <div className="a4-live-editor-wrapper" style={{ borderTop: 'none', borderRadius: '0 0 var(--radius-lg) var(--radius-lg)' }}>
                     <div className="a4-live-editor" style={{ zoom: pageZoom }}>
                         {mounted && (
-                            <ReactQuill 
-                                theme="snow" 
-                                modules={modules}
-                                formats={formats}
-                                value={content}
-                                onChange={setContent}
-                                placeholder="Start typing your policy here..."
+                            <CKEditor
+                                editor={ClassicEditor}
+                                data={content}
+                                onChange={(event, editor) => {
+                                    const data = editor.getData();
+                                    setContent(data);
+                                }}
                             />
                         )}
                     </div>

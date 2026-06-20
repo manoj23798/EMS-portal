@@ -74,7 +74,6 @@ body {
   display: flex;
   flex-direction: column;
   transition: var(--transition);
-  z-index: 10;
   overflow-y: auto;
 }
 
@@ -135,14 +134,12 @@ body {
 .topbar {
   height: 54px;
   background: var(--glass-bg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+
   border-bottom: 1px solid var(--glass-border);
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 32px;
-  z-index: 5;
 }
 
 .page-content {

@@ -4,7 +4,7 @@ import MonthlyAttendanceGrid from '../../components/MonthlyAttendanceGrid';
 import { CalendarDays, Download, Filter, Info, RotateCcw, Search } from 'lucide-react';
 
 const SHIFT_START_HOUR = 9;
-const SHIFT_START_MINUTE = 0;
+const SHIFT_START_MINUTE = 30;
 const SHIFT_START_MINUTES = SHIFT_START_HOUR * 60 + SHIFT_START_MINUTE;
 
 export default function AdminAttendanceDashboard() {
@@ -22,6 +22,7 @@ export default function AdminAttendanceDashboard() {
     const [error, setError] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [viewMode, setViewMode] = useState('daily');
+    const [monthlyStats, setMonthlyStats] = useState({ total: 0, present: 0, late: 0, absent: 0, leave: 0 });
     const rowsPerPage = 10;
 
     useEffect(() => {
@@ -94,8 +95,14 @@ export default function AdminAttendanceDashboard() {
         return `${hrs}h ${mins}m`;
     };
 
-    const normalizeStatus = (status, inTime) => {
+    const normalizeStatus = (status, inTime, recordDate) => {
         const value = String(status || '').trim().toLowerCase();
+        
+        const todayStr = new Date().toISOString().split('T')[0];
+        if (!value && !inTime && recordDate && recordDate <= todayStr) {
+            return 'Absent';
+        }
+
         if (!value) return '--';
         if (value === 'absent') return 'Absent';
         if (value.includes('leave') || value === 'lop' || value.includes('loss of pay')) return 'Leave';
@@ -141,7 +148,7 @@ export default function AdminAttendanceDashboard() {
     const filteredRecords = useMemo(() => {
         const term = searchTerm.toLowerCase().trim();
         return records.filter((record) => {
-            const normalizedStatus = normalizeStatus(record.status, record.inTime);
+        const normalizedStatus = normalizeStatus(record.status, record.inTime, record.date);
             const statusMatch = statusFilter === 'ALL' || normalizedStatus === statusFilter;
             if (!statusMatch) return false;
 
@@ -156,7 +163,7 @@ export default function AdminAttendanceDashboard() {
         });
     }, [records, searchTerm, statusFilter]);
 
-    const stats = useMemo(() => {
+    const dailyStats = useMemo(() => {
         const present = filteredRecords.filter((r) => normalizeStatus(r.status, r.inTime) === 'Present').length;
         const late = filteredRecords.filter((r) => normalizeStatus(r.status, r.inTime) === 'Late').length;
         const absent = filteredRecords.filter((r) => normalizeStatus(r.status, r.inTime) === 'Absent').length;
@@ -169,6 +176,8 @@ export default function AdminAttendanceDashboard() {
             leave
         };
     }, [filteredRecords]);
+
+    const stats = viewMode === 'monthly' ? monthlyStats : dailyStats;
 
     const totalPages = Math.max(1, Math.ceil(filteredRecords.length / rowsPerPage));
     const pagedRecords = useMemo(() => {
@@ -535,7 +544,7 @@ export default function AdminAttendanceDashboard() {
             </div>
 
             {viewMode === 'monthly' ? (
-                <MonthlyAttendanceGrid />
+                <MonthlyAttendanceGrid onMonthlyStatsUpdate={setMonthlyStats} />
             ) : (
             <div className="ap-table-shell">
                 {viewMode === 'daily' && (

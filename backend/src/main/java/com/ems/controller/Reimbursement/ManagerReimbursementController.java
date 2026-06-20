@@ -19,13 +19,13 @@ public class ManagerReimbursementController {
     private ReimbursementService reimbursementService;
 
     @GetMapping("/pending")
-    @PreAuthorize("hasAnyRole('MANAGER', 'PROJECT_MANAGER', 'IT_MANAGER', 'HR', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('MANAGER', 'PROJECT_MANAGER', 'SYSTEM_ADMIN', 'HR', 'ADMIN')")
     public ResponseEntity<List<ReimbursementResponse>> getPendingReimbursements() {
         return ResponseEntity.ok(reimbursementService.getAllPendingForManager());
     }
 
     @PutMapping("/{id}/approve")
-    @PreAuthorize("hasAnyRole('MANAGER', 'PROJECT_MANAGER', 'IT_MANAGER', 'HR', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('MANAGER', 'PROJECT_MANAGER', 'SYSTEM_ADMIN', 'HR', 'ADMIN')")
     public ResponseEntity<ReimbursementResponse> approveOrRejectReimbursement(
             @PathVariable("id") Long id,
             @RequestBody Map<String, Object> payload) {
@@ -35,7 +35,7 @@ public class ManagerReimbursementController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('MANAGER', 'PROJECT_MANAGER', 'IT_MANAGER', 'HR', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('MANAGER', 'PROJECT_MANAGER', 'SYSTEM_ADMIN', 'HR', 'ADMIN')")
     public ResponseEntity<ReimbursementResponse> getReimbursementById(@PathVariable("id") Long id) {
         return ResponseEntity.ok(reimbursementService.getReimbursementById(id));
     }

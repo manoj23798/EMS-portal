@@ -1,6 +1,7 @@
 package com.ems.service.Interface;
 
 import com.ems.dto.request.LeaveApplyRequest;
+import com.ems.dto.request.LeaveModifyRequest;
 import com.ems.dto.response.LeaveBalanceResponse;
 import com.ems.dto.response.LeaveRequestResponse;
 
@@ -23,4 +24,10 @@ public interface LeaveService {
     LeaveRequestResponse rejectLeave(Long leaveId, Long managerId, String remarks);
 
     LeaveRequestResponse cancelLeave(Long leaveId, Long employeeId, String cancelReason);
+
+    LeaveRequestResponse modifyLeaveRequest(Long leaveId, Long employeeId, LeaveModifyRequest request);
+
+    LeaveRequestResponse approveLeaveAction(Long leaveId, Long managerId);
+
+    LeaveRequestResponse rejectLeaveAction(Long leaveId, Long managerId);
 }

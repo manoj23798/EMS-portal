@@ -3,7 +3,7 @@ import { AdminAttendanceAPI, EmployeeAPI } from '../services/api';
 import { Download, CalendarDays } from 'lucide-react';
 
 const SHIFT_START_HOUR = 9;
-const SHIFT_START_MINUTE = 0;
+const SHIFT_START_MINUTE = 30;
 const SHIFT_START_MINUTES = SHIFT_START_HOUR * 60 + SHIFT_START_MINUTE;
 
 // Custom Tooltip Component
@@ -12,7 +12,7 @@ function Tooltip({ text, children, position = 'top' }) {
 
     return (
         <div
-            style={{ position: 'relative', display: 'inline-block', width: '100%', height: '100%' }}
+            style={{ position: 'relative', display: 'inline-block', width: '100%', height: '100%', zIndex: visible ? 9999 : 1 }}
             onMouseEnter={() => setVisible(true)}
             onMouseLeave={() => setVisible(false)}
         >
@@ -31,7 +31,8 @@ function Tooltip({ text, children, position = 'top' }) {
                         borderRadius: '6px',
                         fontSize: '0.85rem',
                         fontWeight: 500,
-                        whiteSpace: 'nowrap',
+                        whiteSpace: 'pre-line',
+                        textAlign: 'center',
                         zIndex: 1000,
                         boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
                         border: '1px solid #ddd',
@@ -47,7 +48,7 @@ function Tooltip({ text, children, position = 'top' }) {
     );
 }
 
-export default function MonthlyAttendanceGrid() {
+export default function MonthlyAttendanceGrid({ onMonthlyStatsUpdate }) {
     const today = new Date();
     const currentMonth = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
 
@@ -128,13 +129,13 @@ export default function MonthlyAttendanceGrid() {
     };
 
     const formatTime = (timeStr) => {
-        if (!timeStr) return '';
+        if (!timeStr) return '---';
         const parts = timeStr.split(':');
         let h = parseInt(parts[0], 10);
         const m = parts[1];
-        const ampm = h >= 12 ? 'pm' : 'am';
+        const ampm = h >= 12 ? 'PM' : 'am';
         h = h % 12 || 12;
-        return `${String(h).padStart(2, '0')}.${m} ${ampm}`;
+        return `${h}:${m}${ampm}`;
     };
 
     const normalizeStatus = (status, inTime) => {
@@ -218,6 +219,18 @@ export default function MonthlyAttendanceGrid() {
         { present: 0, late: 0, absent: 0, leave: 0 }
     );
 
+    useEffect(() => {
+        if (onMonthlyStatsUpdate) {
+            onMonthlyStatsUpdate({
+                total: attendanceRecords.length,
+                present: statusTotals.present,
+                late: statusTotals.late,
+                absent: statusTotals.absent,
+                leave: statusTotals.leave
+            });
+        }
+    }, [statusTotals.present, statusTotals.late, statusTotals.absent, statusTotals.leave, attendanceRecords.length, onMonthlyStatsUpdate]);
+
     return (
         <div className="card" style={{ marginTop: 0 }}>
             <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, padding: '14px 16px', flexWrap: 'wrap' }}>
@@ -239,24 +252,7 @@ export default function MonthlyAttendanceGrid() {
                 </button>
             </div>
 
-            <div className="card-body" style={{ padding: '12px 16px', borderBottom: '1px solid var(--border)', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 10 }}>
-                <div style={{ border: '1px solid var(--border)', borderRadius: 10, padding: '8px 10px' }}>
-                    <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Present</p>
-                    <p style={{ fontSize: '1rem', fontWeight: 700 }}>{statusTotals.present}</p>
-                </div>
-                <div style={{ border: '1px solid var(--border)', borderRadius: 10, padding: '8px 10px' }}>
-                    <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Late</p>
-                    <p style={{ fontSize: '1rem', fontWeight: 700 }}>{statusTotals.late}</p>
-                </div>
-                <div style={{ border: '1px solid var(--border)', borderRadius: 10, padding: '8px 10px' }}>
-                    <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Absent</p>
-                    <p style={{ fontSize: '1rem', fontWeight: 700 }}>{statusTotals.absent}</p>
-                </div>
-                <div style={{ border: '1px solid var(--border)', borderRadius: 10, padding: '8px 10px' }}>
-                    <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Leave</p>
-                    <p style={{ fontSize: '1rem', fontWeight: 700 }}>{statusTotals.leave}</p>
-                </div>
-            </div>
+
 
             <div className="card-body" style={{ padding: 0, overflow: 'hidden' }}>
                 {loading ? (
@@ -349,32 +345,70 @@ export default function MonthlyAttendanceGrid() {
                                         </td>
                                         {days.map((d) => {
                                             const record = attendanceMap[employeeKey]?.[d.fullDate];
-                                            const status = normalizeStatus(record?.status, record?.inTime);
+                                            let status = normalizeStatus(record?.status, record?.inTime);
                                             let content = null;
                                             let bgStyle = {};
                                             let tooltip = '';
 
-                                            if (record) {
+                                            const todayStr = new Date().toISOString().split('T')[0];
+                                            if (!status && !d.isWeekend && d.fullDate <= todayStr) {
+                                                status = 'Absent';
+                                            }
+
+                                            if (status) {
                                                 if (status === 'Leave') {
                                                     bgStyle = { background: '#a855f7', color: '#ffffff' };
                                                     content = <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>L</div>;
-                                                    tooltip = record.leaveType ? `Leave: ${record.leaveType}` : 'Leave';
+                                                    const reason = record?.reason || record?.remarks || record?.leaveType || 'Not provided';
+                                                    tooltip = `Leave\nReason: ${reason}`;
                                                 } else if (status === 'Holiday') {
                                                     bgStyle = { background: '#f97316', color: '#ffffff' };
                                                     content = <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>H</div>;
-                                                    tooltip = record.holidayName ? `Holiday: ${record.holidayName}` : 'Holiday';
+                                                    tooltip = record?.holidayName ? `Holiday: ${record.holidayName}` : 'Holiday';
                                                 } else if (status === 'Absent') {
                                                     bgStyle = { background: '#ef4444', color: '#ffffff' };
                                                     content = <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>A</div>;
                                                     tooltip = 'Absent';
-                                                } else if (status === 'Late') {
-                                                    bgStyle = { background: '#f59e0b', color: '#ffffff' };
-                                                    content = <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>L</div>;
-                                                    tooltip = `Late - In: ${formatTime(record.inTime)} Out: ${formatTime(record.outTime)}`;
-                                                } else if (status === 'Present') {
-                                                    bgStyle = { background: '#22c55e', color: '#ffffff' };
-                                                    content = <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>P</div>;
-                                                    tooltip = `In: ${formatTime(record.inTime)} Out: ${formatTime(record.outTime)}`;
+                                                } else if (status === 'Late' || status === 'Present') {
+                                                    if (status === 'Late') {
+                                                        bgStyle = { background: '#f59e0b', color: '#ffffff' };
+                                                        content = <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>L</div>;
+                                                    } else {
+                                                        bgStyle = { background: '#22c55e', color: '#ffffff' };
+                                                        content = <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>P</div>;
+                                                    }
+                                                    
+                                                    let lateMins = 0;
+                                                    if (status === 'Late' && record?.inTime) {
+                                                        const [h, m] = String(record.inTime).split(':').map(v => parseInt(v, 10));
+                                                        const inMinutes = (Number.isNaN(h) ? 0 : h) * 60 + (Number.isNaN(m) ? 0 : m);
+                                                        lateMins = Math.max(0, inMinutes - SHIFT_START_MINUTES);
+                                                    }
+                                                    
+                                                    const inStr = formatTime(record?.inTime);
+                                                    const outStr = formatTime(record?.outTime);
+                                                    
+                                                    tooltip = (
+                                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', minWidth: '120px' }}>
+                                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontSize: '16px', fontWeight: 800, color: '#000000' }}>
+                                                                <span>{inStr}</span>
+                                                                <span style={{ color: '#f97316', fontSize: '20px', lineHeight: 1 }}>→</span>
+                                                                <span>{outStr}</span>
+                                                            </div>
+                                                            {status === 'Late' && lateMins > 0 && (
+                                                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'flex-start', marginTop: '2px' }}>
+                                                                    <span style={{ color: '#991b1b', fontWeight: 800, fontSize: '13px' }}>LATE :</span>
+                                                                    <span style={{ color: '#0f172a', fontWeight: 800, fontSize: '13px' }}>
+                                                                        {Math.floor(lateMins / 60) > 0 ? `${Math.floor(lateMins / 60)}h ` : ''}{lateMins % 60} m
+                                                                    </span>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    );
+                                                } else if (status === 'Permission') {
+                                                    bgStyle = { background: '#ffedd5', color: '#9a3412' };
+                                                    content = <div style={{ fontWeight: 700, fontSize: '0.8rem', color: '#9a3412' }}>PR</div>;
+                                                    tooltip = 'Permission';
                                                 }
                                             } else if (d.isWeekend) {
                                                 bgStyle = { background: '#475569', color: '#ffffff' };
@@ -394,10 +428,10 @@ export default function MonthlyAttendanceGrid() {
                                                         padding: 0,
                                                         height: 52,
                                                         minWidth: '44px',
-                                                        overflow: 'hidden',
                                                         cursor: tooltip ? 'help' : 'default',
                                                         position: 'relative',
-                                                        background: '#ffffff'
+                                                        background: '#ffffff',
+                                                        zIndex: 1
                                                     }}
                                                 >
                                                     <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

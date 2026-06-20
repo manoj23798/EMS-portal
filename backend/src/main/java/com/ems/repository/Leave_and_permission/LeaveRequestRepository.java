@@ -32,4 +32,8 @@ public interface LeaveRequestRepository extends JpaRepository<LeaveRequest, Long
        List<LeaveRequest> findApprovedOverlapping(@Param("employee") Employee employee,
                      @Param("startDate") LocalDate startDate,
                      @Param("endDate") LocalDate endDate);
+
+       @org.springframework.data.jpa.repository.Modifying
+       @Query("UPDATE LeaveRequest lr SET lr.status = 'Outdated' WHERE lr.status = 'Pending' AND lr.startDate < :currentDate")
+       void markOutdatedPendingLeaves(@Param("currentDate") LocalDate currentDate);
 }

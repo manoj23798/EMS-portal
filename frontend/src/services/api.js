@@ -141,6 +141,7 @@ export const LeaveAPI = {
     getMy: (empId) => api.get(`/leaves/my`, { params: { employeeId: empId } }),
     apply: (data) => api.post(`/leaves/apply`, data),
     cancel: (id, empId, reason) => api.put(`/leaves/${id}/cancel?employeeId=${empId}`, { cancelReason: reason }),
+    modify: (id, empId, data) => api.put(`/leaves/${id}/modify?employeeId=${empId}`, data),
 };
 
 export const PermissionAPI = {
@@ -153,6 +154,8 @@ export const ManagerAPI = {
     getPendingLeaves: () => api.get(`/manager/leaves`),
     approveLeave: (id, managerId, remarks) => api.put(`/manager/leaves/${id}/approve`, null, { params: { managerId, remarks } }),
     rejectLeave: (id, managerId, remarks) => api.put(`/manager/leaves/${id}/reject`, null, { params: { managerId, remarks } }),
+    approveLeaveAction: (id, managerId) => api.put(`/manager/leaves/${id}/action/approve`, null, { params: { managerId } }),
+    rejectLeaveAction: (id, managerId) => api.put(`/manager/leaves/${id}/action/reject`, null, { params: { managerId } }),
     getPendingPermissions: () => api.get(`/manager/permissions`),
     approvePermission: (id, managerId) => api.put(`/manager/permissions/${id}/approve`, null, { params: { managerId } }),
     rejectPermission: (id, managerId, remarks) => api.put(`/manager/permissions/${id}/reject`, null, { params: { managerId, remarks } }),

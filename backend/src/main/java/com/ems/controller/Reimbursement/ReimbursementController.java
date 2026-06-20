@@ -20,25 +20,25 @@ public class ReimbursementController {
     private ReimbursementService reimbursementService;
 
     @PostMapping("/create")
-    @PreAuthorize("hasAnyAuthority('EMPLOYEE', 'MANAGER', 'HR', 'ADMIN', 'PROJECT_MANAGER', 'IT_MANAGER')")
+    @PreAuthorize("hasAnyAuthority('EMPLOYEE', 'MANAGER', 'HR', 'ADMIN', 'PROJECT_MANAGER', 'SYSTEM_ADMIN')")
     public ResponseEntity<ReimbursementResponse> submitReimbursement(@Valid @RequestBody ReimbursementRequest request) {
         return ResponseEntity.ok(reimbursementService.submitReimbursement(request));
     }
 
     @GetMapping("/my")
-    @PreAuthorize("hasAnyAuthority('EMPLOYEE', 'MANAGER', 'HR', 'ADMIN', 'PROJECT_MANAGER', 'IT_MANAGER')")
+    @PreAuthorize("hasAnyAuthority('EMPLOYEE', 'MANAGER', 'HR', 'ADMIN', 'PROJECT_MANAGER', 'SYSTEM_ADMIN')")
     public ResponseEntity<List<ReimbursementResponse>> getMyReimbursements() {
         return ResponseEntity.ok(reimbursementService.getMyReimbursements());
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyAuthority('EMPLOYEE', 'MANAGER', 'HR', 'ADMIN', 'PROJECT_MANAGER', 'IT_MANAGER')")
+    @PreAuthorize("hasAnyAuthority('EMPLOYEE', 'MANAGER', 'HR', 'ADMIN', 'PROJECT_MANAGER', 'SYSTEM_ADMIN')")
     public ResponseEntity<ReimbursementResponse> getReimbursementById(@PathVariable("id") Long id) {
         return ResponseEntity.ok(reimbursementService.getReimbursementById(id));
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyAuthority('EMPLOYEE', 'MANAGER', 'HR', 'ADMIN', 'PROJECT_MANAGER', 'IT_MANAGER')")
+    @PreAuthorize("hasAnyAuthority('EMPLOYEE', 'MANAGER', 'HR', 'ADMIN', 'PROJECT_MANAGER', 'SYSTEM_ADMIN')")
     public ResponseEntity<Void> deleteReimbursement(@PathVariable("id") Long id) {
         reimbursementService.deleteReimbursement(id);
         return ResponseEntity.noContent().build();

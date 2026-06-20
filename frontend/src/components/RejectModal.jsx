@@ -18,8 +18,8 @@ const RejectModal = ({ isOpen, onClose, onReject, title = "Reject Request" }) =>
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
-      <div className="bg-white/10 border border-white/20 backdrop-blur-md rounded-2xl w-full max-w-md shadow-2xl overflow-hidden p-6 text-white">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
+      <div className="bg-white/10 border border-white/20 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden p-6 text-white">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-semibold text-white/90">{title}</h2>
           <button 

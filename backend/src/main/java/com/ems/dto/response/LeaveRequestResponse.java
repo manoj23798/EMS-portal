@@ -30,6 +30,12 @@ public class LeaveRequestResponse {
     private Double lopCount;
     private Double leaveBalance;
     private String profilePhotoUrl;
+    
+    private String actionStatus;
+    private LocalDate proposedStartDate;
+    private LocalDate proposedEndDate;
+    private Double proposedTotalDays;
+    private String proposedReason;
     private LocalDateTime createdAt;
     private LocalDateTime approvedAt;
     private LocalDateTime rejectedAt;

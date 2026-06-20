@@ -2,6 +2,7 @@ package com.ems.controller.Leave;
 
 import com.ems.dto.request.LeaveApplyRequest;
 import com.ems.dto.request.LeaveCancelRequest;
+import com.ems.dto.request.LeaveModifyRequest;
 import com.ems.dto.response.LeaveBalanceResponse;
 import com.ems.dto.response.LeaveRequestResponse;
 import com.ems.service.Interface.LeaveService;
@@ -45,6 +46,14 @@ public class LeaveController {
         return ResponseEntity.ok(leaveService.cancelLeave(id, employeeId, request.getCancelReason()));
     }
 
+    @PutMapping("/leaves/{id}/modify")
+    public ResponseEntity<LeaveRequestResponse> modifyLeave(
+            @PathVariable("id") Long id,
+            @RequestParam("employeeId") Long employeeId,
+            @Valid @RequestBody LeaveModifyRequest request) {
+        return ResponseEntity.ok(leaveService.modifyLeaveRequest(id, employeeId, request));
+    }
+
     // ===================== MANAGER ENDPOINTS =====================
 
     @GetMapping("/manager/leaves")
@@ -66,6 +75,20 @@ public class LeaveController {
             @RequestParam("managerId") Long managerId,
             @RequestParam(required = false) String remarks) {
         return ResponseEntity.ok(leaveService.rejectLeave(id, managerId, remarks));
+    }
+
+    @PutMapping("/manager/leaves/{id}/action/approve")
+    public ResponseEntity<LeaveRequestResponse> approveLeaveAction(
+            @PathVariable("id") Long id,
+            @RequestParam("managerId") Long managerId) {
+        return ResponseEntity.ok(leaveService.approveLeaveAction(id, managerId));
+    }
+
+    @PutMapping("/manager/leaves/{id}/action/reject")
+    public ResponseEntity<LeaveRequestResponse> rejectLeaveAction(
+            @PathVariable("id") Long id,
+            @RequestParam("managerId") Long managerId) {
+        return ResponseEntity.ok(leaveService.rejectLeaveAction(id, managerId));
     }
 
     // ===================== ADMIN ENDPOINTS =====================

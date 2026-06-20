@@ -589,32 +589,34 @@ export default function MonthlyReviewForm() {
             <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 12, padding: '10px 16px', display: 'flex', gap: 12, alignItems: 'flex-end', flexWrap: 'wrap' }}>
                 
                 {/* 1. Search Field */}
-                <div style={{ flex: '1 1 200px', position: 'relative' }}>
-                    <label style={{ display: 'block', fontSize: 10, fontWeight: 800, color: '#64748b', marginBottom: 4, textTransform: 'uppercase' }}>Search Employee</label>
-                    <div style={{ position: 'relative' }}>
-                        <Search size={14} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
-                        <input 
-                            value={searchTerm} 
-                            onChange={e => { setSearchTerm(e.target.value); setSelectedEmployee(null); setShowDropdown(true); }}
-                            disabled={role === 'EMPLOYEE'}
-                            placeholder="Name or ID..."
-                            style={{ width: '100%', height: 32, borderRadius: 6, border: '1px solid #cbd5e1', padding: '0 10px 0 30px', background: role === 'EMPLOYEE' ? '#f8fafc' : '#fff', fontSize: 13, fontWeight: 600 }} 
-                        />
-                        {showDropdown && searchResults.length > 0 && (
-                            <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: '#fff', border: '1px solid #e2e8f0', borderRadius: 8, marginTop: 4, boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', zIndex: 1000, maxHeight: 200, overflowY: 'auto' }}>
-                                {searchResults.map(emp => (
-                                    <div key={emp.id} onClick={() => handleSelectEmployee(emp)} style={{ padding: '8px 10px', cursor: 'pointer', borderBottom: '1px solid #f1f5f9' }} onMouseOver={e => e.currentTarget.style.background = '#f8fafc'} onMouseOut={e => e.currentTarget.style.background = '#fff'}>
-                                        <div style={{ fontWeight: 700, fontSize: 13, color: '#0f172a' }}>{emp.firstName} {emp.lastName}</div>
-                                        <div style={{ fontSize: 11, color: '#64748b' }}>{emp.employeeId} • {emp.designationTitle}</div>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
+                {role !== 'EMPLOYEE' && (
+                    <div style={{ flex: '1 1 200px', position: 'relative' }}>
+                        <label style={{ display: 'block', fontSize: 10, fontWeight: 800, color: '#64748b', marginBottom: 4, textTransform: 'uppercase' }}>Search Employee</label>
+                        <div style={{ position: 'relative' }}>
+                            <Search size={14} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                            <input 
+                                value={searchTerm} 
+                                onChange={e => { setSearchTerm(e.target.value); setSelectedEmployee(null); setShowDropdown(true); }}
+                                disabled={role === 'EMPLOYEE'}
+                                placeholder="Name or ID..."
+                                style={{ width: '100%', height: 32, borderRadius: 6, border: '1px solid #cbd5e1', padding: '0 10px 0 30px', background: role === 'EMPLOYEE' ? '#f8fafc' : '#fff', fontSize: 13, fontWeight: 600 }} 
+                            />
+                            {showDropdown && searchResults.length > 0 && (
+                                <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: '#fff', border: '1px solid #e2e8f0', borderRadius: 8, marginTop: 4, boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', zIndex: 1000, maxHeight: 200, overflowY: 'auto' }}>
+                                    {searchResults.map(emp => (
+                                        <div key={emp.id} onClick={() => handleSelectEmployee(emp)} style={{ padding: '8px 10px', cursor: 'pointer', borderBottom: '1px solid #f1f5f9' }} onMouseOver={e => e.currentTarget.style.background = '#f8fafc'} onMouseOut={e => e.currentTarget.style.background = '#fff'}>
+                                            <div style={{ fontWeight: 700, fontSize: 13, color: '#0f172a' }}>{emp.firstName} {emp.lastName}</div>
+                                            <div style={{ fontSize: 11, color: '#64748b' }}>{emp.employeeId} • {emp.designationTitle}</div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
                     </div>
-                </div>
+                )}
 
                 {/* 2. Selected Employee Card */}
-                {formData.employeeId && (
+                {role !== 'EMPLOYEE' && formData.employeeId && (
                     <div style={{ flex: '1 1 250px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 8, padding: '4px 10px', display: 'flex', gap: 10, alignItems: 'center', height: 32 }}>
                         <div style={{ width: 24, height: 24, borderRadius: '50%', background: '#f97316', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 11 }}>
                             {formData.employeeName.charAt(0)}
@@ -645,13 +647,15 @@ export default function MonthlyReviewForm() {
                 </div>
 
                 {/* 5. Apply Template */}
-                <div style={{ flex: '1 1 200px' }}>
-                    <label style={{ display: 'block', fontSize: 10, fontWeight: 800, color: '#64748b', marginBottom: 4, textTransform: 'uppercase' }}>Apply Template</label>
-                    <select value={selectedTemplateId} onChange={e => handleApplyTemplate(e.target.value)} disabled={isReadOnly} style={{ width: '100%', height: 32, borderRadius: 6, border: '1px solid #cbd5e1', padding: '0 8px', fontSize: 12, fontWeight: 600, background: isReadOnly ? '#f8fafc' : '#fff' }}>
-                        <option value="">Select template...</option>
-                        {templates.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
-                    </select>
-                </div>
+                {role !== 'EMPLOYEE' && (
+                    <div style={{ flex: '1 1 200px' }}>
+                        <label style={{ display: 'block', fontSize: 10, fontWeight: 800, color: '#64748b', marginBottom: 4, textTransform: 'uppercase' }}>Apply Template</label>
+                        <select value={selectedTemplateId} onChange={e => handleApplyTemplate(e.target.value)} disabled={isReadOnly} style={{ width: '100%', height: 32, borderRadius: 6, border: '1px solid #cbd5e1', padding: '0 8px', fontSize: 12, fontWeight: 600, background: isReadOnly ? '#f8fafc' : '#fff' }}>
+                            <option value="">Select template...</option>
+                            {templates.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+                        </select>
+                    </div>
+                )}
 
                 {/* 6. Total Score */}
                 <div style={{ width: 110, background: '#eff6ff', border: '1px solid #dbeafe', borderRadius: 8, padding: '4px 10px', textAlign: 'center', height: 32, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
@@ -908,6 +912,7 @@ export default function MonthlyReviewForm() {
                     <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: 0, textAlign: 'left', minWidth: 1000 }}>
                         <thead style={{ position: 'sticky', top: 41, zIndex: 45, background: '#e2e8f0 !important', color: '#334155', fontWeight: 800, fontSize: 12, letterSpacing: 0.5 }}>
                             <tr>
+                                    <th style={{ width: 18, background: '#e2e8f0', borderRight: '1px solid #cbd5e1', borderBottom: '1px solid #cbd5e1' }}></th>
                                     <th style={{ padding: '12px 16px', width: '15%', borderRight: '1px solid #cbd5e1', borderBottom: '1px solid #cbd5e1', background: '#e2e8f0' }}>Team</th>
                                     <th style={{ padding: '12px 16px', borderRight: '1px solid #cbd5e1', borderBottom: '1px solid #cbd5e1', width: '25%', background: '#e2e8f0' }}>Responsibilities</th>
                                     {['Jan', 'Feb', 'Mar', 'April', 'May', 'June', 'July', 'August', 'Sep', 'Oct', 'Nov', 'Dec'].map(m => (
@@ -916,22 +921,37 @@ export default function MonthlyReviewForm() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {sections.map((section, sIdx) => {
-                                    const rowSpanCount = section.items.length;
+                                {[...new Set(sections.map(s => s.partName || 'Part A'))].map((partName) => {
+                                    const partSections = sections.filter(s => (s.partName || 'Part A') === partName);
+                                    const partRowSpanCount = partSections.reduce((sum, s) => sum + s.items.length, 0);
+
                                     return (
-                                        <React.Fragment key={section.id}>
-                                            {section.items.map((item, iIdx) => {
+                                        <React.Fragment key={partName}>
+                                            {partSections.map((section, sIdx) => {
+                                                const rowSpanCount = section.items.length;
                                                 return (
-                                                    <tr key={item.id} style={{ borderBottom: '1px solid #cbd5e1', background: '#fff' }}>
-                                                        {iIdx === 0 && (
-                                                            <td rowSpan={rowSpanCount} style={{ padding: '8px 16px', background: sIdx % 2 === 0 ? '#fdfdfd' : '#f8fafc', borderRight: '1px solid #cbd5e1', verticalAlign: 'middle', borderBottom: '2px solid #94a3b8', fontWeight: 800, color: '#1e293b' }}>
-                                                                {section.name || 'Unnamed Activity'}
-                                                            </td>
-                                                        )}
-                                                        <td style={{ padding: '8px 16px', borderRight: '1px solid #cbd5e1', verticalAlign: 'middle', fontSize: 12, color: '#334155', borderBottom: iIdx === section.items.length - 1 ? '2px solid #94a3b8' : '1px solid #cbd5e1' }}>
-                                                            {item.parameterName || '-'}
-                                                        </td>
-                                                        {/* 12 Months Columns */}
+                                                    <React.Fragment key={section.id}>
+                                                        {section.items.map((item, iIdx) => {
+                                                            return (
+                                                                <tr key={item.id} style={{ borderBottom: '1px solid #cbd5e1', background: '#fff' }}>
+                                                                    {sIdx === 0 && iIdx === 0 && (
+                                                                        <td rowSpan={partRowSpanCount} style={{ width: 18, padding: 0, background: '#e2e8f0', color: '#334155', verticalAlign: 'middle', textAlign: 'center', borderRight: '1px solid #cbd5e1', borderBottom: '2px solid #94a3b8' }}>
+                                                                            <div style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)', fontWeight: 800, fontSize: 12, letterSpacing: 1, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                                                {partName.toUpperCase().split(' ').map((word, wIdx) => (
+                                                                                    <span key={wIdx} style={{ color: word === 'A' || word === 'B' ? '#ea580c' : '#334155', margin: '4px 0', lineHeight: 1 }}>{word}</span>
+                                                                                ))}
+                                                                            </div>
+                                                                        </td>
+                                                                    )}
+                                                                    {iIdx === 0 && (
+                                                                        <td rowSpan={rowSpanCount} style={{ padding: '8px 16px', background: sIdx % 2 === 0 ? '#fdfdfd' : '#f8fafc', borderRight: '1px solid #cbd5e1', verticalAlign: 'middle', borderBottom: '2px solid #94a3b8', fontWeight: 800, color: '#1e293b' }}>
+                                                                            {section.name || 'Unnamed Activity'}
+                                                                        </td>
+                                                                    )}
+                                                                    <td style={{ padding: '8px 16px', borderRight: '1px solid #cbd5e1', verticalAlign: 'middle', fontSize: 12, color: '#334155', borderBottom: iIdx === section.items.length - 1 ? '2px solid #94a3b8' : '1px solid #cbd5e1' }}>
+                                                                        {item.parameterName || '-'}
+                                                                    </td>
+                                                                    {/* 12 Months Columns */}
                                                         {Array.from({length: 12}, (_, mIdx) => {
                                                             const monthNum = mIdx + 1;
                                                             const ratingToShow = getRatingForMonth(monthNum, item.parameterName);
@@ -951,10 +971,13 @@ export default function MonthlyReviewForm() {
                                         </React.Fragment>
                                     );
                                 })}
+                                        </React.Fragment>
+                                    );
+                                })}
                             </tbody>
                             <tfoot style={{ background: '#f8fafc', fontWeight: 800 }}>
                                 <tr>
-                                    <td colSpan={2} style={{ padding: '12px 16px', borderRight: '1px solid #cbd5e1', borderTop: '2px solid #94a3b8', textAlign: 'right', fontSize: 13, color: '#0f172a', textTransform: 'uppercase' }}>
+                                    <td colSpan={3} style={{ padding: '12px 16px', borderRight: '1px solid #cbd5e1', borderTop: '2px solid #94a3b8', textAlign: 'right', fontSize: 13, color: '#0f172a', textTransform: 'uppercase' }}>
                                         Monthly Average Rating
                                     </td>
                                     {Array.from({length: 12}, (_, mIdx) => {

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { handbookService } from '../../services/handbookService';
-import { ArrowLeft, Clock, User, CheckCircle, Maximize, Minimize, ZoomIn, ZoomOut, Archive, Download } from 'lucide-react';
+import { ArrowLeft, Clock, User, CheckCircle, Maximize, Minimize, ZoomIn, ZoomOut, Archive, Download, Edit } from 'lucide-react';
 import { tokenManager } from '../../utils/tokenManager';
 
 export default function PolicyView() {
@@ -148,7 +148,7 @@ export default function PolicyView() {
                     borderRadius: '30px',
                     border: '1px solid var(--border)', 
                     boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
-                    backdropFilter: 'blur(8px)'
+
                 }}>
                     <div style={{ display: 'flex', gap: 4, alignItems: 'center', borderRight: '1px solid var(--border)', paddingRight: 12, marginRight: 4 }}>
                         <button 
@@ -248,11 +248,11 @@ export default function PolicyView() {
                             </div>
                         )}
 
-                        {/* Document upload for viewing */}
-                        <label style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'var(--surface)', padding: '6px 10px', borderRadius: 6, border: '1px solid var(--border)', cursor: 'pointer' }}>
-                            <input type="file" accept=".docx,.doc,.pdf" style={{ display: 'none' }} onChange={(e) => handleDocxUpload(e.target.files?.[0])} />
-                            <span style={{ fontSize: '0.85rem' }}>{uploading ? 'Loading...' : 'Upload Document'}</span>
-                        </label>
+                        {isHRorAdmin && (
+                            <button onClick={() => navigate(`/handbook/edit/${policy.id}`)} className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '0 12px', height: 32, fontSize: '0.8rem' }}>
+                                <Edit size={14} /> Edit
+                            </button>
+                        )}
 
                         <div style={{ display: 'flex', gap: 4, alignItems: 'center', background: 'var(--surface)', padding: '0 8px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', height: 32 }}>
                             <button onClick={() => setPageZoom(z => Math.max(0.5, z - 0.1))} style={{ background: 'transparent', border: 'none', color: 'inherit', cursor: 'pointer', display: 'flex' }}>

@@ -97,9 +97,14 @@ public class EmployeeServiceImpl implements EmployeeService {
         Employee updated = employeeRepository.save(employee);
 
         // Update User entity if it exists or create one
-        if (request.getUsername() != null && !request.getUsername().isEmpty()) {
+        String username = request.getUsername();
+        if (username == null || username.isBlank()) {
+            username = request.getEmail();
+        }
+
+        if (username != null && !username.isBlank()) {
             User user = userRepository.findByEmployeeId(updated.getId()).orElse(new User());
-            user.setUsername(request.getUsername());
+            user.setUsername(username);
             user.setEmail(request.getEmail());
             user.setEmployee(updated);
             user.setStatus(updated.getStatus());
@@ -117,9 +122,8 @@ public class EmployeeServiceImpl implements EmployeeService {
 
             // If it's a new user where role wasn't provided, default it
             if (user.getId() == null && user.getRole() == null) {
-                Role role = roleRepository.findByRoleName("Employee")
-                        .orElseGet(() -> roleRepository.findByRoleName("EMPLOYEE")
-                                .orElseThrow(() -> new ResourceNotFoundException("Role not found")));
+                Role role = roleRepository.findByRoleName("EMPLOYEE")
+                        .orElseThrow(() -> new ResourceNotFoundException("Role not found"));
                 user.setRole(role);
             }
 

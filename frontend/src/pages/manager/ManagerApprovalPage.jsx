@@ -292,12 +292,13 @@ const MiniCalendar = ({ requests }) => {
     );
 };
 
-const statusColors = {
-    Pending: '#f59e0b',
-    Approved: '#10b981',
-    Rejected: '#ef4444',
-    Canceled: '#64748b'
-};
+    const statusColors = {
+        Pending: '#f59e0b',
+        Approved: '#10b981',
+        Rejected: '#ef4444',
+        Canceled: '#6b7280',
+        Outdated: '#64748b'
+    };
 
 const ManagerApprovalPage = () => {
     const navigate = useNavigate();
@@ -833,6 +834,14 @@ const ManagerApprovalPage = () => {
                 setAllRequests(allRes.data || []);
             } else if (action === 'reject') {
                 setRejectModal({ isOpen: true, requestId: id });
+            } else if (action === 'action_approve') {
+                await ManagerAPI.approveLeaveAction(id, 1);
+                const allRes = await ManagerAPI.getPendingLeaves();
+                setAllRequests(allRes.data || []);
+            } else if (action === 'action_reject') {
+                await ManagerAPI.rejectLeaveAction(id, 1);
+                const allRes = await ManagerAPI.getPendingLeaves();
+                setAllRequests(allRes.data || []);
             }
         } catch (err) {
             console.error(err);
@@ -1967,7 +1976,32 @@ const ManagerApprovalPage = () => {
                                 <td>{new Date(lr.startDate).getDate()} - {new Date(lr.endDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</td>
                                 <td style={{ textAlign: 'center' }}>{typeof lr.totalDays === 'number' ? lr.totalDays.toFixed(1).replace(/\.0$/, '') : lr.totalDays} Days</td>
                                 <td>
-                                    {lr.status === 'Approved' ? (
+                                    {['CANCEL_REQUESTED', 'MODIFY_REQUESTED'].includes(lr.actionStatus) ? (
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                            <div style={{ fontSize: '10px', fontWeight: 900, color: lr.actionStatus === 'CANCEL_REQUESTED' ? '#ef4444' : '#f59e0b', textTransform: 'uppercase' }}>
+                                                {lr.actionStatus === 'CANCEL_REQUESTED' ? 'Cancellation Requested' : 'Modification Requested'}
+                                                {lr.actionStatus === 'MODIFY_REQUESTED' && (
+                                                    <div style={{ fontSize: '9px', color: '#64748b', marginTop: '4px', textTransform: 'none' }}>
+                                                        Proposed: {new Date(lr.proposedStartDate).getDate()} - {new Date(lr.proposedEndDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })} ({lr.proposedTotalDays} Days)
+                                                        <br/>Reason: {lr.proposedReason}
+                                                    </div>
+                                                )}
+                                                {lr.actionStatus === 'CANCEL_REQUESTED' && (
+                                                    <div style={{ fontSize: '9px', color: '#64748b', marginTop: '4px', textTransform: 'none' }}>
+                                                        Reason: {lr.cancelReason}
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                                <button className="ma-btn-approve" type="button" onClick={() => handleAction(lr.id, 'action_approve')}>
+                                                    <Check size={14} strokeWidth={4} /> Approve
+                                                </button>
+                                                <button className="ma-btn-reject" type="button" onClick={() => handleAction(lr.id, 'action_reject')}>
+                                                    <X size={14} strokeWidth={3} /> Reject
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ) : lr.status === 'Approved' ? (
                                         <div style={{ textAlign: 'center' }}>
                                             <span className="ma-status-label" style={{ background: '#ecfdf5', color: '#059669' }}>Approved</span>
                                             <div style={{ fontSize: '9px', fontWeight: 900, color: '#94a3b8', marginTop: '4px', textTransform: 'uppercase', lineHeight: 1.2 }}>
@@ -1994,6 +2028,8 @@ const ManagerApprovalPage = () => {
                                                 {formatActionDate(getStatusActionTimestamp(lr)) || '--'}
                                             </div>
                                         </div>
+                                    ) : lr.status === 'Outdated' ? (
+                                        <span className="ma-status-label" style={{ background: '#f1f5f9', color: '#64748b' }}>Outdated</span>
                                     ) : (
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                             <button className="ma-btn-approve" type="button" onClick={() => handleAction(lr.id, 'approve')}>

@@ -54,7 +54,7 @@ public class SecurityConfig {
                                                                                                               // APIs
                                                                                                               // (and
                                                                                                               // HR/Admin)
-                        .requestMatchers("/api/it/**").hasAnyAuthority("IT_MANAGER", "ADMIN") // IT Manager APIs
+                        .requestMatchers("/api/it/**").hasAnyAuthority("SYSTEM_ADMIN", "ADMIN") // IT Manager APIs
                         .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/employees/**", "/api/departments/**", "/api/designations/**", "/api/roles/**", "/api/leave-config/**").hasAnyAuthority("ADMIN", "HR")
                         .requestMatchers(org.springframework.http.HttpMethod.PUT, "/api/employees/**", "/api/departments/**", "/api/designations/**", "/api/roles/**", "/api/leave-config/**").hasAnyAuthority("ADMIN", "HR")
                         .requestMatchers(org.springframework.http.HttpMethod.DELETE, "/api/employees/**", "/api/departments/**", "/api/designations/**", "/api/roles/**", "/api/leave-config/**").hasAnyAuthority("ADMIN", "HR")

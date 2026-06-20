@@ -33,7 +33,7 @@ public class DataInitializer implements CommandLineRunner {
     @Transactional
     public void run(String... args) throws Exception {
         // Seed Roles
-        String[] roleNames = { "ADMIN", "HR", "EMPLOYEE", "PROJECT_MANAGER", "IT_MANAGER" };
+        String[] roleNames = { "ADMIN", "HR", "EMPLOYEE", "PROJECT_MANAGER", "SYSTEM_ADMIN" };
         for (String roleName : roleNames) {
             if (roleRepository.findByRoleName(roleName).isEmpty()) {
                 roleRepository.save(Role.builder()

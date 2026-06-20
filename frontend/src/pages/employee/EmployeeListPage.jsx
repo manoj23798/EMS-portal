@@ -295,7 +295,7 @@ function CreateEmployeeModal({ onClose, onSuccess }) {
 
     const overlayStyle = {
         position: 'fixed', inset: 0, zIndex: 9999,
-        background: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(6px)',
+        background: 'rgba(15, 23, 42, 0.6)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         animation: 'fadeIn 0.2s ease'
     };

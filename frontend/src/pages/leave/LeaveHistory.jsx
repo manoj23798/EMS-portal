@@ -27,6 +27,38 @@ export default function LeaveHistory({ embedded = false } = {}) {
     const [showFilters, setShowFilters] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const rowsPerPage = 10;
+    
+    const [cancelModal, setCancelModal] = useState({ show: false, leaveId: null, reason: '' });
+    const [modifyModal, setModifyModal] = useState({ show: false, leave: null, startDate: '', endDate: '', reason: '', totalDays: '' });
+
+    const handleCancelSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            await LeaveAPI.cancel(cancelModal.leaveId, tokenManager.getUserData()?.employeeId, cancelModal.reason);
+            setCancelModal({ show: false, leaveId: null, reason: '' });
+            fetchLeaves();
+        } catch (err) {
+            console.error(err);
+            alert("Failed to submit cancellation request");
+        }
+    };
+
+    const handleModifySubmit = async (e) => {
+        e.preventDefault();
+        try {
+            await LeaveAPI.modify(modifyModal.leave.id, tokenManager.getUserData()?.employeeId, {
+                proposedStartDate: modifyModal.startDate,
+                proposedEndDate: modifyModal.endDate,
+                proposedTotalDays: Number(modifyModal.totalDays),
+                proposedReason: modifyModal.reason
+            });
+            setModifyModal({ show: false, leave: null, startDate: '', endDate: '', reason: '', totalDays: '' });
+            fetchLeaves();
+        } catch (err) {
+            console.error(err);
+            alert("Failed to submit modification request");
+        }
+    };
 
     const getSubmittedTimestamp = (leave) => {
         const submittedValue = leave?.submissionDate || leave?.submittedAt || leave?.createdAt || leave?.appliedDate || leave?.startDate;
@@ -85,10 +117,11 @@ export default function LeaveHistory({ embedded = false } = {}) {
     }).sort((a, b) => getSubmittedTimestamp(b) - getSubmittedTimestamp(a));
 
     const getStatusColor = (status) => {
-        const s = status?.toLowerCase();
-        if (s === 'approved') return { bg: '#f0fdf4', color: '#16a34a', border: '#dcfce3' };
-        if (s === 'rejected') return { bg: '#fef2f2', color: '#ef4444', border: '#fee2e2' };
-        return { bg: '#f8fafc', color: '#64748b', border: '#cbd5e1' }; // Pending
+        const s = String(status).toLowerCase();
+        if (s === 'approved') return { bg: '#f0fdf4', color: '#16a34a', border: '#bbf7d0' };
+        if (s === 'rejected') return { bg: '#fef2f2', color: '#ef4444', border: '#fecaca' };
+        if (s === 'outdated') return { bg: '#f1f5f9', color: '#64748b', border: '#cbd5e1' };
+        return { bg: '#f8fafc', color: '#64748b', border: '#cbd5e1' }; // Pending / Default
     };
 
     if (loading) return (
@@ -177,11 +210,12 @@ export default function LeaveHistory({ embedded = false } = {}) {
                                 <th style={{ padding: '14px 24px', textAlign: 'left', fontSize: '11px', fontWeight: 950, color: '#64748b', textTransform: 'uppercase' }}>Dates</th>
                                 <th style={{ padding: '14px 24px', textAlign: 'center', fontSize: '11px', fontWeight: 950, color: '#64748b', textTransform: 'uppercase' }}>Total Days</th>
                                 <th style={{ padding: '14px 24px', textAlign: 'center', fontSize: '11px', fontWeight: 950, color: '#64748b', textTransform: 'uppercase' }}>Status</th>
+                                <th style={{ padding: '14px 24px', textAlign: 'center', fontSize: '11px', fontWeight: 950, color: '#64748b', textTransform: 'uppercase' }}>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {filteredLeaves.length === 0 ? (
-                                <tr><td colSpan="7" style={{ padding: '60px', textAlign: 'center', color: '#64748b', fontSize: '14px', fontWeight: 800 }}>No records found.</td></tr>
+                                <tr><td colSpan="8" style={{ padding: '60px', textAlign: 'center', color: '#64748b', fontSize: '14px', fontWeight: 800 }}>No records found.</td></tr>
                             ) : (
                                 filteredLeaves.slice((currentPage - 1)*rowsPerPage, currentPage*rowsPerPage).map(l => {
                                     const style = getStatusColor(l.status);
@@ -210,6 +244,18 @@ export default function LeaveHistory({ embedded = false } = {}) {
                                                     </div>
                                                 )}
                                             </td>
+                                            <td style={{ padding: '16px 24px', textAlign: 'center' }}>
+                                                {l.actionStatus === 'CANCEL_REQUESTED' ? (
+                                                    <span style={{ fontSize: '10px', color: '#ef4444', fontWeight: 900 }}>Cancel Requested</span>
+                                                ) : l.actionStatus === 'MODIFY_REQUESTED' ? (
+                                                    <span style={{ fontSize: '10px', color: '#f59e0b', fontWeight: 900 }}>Modify Requested</span>
+                                                ) : (['Pending', 'Approved'].includes(l.status) && (!l.actionStatus || l.actionStatus === 'NONE') ? (
+                                                    <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                                                        {l.status !== 'Pending' && <button onClick={() => setModifyModal({ show: true, leave: l, startDate: l.startDate, endDate: l.endDate, reason: l.reason, totalDays: l.totalDays })} style={{ background: '#f8fafc', border: '1.5px solid #cbd5e1', borderRadius: '6px', padding: '6px 12px', fontSize: '10px', cursor: 'pointer', fontWeight: 900, color: '#0f172a' }}>MODIFY</button>}
+                                                        <button onClick={() => setCancelModal({ show: true, leaveId: l.id, reason: '' })} style={{ background: '#fef2f2', border: '1.5px solid #fca5a5', color: '#ef4444', borderRadius: '6px', padding: '6px 12px', fontSize: '10px', cursor: 'pointer', fontWeight: 900 }}>CANCEL</button>
+                                                    </div>
+                                                ) : <span style={{ color: '#cbd5e1' }}>-</span>)}
+                                            </td>
                                         </tr>
                                     );
                                 })
@@ -232,6 +278,82 @@ export default function LeaveHistory({ embedded = false } = {}) {
                     </div>
                 )}
             </div>
+
+            {/* Cancel Modal */}
+            {cancelModal.show && (
+                <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(15, 23, 42, 0.4)' }}>
+                    <div style={{ background: 'white', borderRadius: '24px', width: '90%', maxWidth: '400px', padding: '32px', boxShadow: '0 20px 40px rgba(0,0,0,0.1)' }}>
+                        <h3 style={{ margin: '0 0 20px', fontSize: '16px', fontWeight: 900, color: '#0f172a' }}>Request Cancellation</h3>
+                        <form onSubmit={handleCancelSubmit}>
+                            <div style={{ marginBottom: '20px' }}>
+                                <label style={{ display: 'block', fontSize: '11px', fontWeight: 950, color: '#64748b', textTransform: 'uppercase', marginBottom: '8px' }}>Reason</label>
+                                <textarea 
+                                    required
+                                    rows="3"
+                                    value={cancelModal.reason}
+                                    onChange={(e) => setCancelModal({...cancelModal, reason: e.target.value})}
+                                    style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1.5px solid #e2e8f0', fontSize: '13px', outline: 'none' }}
+                                    placeholder="Why do you want to cancel?"
+                                />
+                            </div>
+                            <div style={{ display: 'flex', gap: '12px' }}>
+                                <button type="button" onClick={() => setCancelModal({ show: false, leaveId: null, reason: '' })} style={{ flex: 1, padding: '12px', borderRadius: '12px', background: '#f8fafc', border: 'none', color: '#64748b', fontWeight: 900, cursor: 'pointer' }}>BACK</button>
+                                <button type="submit" style={{ flex: 1, padding: '12px', borderRadius: '12px', background: '#ef4444', border: 'none', color: 'white', fontWeight: 900, cursor: 'pointer' }}>SUBMIT</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Modify Modal */}
+            {modifyModal.show && (
+                <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(15, 23, 42, 0.4)' }}>
+                    <div style={{ background: 'white', borderRadius: '24px', width: '90%', maxWidth: '450px', padding: '32px', boxShadow: '0 20px 40px rgba(0,0,0,0.1)' }}>
+                        <h3 style={{ margin: '0 0 20px', fontSize: '16px', fontWeight: 900, color: '#0f172a' }}>Request Modification</h3>
+                        <form onSubmit={handleModifySubmit}>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
+                                <div>
+                                    <label style={{ display: 'block', fontSize: '11px', fontWeight: 950, color: '#64748b', textTransform: 'uppercase', marginBottom: '8px' }}>Start Date</label>
+                                    <input 
+                                        type="date" required value={modifyModal.startDate}
+                                        onChange={(e) => setModifyModal({...modifyModal, startDate: e.target.value})}
+                                        style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1.5px solid #e2e8f0', fontSize: '13px', outline: 'none' }}
+                                    />
+                                </div>
+                                <div>
+                                    <label style={{ display: 'block', fontSize: '11px', fontWeight: 950, color: '#64748b', textTransform: 'uppercase', marginBottom: '8px' }}>End Date</label>
+                                    <input 
+                                        type="date" required value={modifyModal.endDate}
+                                        onChange={(e) => setModifyModal({...modifyModal, endDate: e.target.value})}
+                                        style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1.5px solid #e2e8f0', fontSize: '13px', outline: 'none' }}
+                                    />
+                                </div>
+                            </div>
+                            <div style={{ marginBottom: '16px' }}>
+                                <label style={{ display: 'block', fontSize: '11px', fontWeight: 950, color: '#64748b', textTransform: 'uppercase', marginBottom: '8px' }}>Total Days</label>
+                                <input 
+                                    type="number" step="0.5" required value={modifyModal.totalDays}
+                                    onChange={(e) => setModifyModal({...modifyModal, totalDays: e.target.value})}
+                                    style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1.5px solid #e2e8f0', fontSize: '13px', outline: 'none' }}
+                                />
+                            </div>
+                            <div style={{ marginBottom: '20px' }}>
+                                <label style={{ display: 'block', fontSize: '11px', fontWeight: 950, color: '#64748b', textTransform: 'uppercase', marginBottom: '8px' }}>Reason</label>
+                                <textarea 
+                                    required rows="3" value={modifyModal.reason}
+                                    onChange={(e) => setModifyModal({...modifyModal, reason: e.target.value})}
+                                    style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1.5px solid #e2e8f0', fontSize: '13px', outline: 'none' }}
+                                    placeholder="Why do you want to modify?"
+                                />
+                            </div>
+                            <div style={{ display: 'flex', gap: '12px' }}>
+                                <button type="button" onClick={() => setModifyModal({ show: false, leave: null, startDate: '', endDate: '', reason: '', totalDays: '' })} style={{ flex: 1, padding: '12px', borderRadius: '12px', background: '#f8fafc', border: 'none', color: '#64748b', fontWeight: 900, cursor: 'pointer' }}>BACK</button>
+                                <button type="submit" style={{ flex: 1, padding: '12px', borderRadius: '12px', background: '#3b82f6', border: 'none', color: 'white', fontWeight: 900, cursor: 'pointer' }}>SUBMIT</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

@@ -522,7 +522,7 @@ export default function EmployeeProfile() {
                     <div style={{
                         position: 'fixed', inset: 0, background: 'rgba(15, 23, 42, 0.75)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999,
-                        backdropFilter: 'blur(4px)', padding: 16
+                        padding: 16
                     }}>
                         <div style={{
                             background: '#fff', borderRadius: 24, width: '100%', maxWidth: 400,
@@ -842,14 +842,28 @@ function CandidateInfoSection({ employee, employeeId, isHR, data, onUpdate, depa
     // eslint-disable-next-line react-hooks/set-state-in-effect
     useEffect(() => {
         setLocalData(data || getDefaultCandidateData());
-        setEmpData({ ...employee });
-    }, [data, employee]);
+        
+        const dept = departments.find(d => d.name === employee.departmentName) || null;
+        const desig = designations.find(d => d.title === employee.designationTitle) || null;
+        
+        setEmpData({
+            ...employee,
+            department: dept,
+            designation: desig
+        });
+    }, [data, employee, departments, designations]);
 
     const handleSave = async () => {
         try {
+            const employeePayload = {
+                ...empData,
+                departmentId: empData.department?.id || null,
+                designationId: empData.designation?.id || null
+            };
+
             await Promise.all([
                 CandidateAPI.save(employeeId, localData),
-                EmployeeAPI.update(employee.id, empData)
+                EmployeeAPI.update(employee.id, employeePayload)
             ]);
             setEdit(false); alert("All information saved."); onUpdate();
         }
@@ -997,7 +1011,15 @@ function CandidateInfoSection({ employee, employeeId, isHR, data, onUpdate, depa
                             <h4 style={{ margin: 0, fontSize: 15, fontWeight: 900, color: THEME.primary }}>Account Info</h4>
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                            <div><label style={labelStyle}>Role *</label><input disabled style={{ ...inputStyle, background: THEME.white }} value={employee.role || ''} /></div>
+                            <div><label style={labelStyle}>Role *</label>
+                                <select disabled={!edit} style={{ ...inputStyle, background: edit ? THEME.white : 'transparent' }} value={empData.role || ''} onChange={e => setEmpData({ ...empData, role: e.target.value })}>
+                                    <option value="ADMIN">ADMIN</option>
+                                    <option value="HR">HR</option>
+                                    <option value="PROJECT_MANAGER">PROJECT MANAGER</option>
+                                    <option value="SYSTEM_ADMIN">SYSTEM ADMIN</option>
+                                    <option value="EMPLOYEE">EMPLOYEE</option>
+                                </select>
+                            </div>
                             <div><label style={labelStyle}>Username</label><input disabled={!edit} style={{ ...inputStyle, background: edit ? THEME.white : 'transparent' }} value={empData.username || ''} onChange={e => setEmpData({ ...empData, username: e.target.value })} /></div>
                             <div><label style={labelStyle}>Password</label><input disabled={!edit} type="password" style={{ ...inputStyle, background: edit ? THEME.white : 'transparent' }} placeholder="••••••••" value={empData.password || ''} onChange={e => setEmpData({ ...empData, password: e.target.value })} /></div>
                         </div>

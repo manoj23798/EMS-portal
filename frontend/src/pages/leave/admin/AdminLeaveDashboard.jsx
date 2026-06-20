@@ -744,14 +744,19 @@ const AdminLeaveDashboard = () => {
                                     <td>{lr.totalDays} Days</td>
                                     <td>
                                         <span className="status-badge-premium" style={{ 
-                                            background: lr.status === 'Approved' ? '#ecfdf5' : lr.status === 'Rejected' ? '#fef2f2' : '#fff7ed',
-                                            color: lr.status === 'Approved' ? '#059669' : lr.status === 'Rejected' ? '#dc2626' : '#ea580c'
+                                            background: lr.status === 'Approved' ? '#ecfdf5' : lr.status === 'Rejected' ? '#fef2f2' : lr.status === 'Outdated' ? '#f1f5f9' : '#fff7ed',
+                                            color: lr.status === 'Approved' ? '#059669' : lr.status === 'Rejected' ? '#dc2626' : lr.status === 'Outdated' ? '#64748b' : '#ea580c'
                                         }}>
                                             {lr.status}
                                         </span>
                                         {['Approved', 'Rejected'].includes(String(lr.status || '')) && (lr.updatedAt || lr.approvedAt || lr.rejectedAt) && (
                                             <div style={{ fontSize: '9px', fontWeight: 900, color: '#94a3b8', marginTop: '4px', textTransform: 'uppercase' }}>
                                                 {new Date(lr.updatedAt || lr.approvedAt || lr.rejectedAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}
+                                            </div>
+                                        )}
+                                        {['CANCEL_REQUESTED', 'MODIFY_REQUESTED'].includes(lr.actionStatus) && (
+                                            <div style={{ fontSize: '9px', fontWeight: 900, color: lr.actionStatus === 'CANCEL_REQUESTED' ? '#ef4444' : '#f59e0b', marginTop: '4px', textTransform: 'uppercase' }}>
+                                                {lr.actionStatus === 'CANCEL_REQUESTED' ? 'Cancellation Req.' : 'Modification Req.'}
                                             </div>
                                         )}
                                     </td>

@@ -257,7 +257,7 @@ const HolidayManagement = () => {
                     inset: 0;
                     z-index: 2000;
                     background: rgba(15, 23, 42, 0.4);
-                    backdrop-filter: blur(12px);
+
                     display: flex;
                     align-items: center;
                     justify-content: center;

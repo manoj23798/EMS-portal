@@ -274,7 +274,7 @@ const LeaveTypeManagement = () => {
                     inset: 0;
                     z-index: 2000;
                     background: rgba(15, 23, 42, 0.45);
-                    backdrop-filter: blur(15px);
+
                     display: flex;
                     align-items: center;
                     justify-content: center;

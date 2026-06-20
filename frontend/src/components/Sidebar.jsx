@@ -31,11 +31,13 @@ export default function Sidebar() {
             </div>
             <nav className="sidebar-nav">
                 {/* Profile */}
-                <NavLink to={`/employees/${tokenManager.getUserData()?.employeeId || tokenManager.getUserData()?.id}`}
-                    className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
-                    <User size={20} />
-                    <span>My Profile</span>
-                </NavLink>
+                {userRole !== 'ADMIN' && (
+                    <NavLink to={`/employees/${tokenManager.getUserData()?.employeeId || tokenManager.getUserData()?.id}`}
+                        className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
+                        <User size={20} />
+                        <span>My Profile</span>
+                    </NavLink>
+                )}
 
                 {/* Module 1: Employees */}
                 {userRole !== 'EMPLOYEE' && (
@@ -47,12 +49,16 @@ export default function Sidebar() {
                 )}
 
                 {/* Module 2: Attendance */}
-                <div style={{ borderTop: '1px solid var(--border)', margin: '8px 0' }} />
-                <NavLink to="/attendance"
-                    className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
-                    <Clock size={20} />
-                    <span>Attendance</span>
-                </NavLink>
+                {userRole !== 'ADMIN' && (
+                    <>
+                        <div style={{ borderTop: '1px solid var(--border)', margin: '8px 0' }} />
+                        <NavLink to="/attendance"
+                            className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
+                            <Clock size={20} />
+                            <span>Attendance</span>
+                        </NavLink>
+                    </>
+                )}
                 {/* <NavLink to="/attendance/history"
                     className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
                     <History size={20} />
