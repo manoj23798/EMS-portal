@@ -47,6 +47,26 @@ const toDateOnly = (input) => {
     return d;
 };
 
+const formatDateToDDMMYYYY = (dateInput) => {
+    if (!dateInput) return '';
+    if (typeof dateInput === 'string') {
+        const match = dateInput.match(/^(\d{4})-(\d{2})-(\d{2})/);
+        if (match) {
+            return `${match[3]}-${match[2]}-${match[1]}`;
+        }
+    }
+    try {
+        const d = new Date(dateInput);
+        if (isNaN(d.getTime())) return String(dateInput);
+        const day = String(d.getDate()).padStart(2, '0');
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const year = d.getFullYear();
+        return `${day}-${month}-${year}`;
+    } catch (e) {
+        return String(dateInput);
+    }
+};
+
 const parseClock = (value) => {
     if (!value) return '';
     const [h = '00', m = '00'] = String(value).split(':');
@@ -809,14 +829,14 @@ const ManagerPermissionApprovalPage = () => {
                     <div className="mp-card stats-card">
                         <div className="mp-card-title">Live Presence</div>
                         <div className="mp-switch-row">
-                            {['today', 'year', 'all'].map((range) => (
+                            {['today', 'week', 'month'].map((range) => (
                                 <button
                                     key={range}
                                     className={`mp-switch-btn ${presenceRange === range ? 'active' : ''}`}
                                     onClick={() => setPresenceRange(range)}
                                     type="button"
                                 >
-                                    {range}
+                                    {range.charAt(0).toUpperCase() + range.slice(1)}
                                 </button>
                             ))}
                         </div>
@@ -994,18 +1014,18 @@ const ManagerPermissionApprovalPage = () => {
                                         </div>
                                     </div>
                                 </td>
-                                <td style={{ color: '#64748b' }}>{item.date}</td>
+                                <td style={{ color: '#64748b' }}>{formatDateToDDMMYYYY(item.date)}</td>
                                 <td>{parseClock(item.startTime)} - {parseClock(item.endTime)}</td>
                                 <td>{formatMinutes(getDurationMinutes(item))}</td>
                                 <td style={{ maxWidth: '260px' }}>
                                     <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.reason || '-'}</div>
                                 </td>
-                                <td style={{ color: '#64748b' }}>{new Date(item.createdAt || Date.now()).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}</td>
+                                <td style={{ color: '#64748b' }}>{formatDateToDDMMYYYY(item.createdAt || Date.now())}</td>
                                 <td>
                                     {item.status === 'Approved' ? (
                                         <div style={{ textAlign: 'center' }}>
                                             <span className="mp-status-label" style={{ background: '#ecfdf5', color: '#059669' }}>Approved</span>
-                                            {item.updatedAt && <div style={{ fontSize: '9px', fontWeight: 900, color: '#94a3b8', marginTop: '4px', textTransform: 'uppercase' }}>{new Date(item.updatedAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}</div>}
+                                            {item.updatedAt && <div style={{ fontSize: '9px', fontWeight: 900, color: '#94a3b8', marginTop: '4px', textTransform: 'uppercase' }}>{formatDateToDDMMYYYY(item.updatedAt)}</div>}
                                         </div>
                                     ) : item.status === 'Rejected' ? (
                                         <div style={{ textAlign: 'center' }}>
@@ -1021,7 +1041,7 @@ const ManagerPermissionApprovalPage = () => {
                                                     </div>
                                                 )}
                                             </div>
-                                            {item.updatedAt && <div style={{ fontSize: '9px', fontWeight: 900, color: '#94a3b8', marginTop: '4px', textTransform: 'uppercase' }}>{new Date(item.updatedAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}</div>}
+                                            {item.updatedAt && <div style={{ fontSize: '9px', fontWeight: 900, color: '#94a3b8', marginTop: '4px', textTransform: 'uppercase' }}>{formatDateToDDMMYYYY(item.updatedAt)}</div>}
                                         </div>
                                     ) : (
                                         <span className="mp-status-label" style={{ background: '#fff7ed', color: '#ea580c' }}>Pending</span>

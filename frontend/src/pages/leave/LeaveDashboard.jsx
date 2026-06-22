@@ -59,6 +59,26 @@ export default function LeaveDashboard() {
         fetchData();
     }, []);
 
+    const formatDateToDDMMYYYY = (dateInput) => {
+        if (!dateInput) return '';
+        if (typeof dateInput === 'string') {
+            const match = dateInput.match(/^(\d{4})-(\d{2})-(\d{2})/);
+            if (match) {
+                return `${match[3]}-${match[2]}-${match[1]}`;
+            }
+        }
+        try {
+            const d = new Date(dateInput);
+            if (isNaN(d.getTime())) return String(dateInput);
+            const day = String(d.getDate()).padStart(2, '0');
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const year = d.getFullYear();
+            return `${day}-${month}-${year}`;
+        } catch (e) {
+            return String(dateInput);
+        }
+    };
+
     const fetchData = async () => {
         if (!EMPLOYEE_ID) {
             setLoading(false);
@@ -384,6 +404,10 @@ export default function LeaveDashboard() {
                     color: #1e293b;
                     box-sizing: border-box;
                 }
+
+                .ld-tooltip-container { position: relative; display: inline-flex; align-items: center; cursor: pointer; margin-left: 4px; }
+                .ld-tooltip-content { visibility: hidden; width: 220px; background-color: #0f172a; color: #fff; text-align: center; border-radius: 8px; padding: 10px; position: absolute; z-index: 100; bottom: 125%; left: 50%; margin-left: -110px; opacity: 0; transition: opacity 0.2s, visibility 0.2s; font-size: 11px; font-weight: 500; line-height: 1.4; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); border: 1px solid #334155; text-transform: none; }
+                .ld-tooltip-container:hover .ld-tooltip-content { visibility: visible; opacity: 1; }
 
                 .dashboard-header {
                     display: flex;
@@ -1272,7 +1296,7 @@ export default function LeaveDashboard() {
                                                         return (
                                                             <tr key={permission.id}>
                                                                 <td>
-                                                                    {permission.date ? new Date(permission.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '-'}
+                                                                    {permission.date ? formatDateToDDMMYYYY(permission.date) : '-'}
                                                                 </td>
                                                                 <td>
                                                                     <span style={{ fontWeight: 800, color: '#475569' }}>
@@ -1286,13 +1310,24 @@ export default function LeaveDashboard() {
                                                                     <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{permission.reason || '-'}</div>
                                                                 </td>
                                                                 <td style={{ textAlign: 'center' }}>
-                                                                    <span className="status-pill-ui" style={{ background: statusStyle.bg, color: statusStyle.color, borderColor: statusStyle.border }}>
-                                                                        {permission.status === 'Approved' ? <CheckCircle size={12} /> : permission.status === 'Rejected' ? <XCircle size={12} /> : <Clock size={12} />}
-                                                                        {permission.status?.toUpperCase() || 'PENDING'}
-                                                                    </span>
+                                                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                                                                        <span className="status-pill-ui" style={{ background: statusStyle.bg, color: statusStyle.color, borderColor: statusStyle.border }}>
+                                                                            {permission.status === 'Approved' ? <CheckCircle size={12} /> : permission.status === 'Rejected' ? <XCircle size={12} /> : <Clock size={12} />}
+                                                                            {permission.status?.toUpperCase() || 'PENDING'}
+                                                                        </span>
+                                                                        {permission.status?.toLowerCase() === 'rejected' && permission.remarks && (
+                                                                            <span className="ld-tooltip-container">
+                                                                                <Info size={14} color="#ef4444" />
+                                                                                <span className="ld-tooltip-content">
+                                                                                    <div style={{ fontWeight: 800, borderBottom: '1px solid #475569', paddingBottom: '4px', marginBottom: '4px', textTransform: 'uppercase', color: '#f8fafc' }}>Rejection Reason</div>
+                                                                                    <div style={{ color: '#e2e8f0', textAlign: 'left' }}>{permission.remarks}</div>
+                                                                                </span>
+                                                                            </span>
+                                                                        )}
+                                                                    </div>
                                                                     {permission.updatedAt && permission.status !== 'Pending' && (
                                                                         <div style={{ fontSize: '9px', fontWeight: 900, color: '#94a3b8', marginTop: '4px', textTransform: 'uppercase' }}>
-                                                                            {new Date(permission.updatedAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}
+                                                                            {formatDateToDDMMYYYY(permission.updatedAt)}
                                                                         </div>
                                                                     )}
                                                                 </td>

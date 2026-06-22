@@ -15,7 +15,8 @@ import {
     Download,
     Eye,
     EyeOff,
-    Info
+    Info,
+    ArrowRight
 } from 'lucide-react';
 import RejectModal from '../../components/RejectModal';
 import {
@@ -38,6 +39,26 @@ const toDateOnly = (input) => {
     const d = new Date(input);
     d.setHours(0, 0, 0, 0);
     return d;
+};
+
+const formatDateToDDMMYYYY = (dateInput) => {
+    if (!dateInput) return '';
+    if (typeof dateInput === 'string') {
+        const match = dateInput.match(/^(\d{4})-(\d{2})-(\d{2})/);
+        if (match) {
+            return `${match[3]}-${match[2]}-${match[1]}`;
+        }
+    }
+    try {
+        const d = new Date(dateInput);
+        if (isNaN(d.getTime())) return String(dateInput);
+        const day = String(d.getDate()).padStart(2, '0');
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const year = d.getFullYear();
+        return `${day}-${month}-${year}`;
+    } catch (e) {
+        return String(dateInput);
+    }
 };
 
 const getPresenceRangeBounds = (rangeKey) => {
@@ -116,8 +137,8 @@ const getLeaveTotalDays = (request) => Number(request?.totalDays) || 0;
 
 const formatTooltipDateRange = (request) => {
     if (!request?.startDate || !request?.endDate) return 'N/A';
-    const start = new Date(request.startDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
-    const end = new Date(request.endDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+    const start = formatDateToDDMMYYYY(request.startDate);
+    const end = formatDateToDDMMYYYY(request.endDate);
     return `${start} to ${end}`;
 };
 
@@ -324,7 +345,7 @@ const ManagerApprovalPage = () => {
     const [categoryPopupLocked, setCategoryPopupLocked] = useState(false);
     const [categoryPopupPosition, setCategoryPopupPosition] = useState(null);
     const [categoryPopupHovered, setCategoryPopupHovered] = useState(false);
-    const [rejectModal, setRejectModal] = useState({ isOpen: false, requestId: null });
+    const [rejectModal, setRejectModal] = useState({ isOpen: false, requestId: null, isAction: false });
     const categoryChartRef = useRef(null);
     const categoryPopupRef = useRef(null);
 
@@ -495,8 +516,8 @@ const ManagerApprovalPage = () => {
                 employeeName: request.employeeName || 'Unknown Employee',
                 leaveType: request.leaveType || 'Leave',
                 reason: request.reason || 'No reason',
-                from: new Date(request.startDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }),
-                to: new Date(request.endDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }),
+                from: formatDateToDDMMYYYY(request.startDate),
+                to: formatDateToDDMMYYYY(request.endDate),
                 totalDays: typeof request.totalDays === 'number' ? request.totalDays.toFixed(1).replace(/\.0$/, '') : request.totalDays
             }));
     }, [approvedRequests, presenceRange]);
@@ -833,15 +854,13 @@ const ManagerApprovalPage = () => {
                 const allRes = await ManagerAPI.getPendingLeaves();
                 setAllRequests(allRes.data || []);
             } else if (action === 'reject') {
-                setRejectModal({ isOpen: true, requestId: id });
+                setRejectModal({ isOpen: true, requestId: id, isAction: false });
             } else if (action === 'action_approve') {
                 await ManagerAPI.approveLeaveAction(id, 1);
                 const allRes = await ManagerAPI.getPendingLeaves();
                 setAllRequests(allRes.data || []);
             } else if (action === 'action_reject') {
-                await ManagerAPI.rejectLeaveAction(id, 1);
-                const allRes = await ManagerAPI.getPendingLeaves();
-                setAllRequests(allRes.data || []);
+                setRejectModal({ isOpen: true, requestId: id, isAction: true });
             }
         } catch (err) {
             console.error(err);
@@ -850,8 +869,12 @@ const ManagerApprovalPage = () => {
 
     const handleConfirmReject = async (remarks) => {
         try {
-            await ManagerAPI.rejectLeave(rejectModal.requestId, 1, remarks);
-            setRejectModal({ isOpen: false, requestId: null });
+            if (rejectModal.isAction) {
+                await ManagerAPI.rejectLeaveAction(rejectModal.requestId, 1, remarks);
+            } else {
+                await ManagerAPI.rejectLeave(rejectModal.requestId, 1, remarks);
+            }
+            setRejectModal({ isOpen: false, requestId: null, isAction: false });
             const allRes = await ManagerAPI.getPendingLeaves();
             setAllRequests(allRes.data || []);
         } catch (err) {
@@ -1679,7 +1702,7 @@ const ManagerApprovalPage = () => {
                     <div className="ma-card-ui">
                         <div className="ma-card-title-ui">On Leave</div>
                         <div className="ma-switch-row">
-                            {['today', 'month', 'year'].map((range) => (
+                            {['today', 'week', 'month'].map((range) => (
                                 <button
                                     key={range}
                                     className={`ma-switch-btn ${presenceRange === range ? 'active' : ''}`}
@@ -1826,9 +1849,9 @@ const ManagerApprovalPage = () => {
             
             <RejectModal 
                 isOpen={rejectModal.isOpen} 
-                onClose={() => setRejectModal({ isOpen: false, requestId: null })} 
+                onClose={() => setRejectModal({ isOpen: false, requestId: null, isAction: false })} 
                 onReject={handleConfirmReject} 
-                title="Reject Leave Request"
+                title={rejectModal.isAction ? "Reject Cancellation / Modification" : "Reject Leave Request"}
             />
 
             <section className="ma-table-container">
@@ -1961,43 +1984,66 @@ const ManagerApprovalPage = () => {
                                 <td><span style={{ color: '#ea580c', fontWeight: 900 }}>{formatLeaveTypeLabel(lr.leaveType)}</span></td>
                                 <td style={{ color: '#64748b', fontSize: '13px', fontWeight: 800, maxWidth: '260px' }}>
                                     <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={lr.reason || '-'}>{lr.reason || '-'}</div>
-                                    {lr.status === 'Canceled' && lr.cancelReason && (
-                                        <div style={{ marginTop: '4px', fontSize: '11px', fontWeight: 900, color: '#475569', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={lr.cancelReason}>
-                                            Cancel: {lr.cancelReason}
-                                        </div>
-                                    )}
+
                                 </td>
                                 {showLopCountColumn && (
                                     <td style={{ textAlign: 'center', fontSize: '13px', fontWeight: 950, color: (Number(lr.lopCount) || 0) > 0 ? '#ef4444' : '#64748b' }}>
                                         {typeof lr.lopCount === 'number' ? lr.lopCount.toFixed(1).replace(/\.0$/, '') : 0}
                                     </td>
                                 )}
-                                <td style={{ color: '#64748b' }}>{new Date(lr.createdAt || Date.now()).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}</td>
-                                <td>{new Date(lr.startDate).getDate()} - {new Date(lr.endDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</td>
+                                <td style={{ color: '#64748b' }}>{formatDateToDDMMYYYY(lr.createdAt || Date.now())}</td>
+                                <td style={{ color: '#64748b', fontSize: '12px', fontWeight: 800, whiteSpace: 'nowrap' }}>{formatDateToDDMMYYYY(lr.startDate)} <ArrowRight size={10} style={{ verticalAlign: 'middle', margin: '0 4px' }} /> {formatDateToDDMMYYYY(lr.endDate)}</td>
                                 <td style={{ textAlign: 'center' }}>{typeof lr.totalDays === 'number' ? lr.totalDays.toFixed(1).replace(/\.0$/, '') : lr.totalDays} Days</td>
                                 <td>
                                     {['CANCEL_REQUESTED', 'MODIFY_REQUESTED'].includes(lr.actionStatus) ? (
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                            <div style={{ fontSize: '10px', fontWeight: 900, color: lr.actionStatus === 'CANCEL_REQUESTED' ? '#ef4444' : '#f59e0b', textTransform: 'uppercase' }}>
-                                                {lr.actionStatus === 'CANCEL_REQUESTED' ? 'Cancellation Requested' : 'Modification Requested'}
-                                                {lr.actionStatus === 'MODIFY_REQUESTED' && (
-                                                    <div style={{ fontSize: '9px', color: '#64748b', marginTop: '4px', textTransform: 'none' }}>
-                                                        Proposed: {new Date(lr.proposedStartDate).getDate()} - {new Date(lr.proposedEndDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })} ({lr.proposedTotalDays} Days)
-                                                        <br/>Reason: {lr.proposedReason}
-                                                    </div>
-                                                )}
-                                                {lr.actionStatus === 'CANCEL_REQUESTED' && (
-                                                    <div style={{ fontSize: '9px', color: '#64748b', marginTop: '4px', textTransform: 'none' }}>
-                                                        Reason: {lr.cancelReason}
-                                                    </div>
-                                                )}
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-start' }}>
+                                            <div style={{ fontSize: '11px', fontWeight: 900, color: lr.actionStatus === 'CANCEL_REQUESTED' ? '#ef4444' : '#f59e0b', textTransform: 'uppercase', lineHeight: 1.4 }}>
+                                                {lr.actionStatus === 'CANCEL_REQUESTED' ? 'CANCELLATION REQUESTED' : 'MODIFICATION REQUESTED'}
+                                                <div style={{ fontSize: '10px', color: '#64748b', textTransform: 'none', fontWeight: 800 }}>
+                                                    {lr.actionStatus === 'MODIFY_REQUESTED' && (
+                                                        <>Proposed: {formatDateToDDMMYYYY(lr.proposedStartDate)} to {formatDateToDDMMYYYY(lr.proposedEndDate)} ({lr.proposedTotalDays} Days)<br/></>
+                                                    )}
+                                                    Reason: {lr.actionStatus === 'CANCEL_REQUESTED' ? lr.cancelReason : lr.proposedReason}
+                                                </div>
                                             </div>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                                <button className="ma-btn-approve" type="button" onClick={() => handleAction(lr.id, 'action_approve')}>
-                                                    <Check size={14} strokeWidth={4} /> Approve
+                                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                                                <button 
+                                                    type="button" 
+                                                    onClick={() => handleAction(lr.id, 'action_approve')}
+                                                    style={{ 
+                                                        background: '#ecfdf5', 
+                                                        border: '1.5px solid #d1fae5', 
+                                                        borderRight: '2px solid white',
+                                                        borderRadius: '16px 0 0 16px', 
+                                                        height: '32px',
+                                                        width: '42px',
+                                                        cursor: 'pointer', 
+                                                        display: 'flex', 
+                                                        alignItems: 'center', 
+                                                        justifyContent: 'center',
+                                                        padding: 0
+                                                    }}
+                                                >
+                                                    <Check size={16} strokeWidth={4} color="#10b981" />
                                                 </button>
-                                                <button className="ma-btn-reject" type="button" onClick={() => handleAction(lr.id, 'action_reject')}>
-                                                    <X size={14} strokeWidth={3} /> Reject
+                                                <button 
+                                                    type="button" 
+                                                    onClick={() => handleAction(lr.id, 'action_reject')}
+                                                    style={{ 
+                                                        background: '#f8fafc', 
+                                                        border: '1.5px solid #e2e8f0',
+                                                        borderLeft: 'none', 
+                                                        borderRadius: '0 16px 16px 0', 
+                                                        height: '32px',
+                                                        width: '42px',
+                                                        cursor: 'pointer', 
+                                                        display: 'flex', 
+                                                        alignItems: 'center', 
+                                                        justifyContent: 'center',
+                                                        padding: 0
+                                                    }}
+                                                >
+                                                    <X size={16} strokeWidth={3} color="#64748b" />
                                                 </button>
                                             </div>
                                         </div>
@@ -2009,7 +2055,23 @@ const ManagerApprovalPage = () => {
                                             </div>
                                         </div>
                                     ) : lr.status === 'Canceled' ? (
-                                        <span className="ma-status-label" style={{ background: '#f1f5f9', color: '#475569' }}>Canceled</span>
+                                        <div style={{ textAlign: 'center' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                                                <span className="ma-status-label" style={{ background: '#f1f5f9', color: '#475569' }}>Canceled</span>
+                                                {lr.cancelReason && (
+                                                    <div className="ma-tooltip-container">
+                                                        <Info size={14} color="#64748b" />
+                                                        <div className="ma-tooltip-content">
+                                                            <div style={{ fontWeight: 900, marginBottom: '4px', color: '#cbd5e1', borderBottom: '1px solid #334155', paddingBottom: '4px', textTransform: 'uppercase' }}>Cancel Reason</div>
+                                                            <div style={{ color: '#f8fafc', lineHeight: 1.4 }}>{lr.cancelReason}</div>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div style={{ fontSize: '9px', fontWeight: 900, color: '#94a3b8', marginTop: '4px', textTransform: 'uppercase', lineHeight: 1.2 }}>
+                                                {formatActionDate(getStatusActionTimestamp(lr)) || '--'}
+                                            </div>
+                                        </div>
                                     ) : lr.status === 'Rejected' ? (
                                         <div style={{ textAlign: 'center' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>

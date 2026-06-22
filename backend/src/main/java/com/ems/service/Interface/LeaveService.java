@@ -29,5 +29,5 @@ public interface LeaveService {
 
     LeaveRequestResponse approveLeaveAction(Long leaveId, Long managerId);
 
-    LeaveRequestResponse rejectLeaveAction(Long leaveId, Long managerId);
+    LeaveRequestResponse rejectLeaveAction(Long leaveId, Long managerId, String remarks);
 }

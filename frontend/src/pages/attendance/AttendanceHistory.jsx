@@ -64,6 +64,26 @@ export default function AttendanceHistory() {
         return `${hrs}h ${mins}m`;
     };
 
+    const formatDateToDDMMYYYY = (dateInput) => {
+        if (!dateInput) return '';
+        if (typeof dateInput === 'string') {
+            const match = dateInput.match(/^(\d{4})-(\d{2})-(\d{2})/);
+            if (match) {
+                return `${match[3]}-${match[2]}-${match[1]}`;
+            }
+        }
+        try {
+            const d = new Date(dateInput);
+            if (isNaN(d.getTime())) return String(dateInput);
+            const day = String(d.getDate()).padStart(2, '0');
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const year = d.getFullYear();
+            return `${day}-${month}-${year}`;
+        } catch (e) {
+            return String(dateInput);
+        }
+    };
+
     const normalizeStatus = (status) => {
         const value = String(status || '').trim().toLowerCase();
         if (!value) return '--';
@@ -240,7 +260,7 @@ export default function AttendanceHistory() {
                                 filteredRecords.map((record) => (
                                     <tr key={record.id}>
                                         {viewScope === 'org' && <td style={{ fontWeight: 900 }}>{record.employeeName}</td>}
-                                        <td style={{ color: '#64748b', fontSize: '11px', fontWeight: 950 }}>{record.date}</td>
+                                        <td style={{ color: '#64748b', fontSize: '11px', fontWeight: 950 }}>{formatDateToDDMMYYYY(record.date)}</td>
                                         <td>{formatTime(record.inTime)}</td>
                                         <td>{formatTime(record.outTime)}</td>
                                         <td>{formatMinutes(record.breakDuration)}</td>

@@ -25,9 +25,8 @@ export default function Sidebar() {
 
     return (
         <aside className="sidebar">
-            <div className="sidebar-header">
-                <Briefcase size={24} />
-                <span>Elintsys EMS</span>
+            <div className="sidebar-header" style={{ padding: '8px 20px', borderBottom: '1px solid #eef2f6', marginBottom: '10px' }}>
+                <img src="/elintsys-logo.svg" alt="Elintsys" style={{ height: '40px' }} />
             </div>
             <nav className="sidebar-nav">
                 {/* Profile */}

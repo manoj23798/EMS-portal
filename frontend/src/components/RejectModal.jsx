@@ -18,24 +18,90 @@ const RejectModal = ({ isOpen, onClose, onReject, title = "Reject Request" }) =>
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
-      <div className="bg-white/10 border border-white/20 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden p-6 text-white">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-semibold text-white/90">{title}</h2>
+    <div style={{
+      position: 'fixed',
+      inset: 0,
+      zIndex: 9999,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: 'rgba(15, 23, 42, 0.65)',
+      backdropFilter: 'blur(4px)',
+      padding: '16px'
+    }}>
+      <div style={{
+        backgroundColor: '#ffffff',
+        border: '1px solid #e2e8f0',
+        borderRadius: '16px',
+        width: '100%',
+        maxWidth: '440px',
+        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+        overflow: 'hidden',
+        padding: '24px',
+        position: 'relative',
+        boxSizing: 'border-box'
+      }}>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '20px'
+        }}>
+          <h2 style={{
+            fontSize: '18px',
+            fontWeight: 800,
+            color: '#0f172a',
+            margin: 0,
+            fontFamily: 'inherit'
+          }}>{title}</h2>
           <button 
             onClick={onClose}
-            className="text-white/60 hover:text-white transition-colors p-1 rounded-full hover:bg-white/10"
+            style={{
+              background: 'none',
+              border: 'none',
+              color: '#64748b',
+              cursor: 'pointer',
+              padding: '6px',
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'all 0.2s'
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#f1f5f9'; e.currentTarget.style.color = '#0f172a'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#64748b'; }}
           >
-            <X size={20} />
+            <X size={18} />
           </button>
         </div>
         
-        <div className="mb-6">
-          <label className="block text-sm font-medium text-white/70 mb-2">
-            Reason for Rejection <span className="text-red-400">*</span>
+        <div style={{ marginBottom: '20px' }}>
+          <label style={{
+            display: 'block',
+            fontSize: '13px',
+            fontWeight: 700,
+            color: '#334155',
+            marginBottom: '8px',
+            textAlign: 'left'
+          }}>
+            Reason for Rejection <span style={{ color: '#ef4444' }}>*</span>
           </label>
           <textarea
-            className="w-full bg-black/20 border border-white/10 rounded-xl p-3 text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-red-500/50 resize-none"
+            style={{
+              width: '100%',
+              boxSizing: 'border-box',
+              backgroundColor: '#f8fafc',
+              border: '1.5px solid #cbd5e1',
+              borderRadius: '12px',
+              padding: '12px',
+              fontSize: '14px',
+              color: '#0f172a',
+              outline: 'none',
+              resize: 'none',
+              minHeight: '100px',
+              transition: 'border-color 0.2s',
+              fontFamily: 'inherit'
+            }}
             rows="4"
             placeholder="Please enter the reason for rejection..."
             value={remarks}
@@ -43,20 +109,58 @@ const RejectModal = ({ isOpen, onClose, onReject, title = "Reject Request" }) =>
               setRemarks(e.target.value);
               if (error) setError("");
             }}
+            onFocus={(e) => e.currentTarget.style.borderColor = '#ef4444'}
+            onBlur={(e) => e.currentTarget.style.borderColor = '#cbd5e1'}
           />
-          {error && <p className="text-red-400 text-xs mt-2">{error}</p>}
+          {error && (
+            <p style={{
+              color: '#ef4444',
+              fontSize: '12px',
+              fontWeight: 600,
+              margin: '6px 0 0 0',
+              textAlign: 'left'
+            }}>{error}</p>
+          )}
         </div>
 
-        <div className="flex justify-end gap-3">
+        <div style={{
+          display: 'flex',
+          justifyContent: 'end',
+          gap: '12px'
+        }}>
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded-xl text-sm font-medium text-white/70 hover:bg-white/10 transition-colors"
+            style={{
+              padding: '10px 16px',
+              borderRadius: '10px',
+              fontSize: '13px',
+              fontWeight: 800,
+              backgroundColor: '#f1f5f9',
+              border: 'none',
+              color: '#475569',
+              cursor: 'pointer',
+              transition: 'background-color 0.2s'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e2e8f0'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
           >
             Cancel
           </button>
           <button
             onClick={handleReject}
-            className="px-4 py-2 rounded-xl text-sm font-medium bg-red-500/80 hover:bg-red-500 text-white transition-colors"
+            style={{
+              padding: '10px 16px',
+              borderRadius: '10px',
+              fontSize: '13px',
+              fontWeight: 800,
+              backgroundColor: '#ef4444',
+              border: 'none',
+              color: '#ffffff',
+              cursor: 'pointer',
+              transition: 'opacity 0.2s'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.opacity = '0.9'}
+            onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
           >
             Confirm Rejection
           </button>

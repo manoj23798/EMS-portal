@@ -319,6 +319,26 @@ export default function AttendanceDashboard() {
         return `${mins}m`;
     };
 
+    const formatDateToDDMMYYYY = (dateInput) => {
+        if (!dateInput) return '';
+        if (typeof dateInput === 'string') {
+            const match = dateInput.match(/^(\d{4})-(\d{2})-(\d{2})/);
+            if (match) {
+                return `${match[3]}-${match[2]}-${match[1]}`;
+            }
+        }
+        try {
+            const d = new Date(dateInput);
+            if (isNaN(d.getTime())) return String(dateInput);
+            const day = String(d.getDate()).padStart(2, '0');
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const year = d.getFullYear();
+            return `${day}-${month}-${year}`;
+        } catch (e) {
+            return String(dateInput);
+        }
+    };
+
     const normalizeStatus = (status, inTime) => {
         const value = String(status || '').trim().toLowerCase();
         if (!value) return '---';
@@ -1425,7 +1445,7 @@ export default function AttendanceDashboard() {
 
                                     return (
                                         <tr key={record.id ?? record.date}>
-                                            <td style={{ color: '#64748b', fontSize: '13px', fontWeight: 900 }}>{record.date || '---'}</td>
+                                            <td style={{ color: '#64748b', fontSize: '13px', fontWeight: 900 }}>{formatDateToDDMMYYYY(record.date) || '---'}</td>
                                             <td>{formatTime(record.inTime)}</td>
                                             <td>{formatTime(record.outTime)}</td>
                                             <td>

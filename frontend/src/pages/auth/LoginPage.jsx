@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../../services/authService';
-import { Eye, EyeOff, Lock, User, AlertCircle } from 'lucide-react';
+import { Eye, EyeOff, Lock, User, AlertCircle, ArrowRight } from 'lucide-react';
 
 export default function LoginPage() {
     const [username, setUsername] = useState('');
@@ -18,15 +18,14 @@ export default function LoginPage() {
 
         try {
             await authService.login(username, password);
-            navigate('/'); // Navigate to default dashboard, RoleGuard/App router will handle specific routing
+            navigate('/');
         } catch (err) {
-            console.error('Login Failed', err);
             if (err.response && err.response.status === 401) {
                 setError('Invalid username or password.');
             } else if (err.response && err.response.status === 403) {
                  setError('Account is inactive or locked.');
             } else {
-                setError('Unable to connect to server. Please try again later.');
+                setError('Unable to connect to server. Please try again.');
             }
         } finally {
             setLoading(false);
@@ -34,110 +33,262 @@ export default function LoginPage() {
     };
 
     return (
-        <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--background)' }}>
+        <div style={{ 
+            display: 'flex', 
+            minHeight: '100vh', 
+            fontFamily: '"Inter", "Outfit", sans-serif',
+            background: '#f0f4f8',
+            position: 'relative'
+        }}>
             
+            <style>
+                {`
+                .input-field::placeholder {
+                    color: #94a3b8;
+                    font-weight: 500;
+                }
+                .login-btn {
+                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                    position: relative;
+                    overflow: hidden;
+                }
+                .login-btn:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 10px 25px -5px rgba(26, 31, 54, 0.4);
+                }
+                .login-btn:active {
+                    transform: translateY(0);
+                }
+                `}
+            </style>
+
+            {/* Decorative Top Left Orange Blob */}
+            <div style={{
+                position: 'absolute',
+                top: '-50px',
+                left: '-50px',
+                width: '300px',
+                height: '300px',
+                background: '#f97316',
+                borderRadius: '50%',
+                zIndex: 0
+            }}></div>
+
+            {/* Decorative Bottom Right Orange Blob */}
+            <div style={{
+                position: 'absolute',
+                bottom: '-100px',
+                right: '-100px',
+                width: '400px',
+                height: '400px',
+                background: '#f97316',
+                borderRadius: '50%',
+                zIndex: 0
+            }}></div>
+
             {/* Left side: Branding / Image */}
-            <div style={{ flex: 1, background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%)', display: 'flex', flexDirection: 'column', padding: 60, color: 'white' }}>
-                <div style={{ fontSize: '2rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <div style={{ background: 'white', color: 'var(--primary)', padding: '8px', borderRadius: 12, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            <div style={{ 
+                flex: 1, 
+                display: 'flex', 
+                flexDirection: 'column', 
+                alignItems: 'center', 
+                justifyContent: 'center',
+                zIndex: 10,
+                position: 'relative',
+                borderRight: '2px solid #cfd8dc'
+            }}>
+                
+                {/* Decorative Bottom Rectangle */}
+                <div style={{
+                    position: 'absolute',
+                    bottom: '0',
+                    right: '0',
+                    width: '180px',
+                    height: '50px',
+                    background: '#f97316',
+                    zIndex: 0
+                }}></div>
+                
+                {/* Illustration and Logo within Orange Border Container */}
+                <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+                    <div style={{
+                        background: '#ffffff',
+                        border: '4px solid #f97316',
+                        borderRadius: '60px',
+                        padding: '100px 30px',
+                        minHeight: '450px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        width: '80%',
+                        maxWidth: '580px',
+                        boxShadow: '0 10px 30px rgba(0,0,0,0.02)'
+                    }}>
+                        {/* Logo and Text inside the box */}
+                        <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                            <img 
+                                src="/elintsys-logo.svg" 
+                                alt="Elintsys" 
+                                style={{ height: '110px', filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.05))', marginBottom: '10px' }} 
+                            />
+                            <h1 style={{ 
+                                margin: 0, 
+                                color: '#7a7a7a', 
+                                fontSize: '3.5rem', 
+                                fontWeight: '800',
+                                fontFamily: 'Arial, sans-serif',
+                                letterSpacing: '-0.5px'
+                            }}>
+                                Technologies
+                            </h1>
+                        </div>
                     </div>
-                    EMS Portal
-                </div>
-                
-                <div style={{ marginTop: 'auto', marginBottom: 'auto', maxWidth: 480 }}>
-                    <h1 style={{ fontSize: '3.5rem', fontWeight: 700, lineHeight: 1.1, marginBottom: 24, textShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
-                        Empower your workforce.
-                    </h1>
-                    <p style={{ fontSize: '1.25rem', opacity: 0.9, lineHeight: 1.6 }}>
-                        Enterprise-grade employee management system with secure authentication, precise role-based access, and seamless workflows.
-                    </p>
-                </div>
-                
-                <div style={{ opacity: 0.8, fontSize: '0.9rem' }}>
-                    &copy; {new Date().getFullYear()} Your Company Name. All rights reserved.
                 </div>
             </div>
 
             {/* Right side: Login Form */}
-            <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', background: 'var(--surface)' }}>
-                <div style={{ width: '100%', maxWidth: 420, padding: 40, background: 'white', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-lg)' }}>
+            <div style={{ 
+                flex: 1, 
+                display: 'flex', 
+                justifyContent: 'center', 
+                alignItems: 'center', 
+                position: 'relative',
+                zIndex: 10
+            }}>
+                
+                {/* Clean Card */}
+                <div style={{ 
+                    width: '100%', 
+                    maxWidth: '440px', 
+                    padding: '50px 45px', 
+                    background: '#ffffff', 
+                    borderRadius: '24px', 
+                    border: '1px solid rgba(0, 0, 0, 0.05)',
+                    marginRight: '8%',
+                    boxShadow: '0 20px 40px rgba(0, 0, 0, 0.04)'
+                }}>
                     
-                    <div style={{ textAlign: 'center', marginBottom: 32 }}>
-                        <h2 style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--text-main)' }}>Welcome Back</h2>
-                        <p style={{ color: 'var(--text-muted)', marginTop: 8 }}>Please sign in to your account</p>
+                    <div style={{ marginBottom: 40 }}>
+                        <h2 style={{ fontSize: '2.2rem', fontWeight: 800, color: '#0f172a', margin: 0, letterSpacing: '-0.5px' }}>Welcome back</h2>
+                        <p style={{ color: '#64748b', marginTop: '8px', fontSize: '0.95rem', fontWeight: 500 }}>Please enter your details to sign in.</p>
                     </div>
 
                     {error && (
-                        <div style={{ background: '#fef2f2', border: '1px solid #fecaca', color: '#ef4444', padding: '12px 16px', borderRadius: 'var(--radius-md)', marginBottom: 24, display: 'flex', alignItems: 'center', gap: 10, fontSize: '0.9rem' }}>
-                            <AlertCircle size={18} />
+                        <div style={{ background: '#fef2f2', border: '1px solid #fecaca', color: '#ef4444', padding: '14px 16px', borderRadius: '12px', marginBottom: 28, display: 'flex', alignItems: 'center', gap: 12, fontSize: '0.9rem', fontWeight: 500 }}>
+                            <AlertCircle size={20} />
                             {error}
                         </div>
                     )}
 
-                    <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-                        <div className="form-group">
-                            <label className="form-label" style={{ fontWeight: 600 }}>Username or Email</label>
-                            <div style={{ position: 'relative' }}>
-                                <div style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }}>
-                                    <User size={18} />
-                                </div>
-                                <input 
-                                    type="text" 
-                                    className="form-input" 
-                                    placeholder="Enter your username" 
-                                    value={username}
-                                    onChange={(e) => setUsername(e.target.value)}
-                                    style={{ paddingLeft: 42, height: 48 }}
-                                    required
-                                />
+                    <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+                        {/* Username Field */}
+                        <div style={{ 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            background: '#f8fafc',
+                            borderRadius: '16px',
+                            border: '1px solid #e2e8f0',
+                            padding: '4px'
+                        }}>
+                            <div style={{ color: '#94a3b8', padding: '0 16px', display: 'flex', alignItems: 'center' }}>
+                                <User size={20} strokeWidth={2} />
                             </div>
+                            <input 
+                                className="input-field"
+                                type="text" 
+                                placeholder="Username"
+                                value={username}
+                                onChange={(e) => setUsername(e.target.value)}
+                                style={{ 
+                                    border: 'none', 
+                                    outline: 'none', 
+                                    flex: 1, 
+                                    fontSize: '1rem',
+                                    background: 'transparent',
+                                    color: '#0f172a',
+                                    padding: '16px 16px 16px 0',
+                                    fontWeight: 500
+                                }}
+                                required
+                            />
                         </div>
 
-                        <div className="form-group">
-                            <label className="form-label" style={{ fontWeight: 600 }}>Password</label>
-                            <div style={{ position: 'relative' }}>
-                                <div style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }}>
-                                    <Lock size={18} />
-                                </div>
-                                <input 
-                                    type={showPassword ? "text" : "password"} 
-                                    className="form-input" 
-                                    placeholder="Enter your password" 
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    style={{ paddingLeft: 42, paddingRight: 42, height: 48 }}
-                                    required
-                                />
-                                <button 
-                                    type="button" 
-                                    onClick={() => setShowPassword(!showPassword)}
-                                    style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', display: 'flex' }}
-                                >
-                                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                                </button>
+                        {/* Password Field */}
+                        <div style={{ 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            background: '#f8fafc',
+                            borderRadius: '16px',
+                            border: '1px solid #e2e8f0',
+                            padding: '4px'
+                        }}>
+                            <div style={{ color: '#94a3b8', padding: '0 16px', display: 'flex', alignItems: 'center' }}>
+                                <Lock size={20} strokeWidth={2} />
                             </div>
+                            <input 
+                                className="input-field"
+                                type={showPassword ? "text" : "password"} 
+                                placeholder="Password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                style={{ 
+                                    border: 'none', 
+                                    outline: 'none', 
+                                    flex: 1, 
+                                    fontSize: '1rem',
+                                    background: 'transparent',
+                                    color: '#0f172a',
+                                    padding: '16px 0',
+                                    fontWeight: 500
+                                }}
+                                required
+                            />
+                            <button 
+                                type="button" 
+                                onClick={() => setShowPassword(!showPassword)}
+                                style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: '0 16px', display: 'flex', alignItems: 'center' }}
+                            >
+                                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                            </button>
                         </div>
 
-                        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                            <a href="#" style={{ color: 'var(--primary)', fontSize: '0.9rem', textDecoration: 'none', fontWeight: 500 }}>Forgot password?</a>
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '-4px' }}>
+                            <a href="#" style={{ color: '#4f46e5', fontSize: '0.9rem', textDecoration: 'none', fontWeight: 600, transition: 'color 0.2s' }} onMouseOver={(e) => e.target.style.color = '#3730a3'} onMouseOut={(e) => e.target.style.color = '#4f46e5'}>Forgot Password?</a>
                         </div>
 
                         <button 
                             type="submit" 
-                            className="btn btn-primary" 
-                            style={{ height: 48, marginTop: 8, fontSize: '1rem', fontWeight: 600 }}
+                            className="login-btn"
+                            style={{ 
+                                height: 56, 
+                                marginTop: 12, 
+                                fontSize: '1.1rem', 
+                                fontWeight: 700, 
+                                background: '#0f172a', 
+                                color: 'white', 
+                                border: 'none', 
+                                borderRadius: '16px',
+                                cursor: 'pointer',
+                                width: '100%',
+                                display: 'flex',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                gap: '10px'
+                            }}
                             disabled={loading}
                         >
-                            {loading ? 'Signing in...' : 'Sign In'}
+                            {loading ? 'Authenticating...' : (
+                                <>
+                                    Sign In <ArrowRight size={20} strokeWidth={2.5} />
+                                </>
+                            )}
                         </button>
                     </form>
-                    
-                    {/* Development credentials removed for production */}
-
                 </div>
             </div>
             
         </div>
     );
 }
+

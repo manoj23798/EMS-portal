@@ -1,0 +1,14 @@
+<service>
+  <id>EMSFrontend</id>
+  <name>EMS Frontend Portal</name>
+  <description>React Frontend for the Employee Management System running on Vite.</description>
+  <executable>cmd.exe</executable>
+  <arguments>/c npm run dev</arguments>
+  <workingdirectory>C:\Users\91936\Documents\project 3\EMS TESTING 2\frontend</workingdirectory>
+  <log mode="roll-by-size">
+    <logpath>%BASE%\logs</logpath>
+    <sizeThreshold>10240</sizeThreshold>
+    <keepFiles>8</keepFiles>
+  </log>
+  <onfailure action="restart" delay="10000"/>
+</service>

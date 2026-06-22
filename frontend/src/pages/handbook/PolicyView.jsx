@@ -281,7 +281,7 @@ export default function PolicyView() {
                 display: 'flex', 
                 flexDirection: 'column', 
                 alignItems: 'center', 
-                background: 'transparent', 
+                background: '#f1f5f9', 
                 padding: '16px 0', 
                 borderRadius: '0', 
                 height: isFullScreen ? 'calc(100vh - 60px)' : 'calc(100vh - 80px)', 
@@ -291,7 +291,7 @@ export default function PolicyView() {
                     <div style={{ 
                         width: '100%', 
                         maxWidth: '1000px', 
-                        backgroundColor: '#f5f5f5', 
+                        backgroundColor: '#ffffff', 
                         border: '1px solid #ddd',
                         borderRadius: 'var(--radius-md)',
                         boxShadow: '0 1px 3px rgba(0, 0, 0, 0.08)',
@@ -352,7 +352,7 @@ export default function PolicyView() {
                             )
                         )}
                         <div style={{ padding: '10px 60px 30px', color: '#94a3b8', fontSize: '0.85rem', textAlign: 'center', borderTop: '0px solid #f1f5f9', marginTop: 'auto' }}>
-                            - End of Document -
+                            
                         </div>
                     </div>
                 </div>

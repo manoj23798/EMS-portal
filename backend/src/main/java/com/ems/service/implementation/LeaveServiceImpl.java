@@ -239,12 +239,20 @@ public class LeaveServiceImpl implements LeaveService {
             throw new IllegalArgumentException("Only Pending or Approved leave can be canceled.");
         }
 
-        if (leaveRequest.getActionStatus() != null && !"NONE".equalsIgnoreCase(leaveRequest.getActionStatus())) {
+        if ("CANCEL_REQUESTED".equalsIgnoreCase(leaveRequest.getActionStatus()) || "MODIFY_REQUESTED".equalsIgnoreCase(leaveRequest.getActionStatus())) {
             throw new IllegalArgumentException("An action is already requested for this leave.");
         }
 
-        leaveRequest.setActionStatus("CANCEL_REQUESTED");
+        if ("Pending".equalsIgnoreCase(status)) {
+            leaveRequest.setStatus("Canceled");
+            leaveRequest.setActionStatus("NONE");
+            leaveRequest.setUpdatedAt(LocalDateTime.now());
+        } else {
+            leaveRequest.setActionStatus("CANCEL_REQUESTED");
+        }
+        
         leaveRequest.setCancelReason(cancelReason != null ? cancelReason.trim() : "");
+        leaveRequest.setRemarks(null);
 
         return mapToResponse(leaveRequestRepository.save(leaveRequest));
     }
@@ -265,7 +273,7 @@ public class LeaveServiceImpl implements LeaveService {
             throw new IllegalArgumentException("Only Pending or Approved leave can be modified.");
         }
 
-        if (leaveRequest.getActionStatus() != null && !"NONE".equalsIgnoreCase(leaveRequest.getActionStatus())) {
+        if ("CANCEL_REQUESTED".equalsIgnoreCase(leaveRequest.getActionStatus()) || "MODIFY_REQUESTED".equalsIgnoreCase(leaveRequest.getActionStatus())) {
             throw new IllegalArgumentException("An action is already requested for this leave.");
         }
 
@@ -274,6 +282,7 @@ public class LeaveServiceImpl implements LeaveService {
         leaveRequest.setProposedEndDate(request.getProposedEndDate());
         leaveRequest.setProposedTotalDays(request.getProposedTotalDays());
         leaveRequest.setProposedReason(request.getProposedReason());
+        leaveRequest.setRemarks(null);
 
         return mapToResponse(leaveRequestRepository.save(leaveRequest));
     }
@@ -390,23 +399,29 @@ public class LeaveServiceImpl implements LeaveService {
 
     @Override
     @Transactional
-    public LeaveRequestResponse rejectLeaveAction(Long leaveId, Long managerId) {
+    public LeaveRequestResponse rejectLeaveAction(Long leaveId, Long managerId, String remarks) {
         LeaveRequest leaveRequest = leaveRequestRepository.findById(leaveId)
                 .orElseThrow(() -> new ResourceNotFoundException("Leave request not found."));
         Employee manager = getEmployeeOrThrow(managerId);
 
-        if ("NONE".equalsIgnoreCase(leaveRequest.getActionStatus())) {
-            throw new IllegalArgumentException("No pending actions for this leave request.");
+        String currentActionStatus = leaveRequest.getActionStatus();
+        if (!("CANCEL_REQUESTED".equalsIgnoreCase(currentActionStatus) || "MODIFY_REQUESTED".equalsIgnoreCase(currentActionStatus))) {
+            throw new IllegalArgumentException("No pending actions to reject for this leave request.");
         }
 
-        leaveRequest.setActionStatus("NONE");
+        if ("CANCEL_REQUESTED".equalsIgnoreCase(currentActionStatus)) {
+            leaveRequest.setActionStatus("CANCEL_REJECTED");
+        } else if ("MODIFY_REQUESTED".equalsIgnoreCase(currentActionStatus)) {
+            leaveRequest.setActionStatus("MODIFY_REJECTED");
+        } else {
+            leaveRequest.setActionStatus("NONE");
+        }
+
+        leaveRequest.setRemarks(remarks);
         leaveRequest.setProposedStartDate(null);
         leaveRequest.setProposedEndDate(null);
         leaveRequest.setProposedTotalDays(null);
         leaveRequest.setProposedReason(null);
-        if ("CANCEL_REQUESTED".equalsIgnoreCase(leaveRequest.getActionStatus())) {
-            leaveRequest.setCancelReason(null);
-        }
 
         return mapToResponse(leaveRequestRepository.save(leaveRequest));
     }

@@ -4,7 +4,7 @@ import {
     PieChart as PieIcon, BarChart3, LineChart as LineIcon,
     Filter, ArrowUpRight, ArrowDownRight, Search,
     ChevronLeft, ChevronRight, MoreHorizontal, Download,
-    CheckCircle, XCircle, ShieldCheck, Globe, Activity
+    CheckCircle, XCircle, ShieldCheck, Globe, Activity, ArrowRight
 } from 'lucide-react';
 import { 
     PieChart, Pie, Cell, ResponsiveContainer, 
@@ -78,6 +78,26 @@ const MiniCalendar = ({ leaves = [] }) => {
 };
 
 const AdminLeaveDashboard = () => {
+    const formatDateToDDMMYYYY = (dateInput) => {
+        if (!dateInput) return '';
+        if (typeof dateInput === 'string') {
+            const match = dateInput.match(/^(\d{4})-(\d{2})-(\d{2})/);
+            if (match) {
+                return `${match[3]}-${match[2]}-${match[1]}`;
+            }
+        }
+        try {
+            const d = new Date(dateInput);
+            if (isNaN(d.getTime())) return String(dateInput);
+            const day = String(d.getDate()).padStart(2, '0');
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const year = d.getFullYear();
+            return `${day}-${month}-${year}`;
+        } catch (e) {
+            return String(dateInput);
+        }
+    };
+
     const formatLeaveTypeLabel = (leaveType) => {
         const normalized = String(leaveType || '').trim().toLowerCase();
         return normalized === 'urgent leave' ? 'Unplanned Leave' : (leaveType || 'Leave');
@@ -738,20 +758,20 @@ const AdminLeaveDashboard = () => {
                                     <td>
                                         <span style={{ fontWeight: 800, color: lr.lopCount > 0 ? '#ef4444' : '#64748b' }}>{lr.lopCount || 0}</span>
                                     </td>
-                                    <td>
-                                        <div style={{ fontSize: '11px', fontWeight: 800 }}>{lr.startDate} → {lr.endDate}</div>
+                                    <td style={{ color: '#64748b', fontSize: '12px', fontWeight: 800, whiteSpace: 'nowrap' }}>
+                                        {formatDateToDDMMYYYY(lr.startDate)} <ArrowRight size={10} style={{ verticalAlign: 'middle', margin: '0 4px' }} /> {formatDateToDDMMYYYY(lr.endDate)}
                                     </td>
                                     <td>{lr.totalDays} Days</td>
                                     <td>
                                         <span className="status-badge-premium" style={{ 
-                                            background: lr.status === 'Approved' ? '#ecfdf5' : lr.status === 'Rejected' ? '#fef2f2' : lr.status === 'Outdated' ? '#f1f5f9' : '#fff7ed',
-                                            color: lr.status === 'Approved' ? '#059669' : lr.status === 'Rejected' ? '#dc2626' : lr.status === 'Outdated' ? '#64748b' : '#ea580c'
+                                            background: lr.status === 'Approved' ? '#ecfdf5' : lr.status === 'Rejected' ? '#fef2f2' : ['Outdated', 'Canceled'].includes(String(lr.status)) ? '#f1f5f9' : '#fff7ed',
+                                            color: lr.status === 'Approved' ? '#059669' : lr.status === 'Rejected' ? '#dc2626' : ['Outdated', 'Canceled'].includes(String(lr.status)) ? '#64748b' : '#ea580c'
                                         }}>
                                             {lr.status}
                                         </span>
-                                        {['Approved', 'Rejected'].includes(String(lr.status || '')) && (lr.updatedAt || lr.approvedAt || lr.rejectedAt) && (
+                                        {['Approved', 'Rejected', 'Canceled'].includes(String(lr.status || '')) && (lr.updatedAt || lr.approvedAt || lr.rejectedAt) && (
                                             <div style={{ fontSize: '9px', fontWeight: 900, color: '#94a3b8', marginTop: '4px', textTransform: 'uppercase' }}>
-                                                {new Date(lr.updatedAt || lr.approvedAt || lr.rejectedAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}
+                                                {formatDateToDDMMYYYY(lr.updatedAt || lr.approvedAt || lr.rejectedAt)}
                                             </div>
                                         )}
                                         {['CANCEL_REQUESTED', 'MODIFY_REQUESTED'].includes(lr.actionStatus) && (

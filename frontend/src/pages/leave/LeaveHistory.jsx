@@ -5,7 +5,7 @@ import {
     History, Search, Filter, Download, Plus, 
     Calendar, CheckCircle, XCircle, Clock, 
     ArrowRight, ChevronLeft, ChevronRight, 
-    RotateCcw, FileText, Briefcase
+    RotateCcw, FileText, Briefcase, Info
 } from 'lucide-react';
  
 import * as XLSX from 'xlsx';
@@ -60,6 +60,26 @@ export default function LeaveHistory({ embedded = false } = {}) {
         }
     };
 
+    const formatDateToDDMMYYYY = (dateInput) => {
+        if (!dateInput) return '';
+        if (typeof dateInput === 'string') {
+            const match = dateInput.match(/^(\d{4})-(\d{2})-(\d{2})/);
+            if (match) {
+                return `${match[3]}-${match[2]}-${match[1]}`;
+            }
+        }
+        try {
+            const d = new Date(dateInput);
+            if (isNaN(d.getTime())) return String(dateInput);
+            const day = String(d.getDate()).padStart(2, '0');
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const year = d.getFullYear();
+            return `${day}-${month}-${year}`;
+        } catch (e) {
+            return String(dateInput);
+        }
+    };
+
     const getSubmittedTimestamp = (leave) => {
         const submittedValue = leave?.submissionDate || leave?.submittedAt || leave?.createdAt || leave?.appliedDate || leave?.startDate;
         const time = submittedValue ? new Date(submittedValue).getTime() : 0;
@@ -92,11 +112,11 @@ export default function LeaveHistory({ embedded = false } = {}) {
         const data = filteredLeaves.map(l => ({
             "Req ID": `#${l.id}`,
             "Leave Type": formatLeaveTypeLabel(l.leaveType),
-            "Start": l.startDate,
-            "End": l.endDate,
+            "Start": formatDateToDDMMYYYY(l.startDate),
+            "End": formatDateToDDMMYYYY(l.endDate),
             "Days": l.totalDays,
             "Status": l.status,
-            "Submitted On": l.submissionDate || 'N/A'
+            "Submitted On": formatDateToDDMMYYYY(l.submissionDate || l.createdAt) || 'N/A'
         }));
         const ws = XLSX.utils.json_to_sheet(data);
         const wb = XLSX.utils.book_new();
@@ -142,6 +162,10 @@ export default function LeaveHistory({ embedded = false } = {}) {
                 .btn-pagination { width: 32px; height: 32px; border-radius: 10px; border: 1.5px solid #cbd5e1; background: white; display: flex; alignItems: center; justifyContent: center; cursor: pointer; color: #1e293b; transition: 0.2s; }
                 .btn-pagination:hover:not(:disabled) { border-color: #334155; color: #334155; }
                 .btn-pagination.active { background: #334155; color: white; border-color: #334155; }
+                .lh-tooltip-container { position: relative; display: inline-flex; align-items: center; cursor: pointer; margin-left: 4px; }
+                .lh-tooltip-content { visibility: hidden; width: 220px; background-color: #0f172a; color: #fff; text-align: center; border-radius: 8px; padding: 10px; position: absolute; z-index: 100; bottom: 125%; right: -5px; opacity: 0; transition: opacity 0.2s, visibility 0.2s; font-size: 11px; font-weight: 500; line-height: 1.4; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); border: 1px solid #334155; text-transform: none; }
+                .lh-tooltip-content::after { content: ""; position: absolute; top: 100%; right: 10px; margin-left: -5px; border-width: 5px; border-style: solid; border-color: #334155 transparent transparent transparent; }
+                .lh-tooltip-container:hover .lh-tooltip-content { visibility: visible; opacity: 1; }
             `}</style>
 
             {/* ActionBar */}
@@ -225,22 +249,42 @@ export default function LeaveHistory({ embedded = false } = {}) {
                                             <td style={{ padding: '16px 24px', fontSize: '12.5px', fontWeight: 950, color: '#1e293b' }}>{l.reason || 'N/A'}</td>
                                             <td style={{ padding: '16px 24px', textAlign: 'center', fontSize: '13px', fontWeight: 950, color: l.lopCount > 0 ? '#ef4444' : '#64748b' }}>{typeof l.lopCount === 'number' ? l.lopCount.toFixed(1).replace(/\.0$/, '') : 0}</td>
                                             <td style={{ padding: '16px 24px', fontSize: '12px', fontWeight: 800, color: '#64748b' }}>
-                                                {new Date(l.submissionDate || l.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+                                                {formatDateToDDMMYYYY(l.submissionDate || l.createdAt)}
                                             </td>
-                                            <td style={{ padding: '16px 24px', fontSize: '12px', fontWeight: 800, color: '#64748b' }}>
-                                                {l.startDate} <ArrowRight size={10} style={{ verticalAlign: 'middle', margin: '0 4px' }} /> {l.endDate}
+                                            <td style={{ padding: '16px 24px', fontSize: '12px', fontWeight: 800, color: '#64748b', whiteSpace: 'nowrap' }}>
+                                                {formatDateToDDMMYYYY(l.startDate)} <ArrowRight size={10} style={{ verticalAlign: 'middle', margin: '0 4px' }} /> {formatDateToDDMMYYYY(l.endDate)}
                                             </td>
                                             <td style={{ padding: '16px 24px', textAlign: 'center', fontSize: '14px', fontWeight: 950, color: '#1e293b' }}>
                                                 {typeof l.totalDays === 'number' ? l.totalDays.toFixed(1).replace(/\.0$/, '') : l.totalDays} <span style={{ fontSize: '10px', color: '#64748b' }}>DAYS</span>
                                             </td>
                                             <td style={{ padding: '16px 24px', textAlign: 'center' }}>
-                                                <span style={{ 
-                                                    padding: '4px 10px', borderRadius: '10px', fontSize: '10px', fontWeight: 950, textTransform: 'uppercase', 
-                                                    border: '1.5px solid', background: style.bg, color: style.color, borderColor: style.border
-                                                }}>{l.status?.toUpperCase()}</span>
-                                                {['Approved', 'Rejected'].includes(String(l.status || '')) && (l.updatedAt || l.approvedAt || l.rejectedAt) && (
+                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                                                    <span style={{ 
+                                                        padding: '4px 10px', borderRadius: '10px', fontSize: '10px', fontWeight: 950, textTransform: 'uppercase', 
+                                                        border: '1.5px solid', background: style.bg, color: style.color, borderColor: style.border
+                                                    }}>{l.status?.toUpperCase()}</span>
+                                                    {l.status?.toLowerCase() === 'rejected' && l.remarks && (
+                                                        <span className="lh-tooltip-container">
+                                                            <Info size={14} color="#ef4444" />
+                                                            <span className="lh-tooltip-content">
+                                                                <div style={{ fontWeight: 800, borderBottom: '1px solid #475569', paddingBottom: '4px', marginBottom: '4px', textTransform: 'uppercase', color: '#f8fafc' }}>Rejection Reason</div>
+                                                                <div style={{ color: '#e2e8f0', textAlign: 'left' }}>{l.remarks}</div>
+                                                            </span>
+                                                        </span>
+                                                    )}
+                                                    {l.status?.toLowerCase() === 'canceled' && l.cancelReason && (
+                                                        <span className="lh-tooltip-container">
+                                                            <Info size={14} color="#64748b" />
+                                                            <span className="lh-tooltip-content">
+                                                                <div style={{ fontWeight: 800, borderBottom: '1px solid #475569', paddingBottom: '4px', marginBottom: '4px', textTransform: 'uppercase', color: '#f8fafc' }}>Cancel Reason</div>
+                                                                <div style={{ color: '#e2e8f0', textAlign: 'left' }}>{l.cancelReason}</div>
+                                                            </span>
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                {['Approved', 'Rejected', 'Canceled'].includes(String(l.status || '')) && (l.updatedAt || l.approvedAt || l.rejectedAt) && (
                                                     <div style={{ fontSize: '9px', fontWeight: 900, color: '#94a3b8', marginTop: '4px', textTransform: 'uppercase' }}>
-                                                        {new Date(l.updatedAt || l.approvedAt || l.rejectedAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}
+                                                        {formatDateToDDMMYYYY(l.updatedAt || l.approvedAt || l.rejectedAt)}
                                                     </div>
                                                 )}
                                             </td>
@@ -249,7 +293,33 @@ export default function LeaveHistory({ embedded = false } = {}) {
                                                     <span style={{ fontSize: '10px', color: '#ef4444', fontWeight: 900 }}>Cancel Requested</span>
                                                 ) : l.actionStatus === 'MODIFY_REQUESTED' ? (
                                                     <span style={{ fontSize: '10px', color: '#f59e0b', fontWeight: 900 }}>Modify Requested</span>
-                                                ) : (['Pending', 'Approved'].includes(l.status) && (!l.actionStatus || l.actionStatus === 'NONE') ? (
+                                                ) : l.actionStatus === 'CANCEL_REJECTED' ? (
+                                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+                                                        <span style={{ fontSize: '10px', color: '#dc2626', fontWeight: 900 }}>Cancel Rejected</span>
+                                                        {l.remarks && (
+                                                            <span className="lh-tooltip-container">
+                                                                <Info size={12} color="#dc2626" />
+                                                                <span className="lh-tooltip-content">
+                                                                    <div style={{ fontWeight: 800, borderBottom: '1px solid #475569', paddingBottom: '4px', marginBottom: '4px', textTransform: 'uppercase', color: '#f8fafc' }}>Rejection Reason</div>
+                                                                    <div style={{ color: '#e2e8f0', textAlign: 'left' }}>{l.remarks}</div>
+                                                                </span>
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                ) : l.actionStatus === 'MODIFY_REJECTED' ? (
+                                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+                                                        <span style={{ fontSize: '10px', color: '#dc2626', fontWeight: 900 }}>Modify Rejected</span>
+                                                        {l.remarks && (
+                                                            <span className="lh-tooltip-container">
+                                                                <Info size={12} color="#dc2626" />
+                                                                <span className="lh-tooltip-content">
+                                                                    <div style={{ fontWeight: 800, borderBottom: '1px solid #475569', paddingBottom: '4px', marginBottom: '4px', textTransform: 'uppercase', color: '#f8fafc' }}>Rejection Reason</div>
+                                                                    <div style={{ color: '#e2e8f0', textAlign: 'left' }}>{l.remarks}</div>
+                                                                </span>
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                ) : (['Pending', 'Approved'].includes(l.status) && (!l.actionStatus || ['NONE', 'CANCEL_REJECTED', 'MODIFY_REJECTED'].includes(l.actionStatus)) && new Date(l.startDate) >= new Date(new Date().setHours(0,0,0,0)) ? (
                                                     <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
                                                         {l.status !== 'Pending' && <button onClick={() => setModifyModal({ show: true, leave: l, startDate: l.startDate, endDate: l.endDate, reason: l.reason, totalDays: l.totalDays })} style={{ background: '#f8fafc', border: '1.5px solid #cbd5e1', borderRadius: '6px', padding: '6px 12px', fontSize: '10px', cursor: 'pointer', fontWeight: 900, color: '#0f172a' }}>MODIFY</button>}
                                                         <button onClick={() => setCancelModal({ show: true, leaveId: l.id, reason: '' })} style={{ background: '#fef2f2', border: '1.5px solid #fca5a5', color: '#ef4444', borderRadius: '6px', padding: '6px 12px', fontSize: '10px', cursor: 'pointer', fontWeight: 900 }}>CANCEL</button>

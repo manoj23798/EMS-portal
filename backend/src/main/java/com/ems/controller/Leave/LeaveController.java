@@ -87,8 +87,9 @@ public class LeaveController {
     @PutMapping("/manager/leaves/{id}/action/reject")
     public ResponseEntity<LeaveRequestResponse> rejectLeaveAction(
             @PathVariable("id") Long id,
-            @RequestParam("managerId") Long managerId) {
-        return ResponseEntity.ok(leaveService.rejectLeaveAction(id, managerId));
+            @RequestParam("managerId") Long managerId,
+            @RequestParam(required = false) String remarks) {
+        return ResponseEntity.ok(leaveService.rejectLeaveAction(id, managerId, remarks));
     }
 
     // ===================== ADMIN ENDPOINTS =====================
